@@ -12,8 +12,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 仓库
 
-- **GitHub**: `https://github.com/kenyonxu/gdscript-ast-flow`
-- **本地**: `git@github.com:kenyonxu/gdscript-ast-flow.git`
+- **GitHub**: `https://github.com/kenyonxu/godot-byte-code-parser`
+- **本地**: `git@github.com:kenyonxu/godot-byte-code-parser.git`
 
 ## 项目结构
 

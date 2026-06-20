@@ -48,7 +48,7 @@ tests/                  # 测试脚本
 
 name="gdscript_util"
 description="GDScript Analysis Utilities for Godot 4.7"
-author="arlez80"
+author="kenyonxu"
 version="2.0.0"
 script="plugin.gd"
 ```
