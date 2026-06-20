@@ -359,3 +359,176 @@ func _parse_type() -> TypeNode:
         _expect(GDScriptToken.Type.BRACKET_CLOSE)
 
     return node
+
+
+func _parse_suite() -> SuiteNode:
+    var suite = SuiteNode.new()
+
+    # 单行语句: func foo(): return 1
+    if _peek() == null or _peek().type != GDScriptToken.Type.NEWLINE:
+        var stmt = _parse_statement()
+        if stmt != null:
+            suite.statements.append(stmt)
+        return suite
+
+    # 缩进块
+    _match(GDScriptToken.Type.NEWLINE)
+    if not _match(GDScriptToken.Type.INDENT):
+        return suite  # pass (空函数体)
+
+    while _peek() and _peek().type not in [GDScriptToken.Type.DEDENT, GDScriptToken.Type.TK_EOF]:
+        var stmt = _parse_statement()
+        if stmt != null:
+            suite.statements.append(stmt)
+        # 每个语句后跳过 NEWLINE
+        _match(GDScriptToken.Type.NEWLINE)
+
+    _expect(GDScriptToken.Type.DEDENT)
+    return suite
+
+func _parse_statement():
+    var t = _peek()
+    if t == null:
+        return null
+
+    match t.type:
+        GDScriptToken.Type.IF:
+            return _parse_if()
+        GDScriptToken.Type.WHILE:
+            return _parse_while()
+        GDScriptToken.Type.FOR:
+            return _parse_for()
+        GDScriptToken.Type.MATCH:
+            return _parse_match()
+        GDScriptToken.Type.RETURN:
+            return _parse_return()
+        GDScriptToken.Type.BREAK:
+            _advance()
+            return BreakNode.new()
+        GDScriptToken.Type.CONTINUE:
+            _advance()
+            return ContinueNode.new()
+        GDScriptToken.Type.PASS:
+            _advance()
+            return PassNode.new()
+        GDScriptToken.Type.ASSERT:
+            return _parse_assert()
+        GDScriptToken.Type.AWAIT:
+            return _parse_await()
+        GDScriptToken.Type.VAR:
+            return _parse_variable([])
+        GDScriptToken.Type.BREAKPOINT:
+            _advance()
+            var bp = BreakNode.new()  # breakpoint 语法上类似 break
+            return bp
+
+        GDScriptToken.Type.YIELD:
+            _advance()
+            # yield() 在 4.x 中仅保留兼容性，内部转为 await
+            var node = AwaitNode.new()
+            node.expression = _parse_expression()
+            return node
+
+        _:
+            # 表达式语句
+            var expr = _parse_expression()
+            if expr != null:
+                var es = ExpressionStatementNode.new()
+                es.expression = expr
+                return es
+            return null
+
+
+func _parse_if() -> IfNode:
+    _advance()  # IF token
+    var node = IfNode.new()
+    node.condition = _parse_expression()
+    _expect(GDScriptToken.Type.COLON)
+    node.true_branch = _parse_suite()
+
+    # elif / else
+    if _peek() and _peek().type == GDScriptToken.Type.ELIF:
+        _advance()
+        node.false_branch = _parse_if()
+    elif _peek() and _peek().type == GDScriptToken.Type.ELSE:
+        _advance()
+        _expect(GDScriptToken.Type.COLON)
+        node.false_branch = _parse_suite()
+
+    return node
+
+func _parse_while() -> WhileNode:
+    _advance()  # WHILE token
+    var node = WhileNode.new()
+    node.condition = _parse_expression()
+    _expect(GDScriptToken.Type.COLON)
+    node.body = _parse_suite()
+    return node
+
+func _parse_for() -> ForNode:
+    _advance()  # FOR token
+    var node = ForNode.new()
+    var id_t = _expect(GDScriptToken.Type.IDENTIFIER, "for 需要变量名")
+    if id_t:
+        node.var_name = id_t.literal
+    _expect(GDScriptToken.Type.IN, "for 需要 'in' 关键字")
+    node.iterable = _parse_expression()
+    _expect(GDScriptToken.Type.COLON)
+    node.body = _parse_suite()
+    return node
+
+
+func _parse_match() -> MatchNode:
+    _advance()  # MATCH token
+    var node = MatchNode.new()
+    node.test = _parse_expression()
+    _expect(GDScriptToken.Type.COLON)
+    _match(GDScriptToken.Type.NEWLINE)
+    _expect(GDScriptToken.Type.INDENT)
+
+    while _peek() and _peek().type not in [GDScriptToken.Type.DEDENT, GDScriptToken.Type.TK_EOF]:
+        var branch = MatchBranchNode.new()
+
+        # when 关键字
+        if _match(GDScriptToken.Type.WHEN):
+            pass  # when 是可选的
+
+        # 模式列表
+        branch.patterns = _parse_match_patterns()
+        _expect(GDScriptToken.Type.COLON)
+        branch.body = _parse_suite()
+        node.branches.append(branch)
+
+        _match(GDScriptToken.Type.NEWLINE)
+
+    _expect(GDScriptToken.Type.DEDENT)
+    return node
+
+func _parse_match_patterns() -> Array:
+    var patterns: Array = []
+    while _peek() and _peek().type != GDScriptToken.Type.COLON:
+        patterns.append(_parse_expression())
+        if not _match(GDScriptToken.Type.COMMA):
+            break
+    return patterns
+
+func _parse_return() -> ReturnNode:
+    _advance()  # RETURN token
+    var node = ReturnNode.new()
+    if _peek() and _peek().type != GDScriptToken.Type.NEWLINE:
+        node.value = _parse_expression()
+    return node
+
+func _parse_assert() -> AssertNode:
+    _advance()  # ASSERT token
+    var node = AssertNode.new()
+    node.condition = _parse_expression()
+    if _match(GDScriptToken.Type.COMMA):
+        node.message = _parse_expression()
+    return node
+
+func _parse_await() -> AwaitNode:
+    _advance()  # AWAIT token
+    var node = AwaitNode.new()
+    node.expression = _parse_expression()
+    return node
