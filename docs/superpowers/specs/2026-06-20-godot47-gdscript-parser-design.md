@@ -20,7 +20,48 @@
 
 - 纯 GDScript 实现（不依赖 GDExtension 或 C++ 模块）
 - 解析 `.gd` 源文件文本（非 `.gdc` 二进制）
-- 语法覆盖：先核心子集（覆盖 95% 日常代码），架构预留扩展到完整 4.7 语法
+- 语法覆盖：Phase 1 核心子集（见 1.4 节精确定义），架构预留扩展到完整 4.7 语法
+
+### 1.4 Phase 1 核心子集 — 语法覆盖精确定义
+
+以下为 Phase 1 必须支持的 GDScript 语法结构，Phase 3 扩展为完整语法。
+
+**Phase 1 支持：**
+- 类定义：`extends`, `class_name`, `@tool`/`@icon` 文件级注解
+- 变量声明：`var x = 1`, `var x: int = 1`, `var x := 1`, `const`, `@export`, `@onready`
+- 函数定义：`func name(params) -> Type:`, 默认参数值, 静态函数, `return` 类型标注
+- 函数参数：`param: Type = default`
+- 控制流：`if/elif/else`, `while`, `for x in range`, `match` 含 `when` 分支（不含 guard 表达式）
+- 信号：`signal name(params)`, `emit("name")`, `name.emit()`, `signal.connect(cb)`, `obj.connect("sig", cb)`
+- 枚举：`enum { A, B, C }`, `enum Name { A = 1, B }`
+- 表达式：二元/一元运算符（完整 4.7 优先级表），三目 `a if cond else b`
+- 字面量：数字、字符串（单/双引号）、数组 `[1, 2]`、字典 `{"k": v}`、`self`
+- 属性访问：`a.b`, `a[b]`
+- 函数调用：`foo()`, `obj.method()`, `super.method()`
+- Lambda：`func(params): return x`（含独立缩进栈）
+- await：`await expr`
+- 类型操作：`x as Type`, `x is Type`, 类型标注 `: Type`, 泛型容器 `Array[int]`, `Dictionary[String, int]`
+- 其他：`preload("path")`, `assert`, `breakpoint`, `pass`, `return`, `$NodePath`, `break`, `continue`, `yield`
+- 字符串格式化：`"text %s" % var`（`%` 运算符），`"text {var}".format()`（方法调用，通过 CallNode 自然支持）
+
+**Phase 1 不支持（Phase 3 扩展）：**
+- `namespace`, `trait` 关键字
+- `match` 的 `when` guard 表达式（`when x > 0:`）
+- `f"..."` 格式化字符串语法
+- 内联 setter/getter（`var hp: set(v): hp = clamp(v, 0, 100)`）— 仅支持声明式 `setget`
+- 完整 `Callable` 语法（`Callable(obj, "method")`）
+
+**Phase 1 验收标准（测试用例）：**
+1. `extends Node\nclass_name Player\n` → ClassNode(extends="Node", classname="Player")
+2. `var hp := 100` → VariableNode(name="hp", initializer=LiteralNode(100))
+3. `func take_damage(amount: int) -> void:\n\tpass` → FunctionNode 含一个 ParameterNode + SuiteNode
+4. `signal health_changed(old, new)` → SignalNode 含 2 个 ParameterNode
+5. `if hp <= 0:\n\temit("died")\nelse:\n\tpass` → IfNode 含 BinaryOpNode 条件 + 两个 SuiteNode
+6. `@export var speed: float = 10.0` → AnnotationNode(@export) + VariableNode(speed, float, 10.0)
+7. `for i in range(10):\n\tprint(i)` → ForNode(var_name="i", iterable=CallNode)
+8. `match x:\n\twhen 1, 2:\n\t\tpass` → MatchNode 含 MatchBranchNode
+9. `var callback = func(): return 42` → LambdaNode 无参数, body=LiteralNode(42)
+10. `await get_tree().process_frame` → AwaitNode(CallNode(AttributeNode(...)))
 
 ## 二、架构总览
 
@@ -65,6 +106,53 @@
 | **总计** | | **~2810** | |
 
 文件均位于 `addons/gdscript_util/` 目录下。
+
+### 2.3 错误处理策略
+
+管道各阶段的错误处理遵循统一策略：
+
+**分词器 (Tokenizer)：**
+- 遇到非法字符时生成 `Token.ERROR` 令牌，其 `literal` 为错误描述字符串
+- 不中断扫描——后续字符继续正常分词
+- 未终止的字符串/多行注释生成 ERROR 并继续
+- 缩进/括号不匹配尽可能在扫描层检测，生成 ERROR 令牌通知下游
+
+**语法分析器 (Parser)：**
+- 采用 **fail-soft** 策略：遇到语法错误时记录到 `self.error`，跳过当前语句/表达式继续解析后续内容
+- 跳过策略：遇到错误后，前进到下一个语句边界（NEWLINE 或 DEDENT 处）恢复解析
+- `parse()` 始终返回一个（可能不完整的）ClassNode——调用方通过检查 `error` 是否为空来判断解析是否成功
+- 每个 AST 节点记录其源代码位置（line, column），便于错误定位
+
+**符号解析器 (SymbolResolver)：**
+- 未解析的标识符引用（即 `resolve(name)` 返回 null）：
+  - 对于读取引用：记录到 `AnalysisResult.errors` 作为警告（不影响继续分析）
+  - 对于调用目标：CallEdge 的 callee 设为 `"<unresolved: name>"`
+  - 不中断整个解析过程
+
+**错误传播：**
+- 管道阶段之间通过返回值传递状态：
+  - Tokenizer：通过检查 Token 流中是否存在 `ERROR` 类型令牌来判断
+  - Parser：通过 `parser.error` 是否为空来判断
+  - SymbolResolver：通过 `AnalysisResult.errors` 数组是否为空来判断
+- 即使前一阶段有错误，后一阶段也会被调用（只要输出数据存在）——上游尽力而为，下游处理不完整数据
+- 每个阶段的错误信息独立记录在最终 `AnalysisResult.errors` 中，按 `[阶段] 行:列: 描述` 格式
+
+```gdscript
+# 使用示例——带错误检查的完整管道
+var tokens = tokenizer.tokenize(source)
+# 检查是否有词法错误
+for token in tokens:
+    if token.type == Token.ERROR:
+        push_warning("Lexer error at line %d: %s" % [token.start_line, token.literal])
+
+var ast = parser.parse(tokens)
+if parser.error != "":
+    push_warning("Parser error: %s" % parser.error)
+# 即使有警告也继续符号解析
+var result = resolver.resolve(ast, path)
+for err in result.errors:
+    push_warning(err)
+```
 
 ## 三、组件 1：GDScriptTokenizer（词法分析器）
 
@@ -113,6 +201,13 @@ scan():
 - 括号内部（`()`, `[]`, `{}`）忽略缩进变化
 - 支持 lambda 独立缩进栈（`push_expression_indented_block / pop_expression_indented_block`）
 
+**Lambda 缩进规则：**
+- 当分词器在表达式上下文中遇到 `func` 关键字时，调用 `push_expression_indented_block()` 保存当前缩进栈
+- lambda 函数体开始于 `:` 之后，如果 lambda 体在同一行则不需要缩进处理；如果 lambda 体跨行则需要独立缩进栈
+- Lambda 体解析结束后调用 `pop_expression_indented_block()` 恢复外层缩进栈
+- 适用于以下场景：`var f = func(x):\n\treturn x * 2`
+- 括号内的 lambda（如 `arr.map(func(x): return x * 2)`）不需要独立栈——缩进在括号内已被忽略
+
 ### 3.4 Token 类型枚举
 
 核心子集，与 Godot 4.7 `GDScriptTokenizer::Token::Type` 对齐：
@@ -130,6 +225,8 @@ scan():
 **其他：** ANNOTATION, ERROR, TK_EOF, TK_MAX
 
 共约 60 种令牌。暂不包含 NAMESPACE, TRAIT（Phase 3 扩展时添加）。
+
+**关于 `or`/`||` 和 `and`/`&&`：** Godot 4.x 同时支持英文关键字形式和符号形式，两种形式在分词时生成相同的 Token 类型（`OR` 和 `AND`），不区分为不同令牌。运算符优先级表引用同一个 Token 类型。
 
 ## 四、组件 2：GDScriptParser（语法分析器）
 
@@ -168,7 +265,7 @@ scan():
 - **CastNode**: `expression: ExpressionNode`, `type: TypeNode` — `x as Type`
 - **TypeTestNode**: `expression: ExpressionNode`, `type: TypeNode` — `x is Type`
 - **AssignmentNode**: `target: ExpressionNode`, `value: ExpressionNode`, `op: int` — `=`, `+=`, `-=` 等
-- **LambdaNode**: `params: Array[ParameterNode]`, `body: ExpressionNode`
+- **LambdaNode**: `params: Array[ParameterNode]`, `body: ExpressionNode`, `captured_vars: Array[String]` (由 SymbolResolver 填充，记录 lambda 引用的外部变量名)
 - **ArrayNode**: `elements: Array[ExpressionNode]`
 - **DictionaryNode**: `pairs: Array[{key: ExpressionNode, value: ExpressionNode}]`
 - **IdentifierNode**: `name: String`
@@ -256,7 +353,16 @@ func define(name: String, kind: int, node: ASTNode, datatype: String = "") -> Sy
 func resolve(name: String) -> Symbol  # 递归向 parent 查找
 
 class_name Symbol
-enum Kind { CLASS, FUNCTION, VARIABLE, SIGNAL, ENUM, PARAMETER, CONSTANT }
+enum Kind {
+    CLASS = 0,       # class / inner class 定义
+    FUNCTION = 1,    # func 定义
+    VARIABLE = 2,    # var 定义
+    SIGNAL = 3,      # signal 声明
+    ENUM = 4,        # enum 定义
+    PARAMETER = 5,   # 函数参数
+    CONSTANT = 6,    # const 定义
+    ENUM_VALUE = 7   # enum 中的值（如 enum { A, B } 中的 A）
+}
 var name: String
 var kind: int
 var declaration: ASTNode          # 指向 AST 中的声明节点
@@ -277,7 +383,17 @@ var caller: String                # 调用方函数名
 var callee: String                # 被调用方函数名
 var site_line: int                # 调用所在行
 var arguments: Array[ExpressionNode]
-var call_type: int                # SELF / SUPER / EXTERNAL / CONNECT
+enum CallType {
+    SELF = 0,         # self.method() 或隐式 self 调用
+    SUPER = 1,        # super.method()
+    EXTERNAL = 2,     # obj.method() —— 外部对象调用
+    CONNECT = 3,      # .connect("sig", cb) 中的回调
+    SIGNAL_CONNECT = 4, # signal_name.connect(cb) 中的回调
+    LAMBDA = 5,       # lambda 表达式作为回调
+    STATIC = 6,       # ClassName.static_method()
+    EMIT = 7          # emit("signal") 信号发射
+}
+var call_type: int
 var target_object: String         # 调用目标对象名 (外部调用时)
 ```
 
@@ -325,7 +441,13 @@ class_name DefUseSite
 var line: int
 var node: ASTNode
 var enclosing_function: String
-var access_type: int              # DEFINE / READ / WRITE / READ_WRITE
+enum AccessType {
+    DEFINE = 0,      # var x = ... 的定义
+    READ = 1,        # 读取变量值
+    WRITE = 2,       # 赋值写入
+    READ_WRITE = 3   # 读+写（如 x += 1）
+}
+var access_type: int
 ```
 
 ### 5.2 解析策略
@@ -343,7 +465,12 @@ var access_type: int              # DEFINE / READ / WRITE / READ_WRITE
    - 写上下文 (AssignmentNode 左侧, var 声明) → 记录为 WRITE/DEFINE
    - 读上下文 (其余位置) → 记录为 READ
    - resolve 标识符名 → 关联到 Symbol
-4. **处理 CallNode**：
+4. **进入 LambdaNode** → 创建独立的 local_scope（parent = 当前作用域）：
+   - 将 lambda 参数 define 到 lambda_scope
+   - 遍历 lambda.body 表达式/语句 → 递归处理
+   - Lambda 引用的外部变量（不在 lambda_scope 中的标识符）标记为"捕获变量"（captured variable）——记录在 LambdaNode 附加字段 `captured_vars: Array[String]` 中
+   - 如果 LambdaNode 作为 `.connect()` 的参数，其捕获变量信息用于追踪信号回调闭包
+5. **处理 CallNode**：
    - 解析 callee → 确定调用目标 → 添加 CallEdge
 
 ## 六、组件 4：GDScriptAnalysisResult + EditorPlugin
@@ -404,19 +531,79 @@ var usage = result.get_variable_usages("hp")
 #   }
 ```
 
-### 6.3 EditorPlugin
+### 6.3 EditorPlugin 集成
+
+#### 6.3.1 插件生命周期
 
 ```gdscript
 class_name GDScriptUtil
 extends EditorPlugin
 
-func _enter_tree():
-    add_tool_menu_item("GDScript Analysis", _on_analyze)
-    # 可选: add_control_to_bottom_panel(panel, "GDScript Analysis")
+var analysis_cache: Dictionary = {}  # String(path) → GDScriptAnalysisResult
 
-func analyze_script(path: String) -> GDScriptAnalysisResult:
-    # 便捷入口 — 一键获取完整分析结果
+func _enter_tree():
+    add_tool_menu_item("GDScript Analysis", _on_analyze_current)
+    # 可选 Phase 3: 添加底部面板可视化
+    # analysis_panel = preload("analysis_panel.tscn").instantiate()
+    # add_control_to_bottom_panel(analysis_panel, "GDScript Analysis")
+
+func _exit_tree():
+    remove_tool_menu_item("GDScript Analysis")
+    # remove_control_from_bottom_panel(analysis_panel)
+    analysis_cache.clear()
 ```
+
+#### 6.3.2 分析触发方式
+
+支持三种触发模式：
+
+1. **手动触发**（Phase 1）：用户通过 工具菜单 → "GDScript Analysis" 分析当前打开脚本
+2. **保存自动分析**（Phase 2）：通过 `resource_saved` 信号监听，GDScript 文件保存时自动重新分析
+3. **批量分析**（Phase 3）：分析指定目录下所有 `.gd` 文件，构建跨文件调用图
+
+```gdscript
+# 手动分析当前脚本
+func _on_analyze_current():
+    var editor = get_editor_interface()
+    var script = editor.get_script_editor().get_current_script()
+    if script and script is GDScript:
+        var result = analyze_script(script.resource_path)
+
+# 自动分析（Phase 2）
+func _handles(p_object: Object) -> bool:
+    return p_object is GDScript
+
+func _edited(p_script: Object):
+    if p_script is GDScript and p_script.resource_path.ends_with(".gd"):
+        analyze_script(p_script.resource_path)
+```
+
+#### 6.3.3 结果呈现
+
+- **Phase 1：** 日志输出——`print_rich()` 输出分析摘要到编辑器输出面板
+- **Phase 2：** 结构化输出——通过 `GDScriptAnalysisResult` 的查询 API 在 GDScript 中程序化使用
+- **Phase 3：** 可视化面板——信号图/调用图的 UI 呈现（Dock 面板）
+
+```gdscript
+# Phase 1 日志输出示例
+func _print_analysis_summary(result: GDScriptAnalysisResult):
+    print("[b]%s[/b] — %d functions, %d signals, %d variables" % [
+        result.file_path,
+        result.get_all_functions().size(),
+        result.get_all_signals().size(),
+        result.def_use_chain.variables.size()
+    ])
+    for edge in result.call_graph.edges:
+        print("  %s() → %s() @line %d" % [edge.caller, edge.callee, edge.site_line])
+```
+
+#### 6.3.4 缓存策略
+
+- 每次调用 `analyze_script(path)` 时更新缓存
+- 缓存 key 为文件路径，value 为 `GDScriptAnalysisResult`
+- 文件修改时间戳检查：文件未变化时跳过重新分析（Phase 3 优化）
+- 插件卸载时（`_exit_tree`）清空所有缓存
+- 不执行跨会话持久化缓存（避免反序列化 AST 的复杂性和内存占用）
 
 ## 七、实现阶段
 
