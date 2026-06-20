@@ -9,3 +9,5 @@ test.gd
 test_a.gd
 test_b.gd
 dev/*graphify-out/cache/
+.superpowers/
+.claude/
