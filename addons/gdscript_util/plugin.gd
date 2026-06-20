@@ -128,11 +128,11 @@ func _print_analysis_summary(p_result: GDScriptAnalysisResult):
 
 func _call_type_to_string(p_type: int) -> String:
 	match p_type:
-		CallEdge.CallType.SELF: return "[self]"
-		CallEdge.CallType.SUPER: return "[super]"
-		CallEdge.CallType.EXTERNAL: return "[ext]"
-		CallEdge.CallType.CONNECT: return "[connect]"
-		CallEdge.CallType.SIGNAL_CONNECT: return "[sig-conn]"
-		CallEdge.CallType.LAMBDA: return "[lambda]"
-		CallEdge.CallType.EMIT: return "[emit]"
+		GDScriptAnalysisResult.CallEdge.CallType.SELF: return "[self]"
+		GDScriptAnalysisResult.CallEdge.CallType.SUPER: return "[super]"
+		GDScriptAnalysisResult.CallEdge.CallType.EXTERNAL: return "[ext]"
+		GDScriptAnalysisResult.CallEdge.CallType.CONNECT: return "[connect]"
+		GDScriptAnalysisResult.CallEdge.CallType.SIGNAL_CONNECT: return "[sig-conn]"
+		GDScriptAnalysisResult.CallEdge.CallType.LAMBDA: return "[lambda]"
+		GDScriptAnalysisResult.CallEdge.CallType.EMIT: return "[emit]"
 		_: return "[?]"

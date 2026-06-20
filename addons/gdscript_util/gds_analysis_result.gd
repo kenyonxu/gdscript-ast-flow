@@ -3,6 +3,9 @@
 # 纯数据定义，零业务逻辑（查询 API 除外）
 
 # ---- Symbol — 符号表中的单个符号 ----
+
+class_name GDScriptAnalysisResult
+extends RefCounted
 class Symbol:
 	extends RefCounted
 
@@ -186,8 +189,6 @@ class DefUseChain:
 
 
 # ---- GDScriptAnalysisResult — 统一结果容器 ----
-class_name GDScriptAnalysisResult
-extends RefCounted
 
 var file_path: String = ""
 var class_name: String = ""               # class_name 名称

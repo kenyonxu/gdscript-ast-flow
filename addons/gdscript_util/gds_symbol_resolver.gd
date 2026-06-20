@@ -16,15 +16,15 @@ func resolve(p_ast, p_file_path: String = "") -> GDScriptAnalysisResult:
 	result = GDScriptAnalysisResult.new()
 	result.ast = p_ast
 	result.file_path = p_file_path
-	result.call_graph = CallGraph.new()
-	result.signal_graph = SignalGraph.new()
-	result.def_use_chain = DefUseChain.new()
+	result.call_graph = GDScriptAnalysisResult.CallGraph.new()
+	result.signal_graph = GDScriptAnalysisResult.SignalGraph.new()
+	result.def_use_chain = GDScriptAnalysisResult.DefUseChain.new()
 
 	# 预加载源码行（用于 const/var 区分 — 方案 A）
 	_load_source_lines(p_file_path)
 
 	# 创建类作用域
-	result.symbol_table = SymbolTable.new()
+	result.symbol_table = GDScriptAnalysisResult.SymbolTable.new()
 	result.symbol_table.scope_name = "class:%s" % p_ast.classname_id if p_ast.classname_id != "" else "class:<anonymous>"
 
 	# 填充基础信息
@@ -70,7 +70,7 @@ func _preprocess_const_vars(p_ast):
 
 
 # 核心分发 — 按 AST 节点类型匹配
-func _resolve_node(p_node, p_scope: SymbolTable, p_current_function: String, p_lambda_node = null):
+func _resolve_node(p_node, p_scope: GDScriptAnalysisResult.SymbolTable, p_current_function: String, p_lambda_node = null):
 	if p_node == null:
 		return
 
@@ -118,7 +118,7 @@ func _resolve_node(p_node, p_scope: SymbolTable, p_current_function: String, p_l
 
 
 # 表达式递归解析 — 处理所有表达式类型中的子节点
-func _resolve_expression(p_expr, p_scope: SymbolTable, p_current_function: String, p_lambda_node = null):
+func _resolve_expression(p_expr, p_scope: GDScriptAnalysisResult.SymbolTable, p_current_function: String, p_lambda_node = null):
 	if p_expr == null:
 		return
 
@@ -161,7 +161,7 @@ func _resolve_expression(p_expr, p_scope: SymbolTable, p_current_function: Strin
 
 
 # Suite 遍历 — 遍历语句列表（不创建新作用域）
-func _resolve_suite(p_body, p_scope: SymbolTable, p_current_function: String, p_lambda_node = null):
+func _resolve_suite(p_body, p_scope: GDScriptAnalysisResult.SymbolTable, p_current_function: String, p_lambda_node = null):
 	if p_body == null:
 		return
 	# p_body 可能是 SuiteNode（多语句）或 ExpressionNode（单行 lambda body）
@@ -176,24 +176,24 @@ func _resolve_suite(p_body, p_scope: SymbolTable, p_current_function: String, p_
 func _record_def_use(p_var_name: String, p_node, p_current_function: String, p_access_type: int):
 	var info = result.def_use_chain._ensure_info(p_var_name)
 
-	var site = DefUseSite.new()
+	var site = GDScriptAnalysisResult.DefUseSite.new()
 	site.line = p_node.line if p_node.has_method("get") == false and "line" in p_node else 0
 	site.node = p_node
 	site.enclosing_function = p_current_function
 	site.access_type = p_access_type
 
 	match p_access_type:
-		DefUseSite.AccessType.DEFINE:
+		GDScriptAnalysisResult.DefUseSite.AccessType.DEFINE:
 			info.def_site = site
-		DefUseSite.AccessType.READ:
+		GDScriptAnalysisResult.DefUseSite.AccessType.READ:
 			info.read_sites.append(site)
-		DefUseSite.AccessType.WRITE, DefUseSite.AccessType.READ_WRITE:
+		GDScriptAnalysisResult.DefUseSite.AccessType.WRITE, GDScriptAnalysisResult.DefUseSite.AccessType.READ_WRITE:
 			info.write_sites.append(site)
 
 
 # 添加调用边
 func _add_call_edge(p_caller: String, p_callee: String, p_line: int, p_call_type: int, p_target: String = "", p_arguments: Array = []):
-	var edge = CallEdge.new()
+	var edge = GDScriptAnalysisResult.CallEdge.new()
 	edge.caller = p_caller
 	edge.callee = p_callee
 	edge.site_line = p_line
@@ -205,7 +205,7 @@ func _add_call_edge(p_caller: String, p_callee: String, p_line: int, p_call_type
 
 # 创建 Site 对象
 func _make_site(p_node, p_enclosing_function: String, p_arguments: Array = []) -> Site:
-	var site = Site.new()
+	var site = GDScriptAnalysisResult.Site.new()
 	site.line = p_node.line if "line" in p_node else 0
 	site.node = p_node
 	site.enclosing_function = p_enclosing_function
@@ -223,9 +223,9 @@ func _type_to_string(p_type) -> String:
 # ---- Chunk 2: 符号表 + 作用域链 ----
 
 # 解析类体 — 创建 class_scope，define 类级符号，遍历成员
-func _resolve_class(p_node, p_parent_scope: SymbolTable):
+func _resolve_class(p_node, p_parent_scope: GDScriptAnalysisResult.SymbolTable):
 	# 如果传入的不是 SymbolTable（首次调用从 resolve() 传入），直接使用
-	var class_scope: SymbolTable = p_parent_scope
+	var class_scope: GDScriptAnalysisResult.SymbolTable = p_parent_scope
 
 	# 填充 class_name 到 extends_path
 	if p_node.classname_id != "":
@@ -239,23 +239,23 @@ func _resolve_class(p_node, p_parent_scope: SymbolTable):
 
 
 # 解析函数 — 创建 func_scope（parent = class_scope），define 函数符号和参数
-func _resolve_function(p_node, p_parent_scope: SymbolTable):
+func _resolve_function(p_node, p_parent_scope: GDScriptAnalysisResult.SymbolTable):
 	# define 函数到父作用域（class_scope）
-	var func_sym = p_parent_scope.define(p_node.name, Symbol.Kind.FUNCTION, p_node, _type_to_string(p_node.return_type))
+	var func_sym = p_parent_scope.define(p_node.name, GDScriptAnalysisResult.Symbol.Kind.FUNCTION, p_node, _type_to_string(p_node.return_type))
 	if p_node.is_static:
 		func_sym.datatype = "static:" + func_sym.datatype
 
 	# 创建函数作用域
-	var func_scope = SymbolTable.new()
+	var func_scope = GDScriptAnalysisResult.SymbolTable.new()
 	func_scope.parent = p_parent_scope
 	func_scope.scope_name = "func:%s" % p_node.name
 
 	# define 参数
 	for param in p_node.params:
 		if param is GDScriptToken.ParameterNode:
-			func_scope.define(param.name, Symbol.Kind.PARAMETER, param, _type_to_string(param.datatype))
+			func_scope.define(param.name, GDScriptAnalysisResult.Symbol.Kind.PARAMETER, param, _type_to_string(param.datatype))
 			# 记录参数 def site
-			_record_def_use(param.name, param, p_node.name, DefUseSite.AccessType.DEFINE)
+			_record_def_use(param.name, param, p_node.name, GDScriptAnalysisResult.DefUseSite.AccessType.DEFINE)
 
 	# 遍历函数体
 	if p_node.body != null:
@@ -263,16 +263,16 @@ func _resolve_function(p_node, p_parent_scope: SymbolTable):
 
 
 # 解析变量声明 — 用方案 A 区分 const/var
-func _resolve_variable(p_node, p_scope: SymbolTable, p_current_function: String):
+func _resolve_variable(p_node, p_scope: GDScriptAnalysisResult.SymbolTable, p_current_function: String):
 	# 方案 A: 通过源码行确定是 const 还是 var
-	var kind = Symbol.Kind.CONSTANT if _const_set.has(p_node) else Symbol.Kind.VARIABLE
+	var kind = GDScriptAnalysisResult.Symbol.Kind.CONSTANT if _const_set.has(p_node) else GDScriptAnalysisResult.Symbol.Kind.VARIABLE
 
 	# define 到当前作用域
 	var sym = p_scope.define(p_node.name, kind, p_node, _type_to_string(p_node.datatype))
 	sym.is_exported = p_node.is_export
 
 	# 记录 def site
-	_record_def_use(p_node.name, p_node, p_current_function, DefUseSite.AccessType.DEFINE)
+	_record_def_use(p_node.name, p_node, p_current_function, GDScriptAnalysisResult.DefUseSite.AccessType.DEFINE)
 
 	# 解析初始化表达式中的标识符引用（这些是 READ）
 	if p_node.initializer != null:
@@ -280,12 +280,12 @@ func _resolve_variable(p_node, p_scope: SymbolTable, p_current_function: String)
 
 
 # 解析信号声明
-func _resolve_signal(p_node, p_scope: SymbolTable):
+func _resolve_signal(p_node, p_scope: GDScriptAnalysisResult.SymbolTable):
 	# define 信号符号
-	p_scope.define(p_node.name, Symbol.Kind.SIGNAL, p_node)
+	p_scope.define(p_node.name, GDScriptAnalysisResult.Symbol.Kind.SIGNAL, p_node)
 
 	# 注册 SignalInfo 到 SignalGraph
-	var info = SignalInfo.new()
+	var info = GDScriptAnalysisResult.SignalInfo.new()
 	info.name = p_node.name
 	info.declaration = p_node
 	for param in p_node.params:
@@ -296,21 +296,21 @@ func _resolve_signal(p_node, p_scope: SymbolTable):
 
 
 # 解析枚举声明
-func _resolve_enum(p_node, p_scope: SymbolTable):
+func _resolve_enum(p_node, p_scope: GDScriptAnalysisResult.SymbolTable):
 	# define 枚举到当前作用域
 	var enum_name = p_node.name if p_node.name != "" else "<anonymous_enum>"
-	p_scope.define(enum_name, Symbol.Kind.ENUM, p_node)
+	p_scope.define(enum_name, GDScriptAnalysisResult.Symbol.Kind.ENUM, p_node)
 
 	# define 枚举值到当前作用域（GDScript 枚举值在 class scope 直接可用）
 	for entry in p_node.values:
 		var value_name = entry["name"]
-		p_scope.define(value_name, Symbol.Kind.ENUM_VALUE, p_node)
+		p_scope.define(value_name, GDScriptAnalysisResult.Symbol.Kind.ENUM_VALUE, p_node)
 
 
 # ---- Task 4: 语句节点遍历 + scope chain 查找 ----
 
 # 解析 if 语句 — 不创建新作用域
-func _resolve_if(p_node, p_scope: SymbolTable, p_current_function: String, p_lambda_node = null):
+func _resolve_if(p_node, p_scope: GDScriptAnalysisResult.SymbolTable, p_current_function: String, p_lambda_node = null):
 	_resolve_expression(p_node.condition, p_scope, p_current_function, p_lambda_node)
 	_resolve_suite(p_node.true_branch, p_scope, p_current_function, p_lambda_node)
 	if p_node.false_branch != null:
@@ -322,13 +322,13 @@ func _resolve_if(p_node, p_scope: SymbolTable, p_current_function: String, p_lam
 
 
 # 解析 while — 不创建新作用域
-func _resolve_while(p_node, p_scope: SymbolTable, p_current_function: String, p_lambda_node = null):
+func _resolve_while(p_node, p_scope: GDScriptAnalysisResult.SymbolTable, p_current_function: String, p_lambda_node = null):
 	_resolve_expression(p_node.condition, p_scope, p_current_function, p_lambda_node)
 	_resolve_suite(p_node.body, p_scope, p_current_function, p_lambda_node)
 
 
 # 解析 match — 不创建新作用域
-func _resolve_match(p_node, p_scope: SymbolTable, p_current_function: String, p_lambda_node = null):
+func _resolve_match(p_node, p_scope: GDScriptAnalysisResult.SymbolTable, p_current_function: String, p_lambda_node = null):
 	_resolve_expression(p_node.test, p_scope, p_current_function, p_lambda_node)
 	for branch in p_node.branches:
 		if branch is GDScriptToken.MatchBranchNode:
@@ -338,10 +338,10 @@ func _resolve_match(p_node, p_scope: SymbolTable, p_current_function: String, p_
 
 
 # 解析 for 循环 — 不创建新作用域，循环变量 define 到当前作用域
-func _resolve_for(p_node, p_scope: SymbolTable, p_current_function: String, p_lambda_node = null):
+func _resolve_for(p_node, p_scope: GDScriptAnalysisResult.SymbolTable, p_current_function: String, p_lambda_node = null):
 	# for i in range(10): — i define 到当前作用域
-	p_scope.define(p_node.var_name, Symbol.Kind.FOR_VAR, p_node, "Variant")
-	_record_def_use(p_node.var_name, p_node, p_current_function, DefUseSite.AccessType.DEFINE)
+	p_scope.define(p_node.var_name, GDScriptAnalysisResult.Symbol.Kind.FOR_VAR, p_node, "Variant")
+	_record_def_use(p_node.var_name, p_node, p_current_function, GDScriptAnalysisResult.DefUseSite.AccessType.DEFINE)
 
 	# iterable 中的标识符是 READ
 	_resolve_expression(p_node.iterable, p_scope, p_current_function, p_lambda_node)
@@ -351,13 +351,13 @@ func _resolve_for(p_node, p_scope: SymbolTable, p_current_function: String, p_la
 
 
 # 解析 return 语句
-func _resolve_return(p_node, p_scope: SymbolTable, p_current_function: String, p_lambda_node = null):
+func _resolve_return(p_node, p_scope: GDScriptAnalysisResult.SymbolTable, p_current_function: String, p_lambda_node = null):
 	if p_node.value != null:
 		_resolve_expression(p_node.value, p_scope, p_current_function, p_lambda_node)
 
 
 # 解析标识符读取
-func _resolve_identifier_read(p_node, p_scope: SymbolTable, p_current_function: String, p_lambda_node = null):
+func _resolve_identifier_read(p_node, p_scope: GDScriptAnalysisResult.SymbolTable, p_current_function: String, p_lambda_node = null):
 	# lambda 捕获检测优先
 	if p_lambda_node != null:
 		_resolve_identifier_in_lambda(p_node, p_scope, p_lambda_node, p_current_function)
@@ -371,13 +371,13 @@ func _resolve_identifier_read(p_node, p_scope: SymbolTable, p_current_function: 
 		return
 
 	# 记录 READ
-	_record_def_use(sym.name, p_node, p_current_function, DefUseSite.AccessType.READ)
+	_record_def_use(sym.name, p_node, p_current_function, GDScriptAnalysisResult.DefUseSite.AccessType.READ)
 
 
 # ---- Chunk 3: 调用图 + 信号图 ----
 
 # 解析函数调用 — 6 种调用模式检测
-func _resolve_call(p_node, p_scope: SymbolTable, p_current_function: String):
+func _resolve_call(p_node, p_scope: GDScriptAnalysisResult.SymbolTable, p_current_function: String):
 	# 先解析参数中的标识符引用（都是 READ）
 	for arg in p_node.arguments:
 		_resolve_expression(arg, p_scope, p_current_function)
@@ -392,8 +392,8 @@ func _resolve_call(p_node, p_scope: SymbolTable, p_current_function: String):
 			return
 		# 1b: 隐式 self 调用 foo()
 		var sym = p_scope.resolve(callee.name)
-		if sym != null and sym.kind == Symbol.Kind.FUNCTION:
-			_add_call_edge(p_current_function, callee.name, callee.line, CallEdge.CallType.SELF, "", p_node.arguments)
+		if sym != null and sym.kind == GDScriptAnalysisResult.Symbol.Kind.FUNCTION:
+			_add_call_edge(p_current_function, callee.name, callee.line, GDScriptAnalysisResult.CallEdge.CallType.SELF, "", p_node.arguments)
 		# 否则可能是内置函数 (print, range 等) — 不记录 CallEdge
 
 	# 模式 2: 属性调用 — self.foo() / obj.method() / super.foo() / sig.connect() / sig.emit()
@@ -402,17 +402,17 @@ func _resolve_call(p_node, p_scope: SymbolTable, p_current_function: String):
 
 
 # 属性调用分析 — AttributeNode(callee) 的 7 种子模式
-func _resolve_attribute_call(p_call_node, p_attr, p_scope: SymbolTable, p_current_function: String):
+func _resolve_attribute_call(p_call_node, p_attr, p_scope: GDScriptAnalysisResult.SymbolTable, p_current_function: String):
 	var base = p_attr.base
 	var method_name = p_attr.name
 
 	# 2a: self.method() → SELF
 	if base is GDScriptToken.SelfNode:
-		_add_call_edge(p_current_function, method_name, p_attr.line, CallEdge.CallType.SELF, "", p_call_node.arguments)
+		_add_call_edge(p_current_function, method_name, p_attr.line, GDScriptAnalysisResult.CallEdge.CallType.SELF, "", p_call_node.arguments)
 
 	# 2b: super.method() → SUPER
 	elif base is GDScriptToken.SuperNode:
-		_add_call_edge(p_current_function, method_name, p_attr.line, CallEdge.CallType.SUPER, "", p_call_node.arguments)
+		_add_call_edge(p_current_function, method_name, p_attr.line, GDScriptAnalysisResult.CallEdge.CallType.SUPER, "", p_call_node.arguments)
 
 	# 2c: signal_name.connect(cb) → SIGNAL_CONNECT 或 LAMBDA
 	elif method_name == "connect" and base is GDScriptToken.IdentifierNode:
@@ -428,7 +428,7 @@ func _resolve_attribute_call(p_call_node, p_attr, p_scope: SymbolTable, p_curren
 
 	# 2f: obj.method() → EXTERNAL
 	elif base is GDScriptToken.IdentifierNode:
-		_add_call_edge(p_current_function, method_name, p_attr.line, CallEdge.CallType.EXTERNAL, base.name, p_call_node.arguments)
+		_add_call_edge(p_current_function, method_name, p_attr.line, GDScriptAnalysisResult.CallEdge.CallType.EXTERNAL, base.name, p_call_node.arguments)
 
 	# 2g: 链式调用 a.b.method() 或 ClassName.method() — [Phase 3] STATIC 调用
 
@@ -441,32 +441,32 @@ func _resolve_emit_call(p_node, p_current_function: String):
 		var info = result.signal_graph.get_signal_flow(sig_name)
 		if info == null:
 			# 未声明的信号 — 创建临时 SignalInfo
-			info = SignalInfo.new()
+			info = GDScriptAnalysisResult.SignalInfo.new()
 			info.name = sig_name
 			result.signal_graph.signals[sig_name] = info
 			result.add_error("[SymbolResolver] %d: 信号 '%s' 未声明，通过 emit() 发射" % [p_node.line, sig_name])
 		info.emit_sites.append(_make_site(p_node, p_current_function, p_node.arguments))
 		# 同时记录为 EMIT 类型的 CallEdge
-		_add_call_edge(p_current_function, sig_name, p_node.callee.line, CallEdge.CallType.EMIT, "", p_node.arguments)
+		_add_call_edge(p_current_function, sig_name, p_node.callee.line, GDScriptAnalysisResult.CallEdge.CallType.EMIT, "", p_node.arguments)
 
 
 # signal_name.emit() 形式 — 从 _resolve_attribute_call 调用
 func _resolve_signal_emit(p_call_node, p_signal_name: String, p_current_function: String, p_form: String):
 	var info = result.signal_graph.get_signal_flow(p_signal_name)
 	if info == null:
-		info = SignalInfo.new()
+		info = GDScriptAnalysisResult.SignalInfo.new()
 		info.name = p_signal_name
 		result.signal_graph.signals[p_signal_name] = info
 		result.add_error("[SymbolResolver] %d: 信号 '%s' 未声明，通过 .emit() 发射" % [p_call_node.line, p_signal_name])
 	info.emit_sites.append(_make_site(p_call_node, p_current_function, p_call_node.arguments))
-	_add_call_edge(p_current_function, p_signal_name, p_call_node.callee.line, CallEdge.CallType.EMIT, "", p_call_node.arguments)
+	_add_call_edge(p_current_function, p_signal_name, p_call_node.callee.line, GDScriptAnalysisResult.CallEdge.CallType.EMIT, "", p_call_node.arguments)
 
 
 # signal_name.connect(cb/lambda) 形式
-func _resolve_signal_connect(p_call_node, p_signal_name: String, p_scope: SymbolTable, p_current_function: String):
+func _resolve_signal_connect(p_call_node, p_signal_name: String, p_scope: GDScriptAnalysisResult.SymbolTable, p_current_function: String):
 	var info = result.signal_graph.get_signal_flow(p_signal_name)
 	if info == null:
-		info = SignalInfo.new()
+		info = GDScriptAnalysisResult.SignalInfo.new()
 		info.name = p_signal_name
 		result.signal_graph.signals[p_signal_name] = info
 		result.add_error("[SymbolResolver] %d: 信号 '%s' 未声明，通过 .connect() 连接" % [p_call_node.line, p_signal_name])
@@ -479,23 +479,23 @@ func _resolve_signal_connect(p_call_node, p_signal_name: String, p_scope: Symbol
 		var cb = p_call_node.arguments[0]
 		if cb is GDScriptToken.IdentifierNode:
 			# signal_name.connect(callback_func) → SIGNAL_CONNECT
-			_add_call_edge(p_current_function, cb.name, p_call_node.callee.line, CallEdge.CallType.SIGNAL_CONNECT, p_signal_name, p_call_node.arguments)
+			_add_call_edge(p_current_function, cb.name, p_call_node.callee.line, GDScriptAnalysisResult.CallEdge.CallType.SIGNAL_CONNECT, p_signal_name, p_call_node.arguments)
 		elif cb is GDScriptToken.LambdaNode:
 			# signal_name.connect(lambda) → LAMBDA
-			_add_call_edge(p_current_function, "<lambda@%d>" % cb.line, p_call_node.callee.line, CallEdge.CallType.LAMBDA, p_signal_name, p_call_node.arguments)
+			_add_call_edge(p_current_function, "<lambda@%d>" % cb.line, p_call_node.callee.line, GDScriptAnalysisResult.CallEdge.CallType.LAMBDA, p_signal_name, p_call_node.arguments)
 			# 同时解析 lambda（其 captured_vars 提供闭包上下文）
 			_resolve_lambda(cb, p_scope, p_current_function)
 
 
 # obj.connect("signal_name", cb) 形式
-func _resolve_object_connect(p_call_node, p_scope: SymbolTable, p_current_function: String):
+func _resolve_object_connect(p_call_node, p_scope: GDScriptAnalysisResult.SymbolTable, p_current_function: String):
 	if p_call_node.arguments.size() >= 1 and p_call_node.arguments[0] is GDScriptToken.LiteralNode:
 		var sig_name = str(p_call_node.arguments[0].value)
 
 		# 记录 connect_site（可能是未声明的外部信号）
 		var info = result.signal_graph.get_signal_flow(sig_name)
 		if info == null:
-			info = SignalInfo.new()
+			info = GDScriptAnalysisResult.SignalInfo.new()
 			info.name = sig_name
 			result.signal_graph.signals[sig_name] = info
 		info.connect_sites.append(_make_site(p_call_node, p_current_function, p_call_node.arguments))
@@ -504,23 +504,23 @@ func _resolve_object_connect(p_call_node, p_scope: SymbolTable, p_current_functi
 		if p_call_node.arguments.size() >= 2:
 			var cb = p_call_node.arguments[1]
 			if cb is GDScriptToken.IdentifierNode:
-				_add_call_edge(p_current_function, cb.name, p_call_node.callee.line, CallEdge.CallType.CONNECT, sig_name, p_call_node.arguments)
+				_add_call_edge(p_current_function, cb.name, p_call_node.callee.line, GDScriptAnalysisResult.CallEdge.CallType.CONNECT, sig_name, p_call_node.arguments)
 			elif cb is GDScriptToken.LambdaNode:
-				_add_call_edge(p_current_function, "<lambda@%d>" % cb.line, p_call_node.callee.line, CallEdge.CallType.LAMBDA, sig_name, p_call_node.arguments)
+				_add_call_edge(p_current_function, "<lambda@%d>" % cb.line, p_call_node.callee.line, GDScriptAnalysisResult.CallEdge.CallType.LAMBDA, sig_name, p_call_node.arguments)
 				_resolve_lambda(cb, p_scope, p_current_function)
 
 
 # ---- Task 6: self.hp = 10 的 AttributeNode 特殊处理 ----
 
 # 解析赋值语句 — 区分 target 形态
-func _resolve_assignment(p_node, p_scope: SymbolTable, p_current_function: String):
+func _resolve_assignment(p_node, p_scope: GDScriptAnalysisResult.SymbolTable, p_current_function: String):
 	# 先解析 value 侧的表达式（所有标识符为 READ）
 	_resolve_expression(p_node.value, p_scope, p_current_function)
 
 	# 再解析 target 侧的标识符
 	if p_node.target is GDScriptToken.IdentifierNode:
 		# x = value → x 是 WRITE（或 READ_WRITE 若复合赋值）
-		var access = DefUseSite.AccessType.WRITE if p_node.op == GDScriptToken.Type.EQUAL else DefUseSite.AccessType.READ_WRITE
+		var access = GDScriptAnalysisResult.DefUseSite.AccessType.WRITE if p_node.op == GDScriptToken.Type.EQUAL else GDScriptAnalysisResult.DefUseSite.AccessType.READ_WRITE
 		_record_def_use(p_node.target.name, p_node.target, p_current_function, access)
 
 	elif p_node.target is GDScriptToken.AttributeNode:
@@ -531,7 +531,7 @@ func _resolve_assignment(p_node, p_scope: SymbolTable, p_current_function: Strin
 		# self.hp = 10 → self 是 SelfNode，不需要追踪
 		# obj.hp = 10 → obj 是 IdentifierNode，记录 READ
 		if base is GDScriptToken.IdentifierNode:
-			_record_def_use(base.name, base, p_current_function, DefUseSite.AccessType.READ)
+			_record_def_use(base.name, base, p_current_function, GDScriptAnalysisResult.DefUseSite.AccessType.READ)
 		# 递归处理更深层的属性链: a.b.c = value → a.b 是 READ
 		elif base is GDScriptToken.AttributeNode:
 			_resolve_expression(base, p_scope, p_current_function)
@@ -548,29 +548,29 @@ func _resolve_assignment(p_node, p_scope: SymbolTable, p_current_function: Strin
 # ---- Chunk 4: Lambda 闭包捕获 ----
 
 # 解析 Lambda 表达式 — 创建 lambda_scope (parent = 当前作用域)
-func _resolve_lambda(p_node, p_parent_scope: SymbolTable, p_current_function: String):
+func _resolve_lambda(p_node, p_parent_scope: GDScriptAnalysisResult.SymbolTable, p_current_function: String):
 	# 创建 lambda_scope
-	var lambda_scope = SymbolTable.new()
+	var lambda_scope = GDScriptAnalysisResult.SymbolTable.new()
 	lambda_scope.parent = p_parent_scope
 	lambda_scope.scope_name = "lambda@%d" % p_node.line
 
 	# define lambda 参数到 lambda_scope
 	for param in p_node.params:
 		if param is GDScriptToken.ParameterNode:
-			lambda_scope.define(param.name, Symbol.Kind.PARAMETER, param, _type_to_string(param.datatype))
-			_record_def_use(param.name, param, p_current_function, DefUseSite.AccessType.DEFINE)
+			lambda_scope.define(param.name, GDScriptAnalysisResult.Symbol.Kind.PARAMETER, param, _type_to_string(param.datatype))
+			_record_def_use(param.name, param, p_current_function, GDScriptAnalysisResult.DefUseSite.AccessType.DEFINE)
 
 	# 遍历 lambda body — 传入 p_node 自身用于捕获检测
 	_resolve_suite(p_node.body, lambda_scope, p_current_function, p_node)
 
 
 # Lambda 中的标识符解析 — 区分局部变量 vs 捕获变量
-func _resolve_identifier_in_lambda(p_node, p_lambda_scope: SymbolTable, p_lambda_node, p_current_function: String):
+func _resolve_identifier_in_lambda(p_node, p_lambda_scope: GDScriptAnalysisResult.SymbolTable, p_lambda_node, p_current_function: String):
 	# 先检查 lambda 自己的局部作用域（参数）
 	var local = p_lambda_scope.resolve_local(p_node.name)
 	if local != null:
 		# lambda 局部变量（参数）— 正常记录 READ
-		_record_def_use(p_node.name, p_node, p_current_function, DefUseSite.AccessType.READ)
+		_record_def_use(p_node.name, p_node, p_current_function, GDScriptAnalysisResult.DefUseSite.AccessType.READ)
 		return
 
 	# 不在 lambda 局部 → 向父作用域查找（resolve 自动递归到 parent）
@@ -579,7 +579,7 @@ func _resolve_identifier_in_lambda(p_node, p_lambda_scope: SymbolTable, p_lambda
 		# 这是捕获变量！记录到 LambdaNode.captured_vars
 		if p_lambda_node.captured_vars.find(p_node.name) == -1:
 			p_lambda_node.captured_vars.append(p_node.name)
-		_record_def_use(p_node.name, p_node, p_current_function, DefUseSite.AccessType.READ)
+		_record_def_use(p_node.name, p_node, p_current_function, GDScriptAnalysisResult.DefUseSite.AccessType.READ)
 		return
 
 	# 完全未解析 — 可能是内置函数/全局引用
