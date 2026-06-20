@@ -130,3 +130,63 @@ class EnumNode:
     extends ASTNode
     var name: String = ""
     var values: Array = []              # of Dictionary {name: String, value: ExpressionNode}
+
+
+class SuiteNode:
+    extends ASTNode
+    var statements: Array = []          # of ASTNode (语句)
+
+class IfNode:
+    extends ASTNode
+    var condition = null                # ExpressionNode
+    var true_branch: SuiteNode = null
+    var false_branch = null             # IfNode or SuiteNode or null
+
+class WhileNode:
+    extends ASTNode
+    var condition = null                # ExpressionNode
+    var body: SuiteNode = null
+
+class ForNode:
+    extends ASTNode
+    var var_name: String = ""
+    var iterable = null                 # ExpressionNode
+    var body: SuiteNode = null
+
+
+class MatchNode:
+    extends ASTNode
+    var test = null                     # ExpressionNode
+    var branches: Array = []            # of MatchBranchNode
+
+class MatchBranchNode:
+    extends ASTNode
+    var patterns: Array = []            # of ExpressionNode
+    var guard = null                    # ExpressionNode or null (Phase 3)
+    var body: SuiteNode = null
+
+class ReturnNode:
+    extends ASTNode
+    var value = null                    # ExpressionNode or null
+
+class BreakNode:
+    extends ASTNode
+
+class ContinueNode:
+    extends ASTNode
+
+class PassNode:
+    extends ASTNode
+
+class AssertNode:
+    extends ASTNode
+    var condition = null                # ExpressionNode
+    var message = null                  # ExpressionNode or null
+
+class AwaitNode:
+    extends ASTNode
+    var expression = null               # ExpressionNode
+
+class ExpressionStatementNode:
+    extends ASTNode
+    var expression = null               # ExpressionNode
