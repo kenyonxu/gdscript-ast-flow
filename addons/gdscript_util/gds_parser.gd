@@ -162,3 +162,200 @@ func _parse_class_member():
             _set_error("非预期的令牌: %s" % t.get_name())
             _advance()
             return null
+
+
+func _parse_inner_class() -> ClassNode:
+    _advance()  # CLASS token
+    var name_t = _expect(GDScriptToken.Type.IDENTIFIER, "class 后需要类名")
+    var node = ClassNode.new()
+    if name_t:
+        node.classname_id = name_t.literal
+
+    # extends
+    if _match(GDScriptToken.Type.EXTENDS):
+        var ext_t = _expect(GDScriptToken.Type.IDENTIFIER, "extends 后需要类名")
+        if ext_t:
+            node.extends_id = ext_t.literal
+
+    _expect(GDScriptToken.Type.COLON)
+    _match(GDScriptToken.Type.NEWLINE)
+
+    # 类体
+    _expect(GDScriptToken.Type.INDENT)
+    while _peek() and _peek().type not in [GDScriptToken.Type.DEDENT, GDScriptToken.Type.TK_EOF]:
+        var m = _parse_class_member()
+        if m:
+            node.members.append(m)
+    _expect(GDScriptToken.Type.DEDENT)
+    return node
+
+func _parse_function(p_annotations: Array) -> FunctionNode:
+    _advance()  # FUNC token
+    var name_t = _expect(GDScriptToken.Type.IDENTIFIER, "func 后需要函数名")
+    var node = FunctionNode.new()
+    if name_t:
+        node.name = name_t.literal
+        node.line = name_t.start_line
+
+    node.params = _parse_parameters()
+
+    # 返回类型
+    if _match(GDScriptToken.Type.FORWARD_ARROW):
+        node.return_type = _parse_type()
+
+    # 函数体
+    _expect(GDScriptToken.Type.COLON)
+    node.body = _parse_suite()
+
+    return node
+
+func _parse_parameters() -> Array[ParameterNode]:
+    if not _match(GDScriptToken.Type.PAREN_OPEN):
+        return []
+
+    var params: Array[ParameterNode] = []
+    if _peek() and _peek().type == GDScriptToken.Type.PAREN_CLOSE:
+        _advance()
+        return params
+
+    while _peek() and _peek().type != GDScriptToken.Type.TK_EOF:
+        var p = ParameterNode.new()
+        var id_t = _expect(GDScriptToken.Type.IDENTIFIER, "参数需要标识符")
+        if id_t == null:
+            break
+        p.name = id_t.literal
+        p.line = id_t.start_line
+
+        # 类型标注
+        if _match(GDScriptToken.Type.COLON):
+            p.datatype = _parse_type()
+
+        # 默认值
+        if _match(GDScriptToken.Type.EQUAL):
+            p.default_value = _parse_expression()
+
+        params.append(p)
+
+        if _match(GDScriptToken.Type.COMMA):
+            continue
+        elif _peek() and _peek().type == GDScriptToken.Type.PAREN_CLOSE:
+            break
+        else:
+            _set_error("参数列表语法错误")
+            break
+
+    _expect(GDScriptToken.Type.PAREN_CLOSE)
+    return params
+
+
+func _parse_variable(p_annotations: Array) -> VariableNode:
+    _advance()  # VAR token
+    var name_t = _expect(GDScriptToken.Type.IDENTIFIER, "var 后需要变量名")
+    var node = VariableNode.new()
+    if name_t:
+        node.name = name_t.literal
+        node.line = name_t.start_line
+
+    # 注解处理
+    for ann in p_annotations:
+        match ann.name:
+            "export": node.is_export = true
+            "onready": node.is_onready = true
+
+    # 类型标注或推断
+    if _match(GDScriptToken.Type.COLON):
+        if _match(GDScriptToken.Type.EQUAL):
+            # var x := value (类型推断)
+            node.initializer = _parse_expression()
+            node.datatype = null  # 推断类型
+        else:
+            node.datatype = _parse_type()
+            if _match(GDScriptToken.Type.EQUAL):
+                node.initializer = _parse_expression()
+    elif _match(GDScriptToken.Type.EQUAL):
+        node.initializer = _parse_expression()
+
+    # setget (Phase 1: 仅支持声明式，不支持内联 setter/getter)
+    if _match(GDScriptToken.Type.IDENTIFIER):
+        # 忽略遗留 setget 语法
+        pass
+
+    return node
+
+func _parse_const(p_annotations: Array):
+    _advance()  # CONST token (已在 _parse_class_member 中匹配)
+    var name_t = _expect(GDScriptToken.Type.IDENTIFIER, "const 后需要常量名")
+    var node = VariableNode.new()
+    if name_t:
+        node.name = name_t.literal
+        node.line = name_t.start_line
+
+    # 类型标注
+    if _match(GDScriptToken.Type.COLON):
+        if _match(GDScriptToken.Type.EQUAL):
+            node.initializer = _parse_expression()
+        else:
+            node.datatype = _parse_type()
+            if _match(GDScriptToken.Type.EQUAL):
+                node.initializer = _parse_expression()
+    elif _match(GDScriptToken.Type.EQUAL):
+        node.initializer = _parse_expression()
+
+    # 注意: const 返回 VariableNode (无独立 ConstNode 类型)
+    # SymbolResolver Phase 2 通过检查源 Token 区分 const/var
+    return node
+
+
+func _parse_signal() -> SignalNode:
+    _advance()  # SIGNAL token
+    var name_t = _expect(GDScriptToken.Type.IDENTIFIER, "signal 后需要信号名")
+    var node = SignalNode.new()
+    if name_t:
+        node.name = name_t.literal
+        node.line = name_t.start_line
+
+    # 信号参数
+    if _match(GDScriptToken.Type.PAREN_OPEN):
+        node.params = _parse_parameters()
+    return node
+
+func _parse_enum() -> EnumNode:
+    _advance()  # ENUM token
+    var node = EnumNode.new()
+
+    # 可选枚举名
+    if _peek() and _peek().type == GDScriptToken.Type.IDENTIFIER:
+        node.name = _advance().literal
+
+    _expect(GDScriptToken.Type.BRACE_OPEN, "enum 需要 {")
+
+    while _peek() and _peek().type != GDScriptToken.Type.BRACE_CLOSE:
+        var key_t = _expect(GDScriptToken.Type.IDENTIFIER, "enum 成员需要标识符")
+        if key_t == null:
+            break
+        var entry = {"name": key_t.literal, "value": null}
+        if _match(GDScriptToken.Type.EQUAL):
+            entry["value"] = _parse_expression()
+        node.values.append(entry)
+
+        if not _match(GDScriptToken.Type.COMMA):
+            break
+
+    _expect(GDScriptToken.Type.BRACE_CLOSE)
+    return node
+
+func _parse_type() -> TypeNode:
+    var node = TypeNode.new()
+
+    if _peek() and _peek().type == GDScriptToken.Type.IDENTIFIER:
+        node.type_name = _advance().literal
+
+    # 泛型参数: Array[int], Dictionary[String, int]
+    if _match(GDScriptToken.Type.BRACKET_OPEN):
+        while _peek() and _peek().type != GDScriptToken.Type.BRACKET_CLOSE:
+            node.container_element_types.append(_parse_type())
+            if not _match(GDScriptToken.Type.COMMA):
+                break
+        _expect(GDScriptToken.Type.BRACKET_CLOSE)
+
+    return node
