@@ -66,3 +66,22 @@ func _to_string() -> String:
     if literal != null and type in [Type.IDENTIFIER, Type.LITERAL, Type.ANNOTATION]:
         return "%s(%s) @%d:%d" % [name, literal, start_line, start_column]
     return "%s @%d:%d" % [name, start_line, start_column]
+
+
+# ---- AST 节点基类 ----
+class ASTNode:
+    extends RefCounted
+    var line: int = 0
+    var column: int = 0
+
+# ---- 类型节点 ----
+class TypeNode:
+    extends RefCounted
+    var type_name: String = ""          # "int", "Array", "Node" 等
+    var container_element_types: Array[TypeNode] = []  # 泛型参数: Array[int] → [TypeNode("int")]
+
+# ---- 注解节点 ----
+class AnnotationNode:
+    extends ASTNode
+    var name: String = ""               # @export, @onready, @tool ...
+    var arguments: Array = []           # of ExpressionNode
