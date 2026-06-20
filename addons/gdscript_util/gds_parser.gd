@@ -93,3 +93,72 @@ func _skip_newlines():
 func _skip_to_newline():
     while _peek() and _peek().type != GDScriptToken.Type.NEWLINE and _peek().type != GDScriptToken.Type.TK_EOF:
         _advance()
+
+
+func _parse_annotation() -> AnnotationNode:
+    var t = _advance()  # ANNOTATION token
+    var node = AnnotationNode.new()
+    node.line = t.start_line
+    node.name = t.literal
+    # 注解参数（如 @export_range(0, 100)）
+    if _match(GDScriptToken.Type.PAREN_OPEN):
+        while _peek() and _peek().type != GDScriptToken.Type.PAREN_CLOSE:
+            node.arguments.append(_parse_expression())
+            if not _match(GDScriptToken.Type.COMMA):
+                break
+        _expect(GDScriptToken.Type.PAREN_CLOSE)
+    return node
+
+func _parse_class_member():
+    var t = _peek()
+    if t == null:
+        return null
+
+    # 处理成员注解 (@export, @onready, @static...)
+    var annotations: Array[AnnotationNode] = []
+    while t and t.type == GDScriptToken.Type.ANNOTATION:
+        annotations.append(_parse_annotation())
+        t = _peek()
+
+    if t == null:
+        return null
+
+    match t.type:
+        GDScriptToken.Type.EXTENDS, GDScriptToken.Type.CLASS_NAME:
+            # extends/class_name 已在 parse() 中作为文件级声明解析
+            # 这里出现在类体中作为错误处理
+            _set_error("extends/class_name 只能出现在文件顶部")
+            _advance()
+            return null
+
+        GDScriptToken.Type.FUNC:
+            return _parse_function(annotations)
+
+        GDScriptToken.Type.VAR:
+            return _parse_variable(annotations)
+
+        GDScriptToken.Type.TK_CONST:
+            return _parse_const(annotations)
+
+        GDScriptToken.Type.SIGNAL:
+            return _parse_signal()
+
+        GDScriptToken.Type.ENUM:
+            return _parse_enum()
+
+        GDScriptToken.Type.CLASS:
+            return _parse_inner_class()
+
+        GDScriptToken.Type.STATIC:
+            _advance()
+            if _peek() and _peek().type == GDScriptToken.Type.FUNC:
+                var f = _parse_function([])
+                f.is_static = true
+                return f
+            _set_error("static 只能用于函数")
+            return null
+
+        _:
+            _set_error("非预期的令牌: %s" % t.get_name())
+            _advance()
+            return null
