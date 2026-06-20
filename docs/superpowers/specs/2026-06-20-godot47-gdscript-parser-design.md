@@ -608,6 +608,9 @@ func _print_analysis_summary(result: GDScriptAnalysisResult):
 ## 七、实现阶段
 
 ### Phase 1: 基础管道（优先）
+
+**目标：** 建立完整的"源码 → AST"解析管路。交付后可将任意 `.gd` 文件解析为结构化 AST 树，覆盖核心 GDScript 语法（类/函数/变量/控制流/表达式/lambda/注解），通过 10 个验收测试用例验证正确性。为 Phase 2 的符号分析提供基础。
+
 1. Token 类型枚举 + AST 节点类定义 (`gds_ast_nodes.gd`)
 2. GDScriptTokenizer 词法分析器
 3. GDScriptParser 语法分析器（核心子集语法）
@@ -616,6 +619,9 @@ func _print_analysis_summary(result: GDScriptAnalysisResult):
 **交付物：** 可解析 `.gd` 源文件并生成 AST
 
 ### Phase 2: 符号分析
+
+**目标：** 在 AST 之上构建符号表和逻辑流图，实现信号连接/方法调用/变量读写的跨函数追踪能力。交付后可回答"这个信号在哪里发射？谁连接了它？"、"`take_damage()` 被哪些函数调用？"、"变量 `hp` 在哪些位置被读写？"等问题。
+
 1. SymbolTable + 嵌套作用域
 2. CallGraph 构建（6 种调用模式）
 3. SignalGraph 构建（声明 → emit → connect 链路）
@@ -625,11 +631,14 @@ func _print_analysis_summary(result: GDScriptAnalysisResult):
 **交付物：** 完整逻辑流分析能力（调用图 + 信号链 + 变量追踪）
 
 ### Phase 3: 扩展完善
+
+**目标：** 将分析工具融入 Godot 编辑器工作流，支持完整 4.7 语法，达到实用级别的性能和错误容忍度。Phase 3 完成后，工具可在编辑器内部直接使用，覆盖所有 GDScript 语言特性，并能处理大型项目（1000+ 行脚本）。
+
 1. EditorPlugin 编辑器面板集成
-2. 完整 4.7 语法覆盖（NAMESPACE, TRAIT 等）
-3. 性能优化（大文件解析）
-4. 错误恢复（部分解析失败时继续）
-5. 泛用性增强（跨文件类型追踪）
+2. 完整 4.7 语法覆盖（NAMESPACE, TRAIT, 格式化字符串等）
+3. 性能优化（1000 行 `.gd` 文件解析 < 500ms）
+4. 错误恢复（部分解析失败时继续，最大化分析覆盖）
+5. 泛用性增强（跨文件类型追踪、多文件批量分析）
 
 **交付物：** 编辑器就绪的完整分析工具
 
