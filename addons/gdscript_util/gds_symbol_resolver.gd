@@ -508,3 +508,38 @@ func _resolve_object_connect(p_call_node, p_scope: SymbolTable, p_current_functi
 			elif cb is GDScriptToken.LambdaNode:
 				_add_call_edge(p_current_function, "<lambda@%d>" % cb.line, p_call_node.callee.line, CallEdge.CallType.LAMBDA, sig_name, p_call_node.arguments)
 				_resolve_lambda(cb, p_scope, p_current_function)
+
+
+# ---- Task 6: self.hp = 10 的 AttributeNode 特殊处理 ----
+
+# 解析赋值语句 — 区分 target 形态
+func _resolve_assignment(p_node, p_scope: SymbolTable, p_current_function: String):
+	# 先解析 value 侧的表达式（所有标识符为 READ）
+	_resolve_expression(p_node.value, p_scope, p_current_function)
+
+	# 再解析 target 侧的标识符
+	if p_node.target is GDScriptToken.IdentifierNode:
+		# x = value → x 是 WRITE（或 READ_WRITE 若复合赋值）
+		var access = DefUseSite.AccessType.WRITE if p_node.op == GDScriptToken.Type.EQUAL else DefUseSite.AccessType.READ_WRITE
+		_record_def_use(p_node.target.name, p_node.target, p_current_function, access)
+
+	elif p_node.target is GDScriptToken.AttributeNode:
+		# a.b = value → a 是 READ（读取对象引用，未修改 a 本身）
+		# 但 b 是对象属性写入，不在当前文件的变量追踪范围内
+		var base = p_node.target.base
+
+		# self.hp = 10 → self 是 SelfNode，不需要追踪
+		# obj.hp = 10 → obj 是 IdentifierNode，记录 READ
+		if base is GDScriptToken.IdentifierNode:
+			_record_def_use(base.name, base, p_current_function, DefUseSite.AccessType.READ)
+		# 递归处理更深层的属性链: a.b.c = value → a.b 是 READ
+		elif base is GDScriptToken.AttributeNode:
+			_resolve_expression(base, p_scope, p_current_function)
+		# SelfNode / SuperNode / CallNode 等 → 递归解析 base 中的标识符
+		elif base is GDScriptToken.CallNode:
+			_resolve_call(base, p_scope, p_current_function)
+
+	elif p_node.target is GDScriptToken.SubscriptNode:
+		# a[b] = value → a 是 READ, b 中的标识符是 READ
+		_resolve_expression(p_node.target.base, p_scope, p_current_function)
+		_resolve_expression(p_node.target.index, p_scope, p_current_function)
