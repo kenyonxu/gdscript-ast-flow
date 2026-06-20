@@ -326,3 +326,115 @@ func _scan_string(p_quote: String) -> GDScriptToken:
             str_value += c
 
     return _make_token(GDScriptToken.Type.LITERAL, str_value)
+
+
+func _scan_operator(p_first: String) -> GDScriptToken:
+    match p_first:
+        "!":
+            if _match("="): return _make_token(GDScriptToken.Type.BANG_EQUAL)
+            return _make_token(GDScriptToken.Type.NOT)  # 注意: ! 映射为 NOT
+
+        "=":
+            if _match("="): return _make_token(GDScriptToken.Type.EQUAL_EQUAL)
+            return _make_token(GDScriptToken.Type.EQUAL)
+
+        "<":
+            if _match("<"):
+                if _match("="): return _make_token(GDScriptToken.Type.LESS_LESS_EQUAL)
+                return _make_token(GDScriptToken.Type.LESS_LESS)
+            if _match("="): return _make_token(GDScriptToken.Type.LESS_EQUAL)
+            return _make_token(GDScriptToken.Type.LESS)
+
+        ">":
+            if _match(">"):
+                if _match("="): return _make_token(GDScriptToken.Type.GREATER_GREATER_EQUAL)
+                return _make_token(GDScriptToken.Type.GREATER_GREATER)
+            if _match("="): return _make_token(GDScriptToken.Type.GREATER_EQUAL)
+            return _make_token(GDScriptToken.Type.GREATER)
+
+        "+":
+            if _match("="): return _make_token(GDScriptToken.Type.PLUS_EQUAL)
+            return _make_token(GDScriptToken.Type.PLUS)
+
+        "-":
+            if _match("="): return _make_token(GDScriptToken.Type.MINUS_EQUAL)
+            # > 是 forward arrow -> (函数返回类型标注)
+            if _match(">"): return _make_token(GDScriptToken.Type.FORWARD_ARROW)
+            return _make_token(GDScriptToken.Type.MINUS)
+
+        "*":
+            if _match("*"):
+                if _match("="): return _make_token(GDScriptToken.Type.STAR_STAR_EQUAL)
+                return _make_token(GDScriptToken.Type.STAR_STAR)
+            if _match("="): return _make_token(GDScriptToken.Type.STAR_EQUAL)
+            return _make_token(GDScriptToken.Type.STAR)
+
+        "/":
+            if _match("="): return _make_token(GDScriptToken.Type.SLASH_EQUAL)
+            return _make_token(GDScriptToken.Type.SLASH)
+
+        "%":
+            if _match("="): return _make_token(GDScriptToken.Type.PERCENT_EQUAL)
+            return _make_token(GDScriptToken.Type.PERCENT)
+
+        "&":
+            if _match("="): return _make_token(GDScriptToken.Type.AMPERSAND_EQUAL)
+            if _match("&"): return _make_token(GDScriptToken.Type.AND)  # && → AND
+            return _make_token(GDScriptToken.Type.AMPERSAND)
+
+        "|":
+            if _match("="): return _make_token(GDScriptToken.Type.PIPE_EQUAL)
+            if _match("|"): return _make_token(GDScriptToken.Type.OR)   # || → OR
+            return _make_token(GDScriptToken.Type.PIPE)
+
+        "^":
+            if _match("="): return _make_token(GDScriptToken.Type.CARET_EQUAL)
+            return _make_token(GDScriptToken.Type.CARET)
+
+        "~":
+            return _make_token(GDScriptToken.Type.TILDE)
+
+        "(":
+            paren_level += 1
+            return _make_token(GDScriptToken.Type.PAREN_OPEN)
+
+        ")":
+            paren_level = max(0, paren_level - 1)
+            return _make_token(GDScriptToken.Type.PAREN_CLOSE)
+
+        "[":
+            paren_level += 1
+            return _make_token(GDScriptToken.Type.BRACKET_OPEN)
+
+        "]":
+            paren_level = max(0, paren_level - 1)
+            return _make_token(GDScriptToken.Type.BRACKET_CLOSE)
+
+        "{":
+            paren_level += 1
+            return _make_token(GDScriptToken.Type.BRACE_OPEN)
+
+        "}":
+            paren_level = max(0, paren_level - 1)
+            return _make_token(GDScriptToken.Type.BRACE_CLOSE)
+
+        ",":
+            return _make_token(GDScriptToken.Type.COMMA)
+
+        ";":
+            return _make_token(GDScriptToken.Type.SEMICOLON)
+
+        ":":
+            return _make_token(GDScriptToken.Type.COLON)
+
+        ".":
+            if _match("."):
+                if _match("."): return _make_token(GDScriptToken.Type.PERIOD_PERIOD_PERIOD)
+                return _make_token(GDScriptToken.Type.PERIOD_PERIOD)
+            return _make_token(GDScriptToken.Type.PERIOD)
+
+        "?":
+            return _make_token(GDScriptToken.Type.QUESTION_MARK)
+
+        _:
+            return _make_token(GDScriptToken.Type.ERROR, "非法字符: '%s'" % p_first)
