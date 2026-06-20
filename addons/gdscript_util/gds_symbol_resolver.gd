@@ -158,6 +158,8 @@ func _resolve_expression(p_expr, p_scope: GDScriptAnalysisResult.SymbolTable, p_
 	elif p_expr is GDScriptToken.PreloadNode:
 		if result.preloads.find(p_expr.path) == -1:
 			result.preloads.append(p_expr.path)
+	elif p_expr is GDScriptToken.AssignmentNode:
+		_resolve_assignment(p_expr, p_scope, p_current_function)
 
 
 # Suite 遍历 — 遍历语句列表（不创建新作用域）
@@ -406,19 +408,21 @@ func _resolve_attribute_call(p_call_node, p_attr, p_scope: GDScriptAnalysisResul
 	var base = p_attr.base
 	var method_name = p_attr.name
 
-	# 2a: self.method() → SELF
-	if base is GDScriptToken.SelfNode:
+	# 2a: self.method() / super.method()
+	if base.get("_kind") == "self":
 		_add_call_edge(p_current_function, method_name, p_attr.line, GDScriptAnalysisResult.CallEdge.CallType.SELF, "", p_call_node.arguments)
-
-	# 2b: super.method() → SUPER
-	elif base is GDScriptToken.SuperNode:
+	elif base.get("_kind") == "super":
 		_add_call_edge(p_current_function, method_name, p_attr.line, GDScriptAnalysisResult.CallEdge.CallType.SUPER, "", p_call_node.arguments)
 
-	# 2c: signal_name.connect(cb) → SIGNAL_CONNECT 或 LAMBDA
+	# 2c: obj.connect("sig", cb) -> CONNECT
+	elif method_name == "connect" and p_call_node.arguments.size() >= 1 and p_call_node.arguments[0] is GDScriptToken.LiteralNode and typeof(p_call_node.arguments[0].value) == TYPE_STRING:
+		_resolve_object_connect(p_call_node, p_scope, p_current_function)
+
+	# 2d: signal_name.connect(cb) -> SIGNAL_CONNECT / LAMBDA
 	elif method_name == "connect" and base is GDScriptToken.IdentifierNode:
 		_resolve_signal_connect(p_call_node, base.name, p_scope, p_current_function)
 
-	# 2d: obj.connect("sig", cb) → CONNECT（base 不是 IdentifierNode 或 base 是但非信号名）
+	# 2e: other connect
 	elif method_name == "connect":
 		_resolve_object_connect(p_call_node, p_scope, p_current_function)
 
