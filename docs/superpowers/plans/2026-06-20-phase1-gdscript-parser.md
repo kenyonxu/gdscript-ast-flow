@@ -132,8 +132,9 @@ var start_column: int = 1
 var end_line: int = 1
 var end_column: int = 1
 
+# 注意: Godot 4.x 枚举没有 .keys(), 需要用 find_key() 或手动映射表
 func get_name() -> String:
-    return Type.keys()[type] if type >= 0 and type < Type.size() else "UNKNOWN"
+    return Type.find_key(type) if type >= 0 and type < Type.size() else "UNKNOWN"
 
 func _to_string() -> String:
     var name = get_name()
@@ -459,6 +460,7 @@ var _start_column: int = 1
 # 缩进状态
 var indent_stack: Array[int] = [0]     # 栈顶 = 当前缩进级别
 var pending_indents: int = 0           # >0 需要生成 INDENT, <0 需要生成 DEDENT
+var _pending_tokens: Array = []        # 待输出的 INDENT/DEDENT (在 NEWLINE 后插入)
 var paren_level: int = 0               # 括号嵌套深度
 var at_line_start: bool = true         # 是否在行首（用于缩进检测）
 var last_was_newline: bool = false
@@ -531,6 +533,10 @@ func _match(p_expected: String) -> bool:
 
 ```gdscript
 func _scan() -> GDScriptToken:
+    # 优先输出待处理的 INDENT/DEDENT
+    if not _pending_tokens.is_empty():
+        return _pending_tokens.pop_front()
+
     _start_line = _line
     _start_column = _column
 
@@ -544,7 +550,7 @@ func _scan() -> GDScriptToken:
             var col = _column
             _check_indent(col)
 
-    c = _advance()
+    var c = _advance()
 
     # 空字符保护
     if c == "\0":
@@ -1038,6 +1044,20 @@ func parse(p_tokens: Array) -> ClassNode:
     while _peek() and _peek().type == GDScriptToken.Type.ANNOTATION:
         root.annotations.append(_parse_annotation())
 
+    # 解析 extends (文件级, 在 class body 之前)
+    if _peek() and _peek().type == GDScriptToken.Type.EXTENDS:
+        _advance()
+        var id_t = _expect(GDScriptToken.Type.IDENTIFIER, "extends 后需要类名")
+        if id_t:
+            root.extends_id = id_t.literal
+
+    # 解析 class_name (文件级)
+    if _peek() and _peek().type == GDScriptToken.Type.CLASS_NAME:
+        _advance()
+        var id_t = _expect(GDScriptToken.Type.IDENTIFIER, "class_name 后需要类名")
+        if id_t:
+            root.classname_id = id_t.literal
+
     # 解析类体成员
     while _peek() and _peek().type != GDScriptToken.Type.TK_EOF:
         var member = _parse_class_member()
@@ -1046,12 +1066,6 @@ func parse(p_tokens: Array) -> ClassNode:
         else:
             # 错误恢复: 跳过当前行
             _skip_to_newline()
-
-    # 提取 extends 和 class_name
-    for member in root.members:
-        if member is VariableNode and member.name == "":
-            # extends 在 parse 阶段已直接设置
-            pass
 
     return root
 
@@ -1137,16 +1151,12 @@ func _parse_class_member():
         return null
 
     match t.type:
-        GDScriptToken.Type.EXTENDS:
+        GDScriptToken.Type.EXTENDS, GDScriptToken.Type.CLASS_NAME:
+            # extends/class_name 已在 parse() 中作为文件级声明解析
+            # 这里出现在类体中作为错误处理
+            _set_error("extends/class_name 只能出现在文件顶部")
             _advance()
-            var id_t = _expect(GDScriptToken.Type.IDENTIFIER, "extends 后需要类名")
-            # extends 信息由 ClassNode 级别处理
-            return null  # Phase 2: 存入 ClassNode.extends_id
-
-        GDScriptToken.Type.CLASS_NAME:
-            _advance()
-            var id_t = _expect(GDScriptToken.Type.IDENTIFIER, "class_name 后需要类名")
-            return null  # Phase 2: 存入 ClassNode.classname_id
+            return null
 
         GDScriptToken.Type.FUNC:
             return _parse_function(annotations)
@@ -1320,8 +1330,10 @@ func _parse_variable(p_annotations: Array) -> VariableNode:
 
 func _parse_const(p_annotations: Array) -> VariableNode:
     _advance()  # CONST token
-    var node = _parse_variable([])  # 复用 var 解析
-    return node  # Phase 2: 标记为常量
+    # 注意: const 返回 VariableNode (复用var解析)，通过 datatype 和 initializer 字段
+    # Phase 1 不区分 const/var AST 节点类型，SymbolResolver Phase 2 中通过 Symbol.Kind.CONSTANT 区分
+    var node = _parse_variable([])
+    return node
 ```
 
 - [ ] **Step 3: 实现 _parse_signal + _parse_enum + _parse_type**
@@ -1456,7 +1468,15 @@ func _parse_statement():
             return _parse_variable([])
         GDScriptToken.Type.BREAKPOINT:
             _advance()
-            return null  # Phase 2
+            var bp = BreakNode.new()  # breakpoint 语法上类似 break
+            return bp
+
+        GDScriptToken.Type.YIELD:
+            _advance()
+            # yield() 在 4.x 中仅保留兼容性，内部转为 await
+            var node = AwaitNode.new()
+            node.expression = _parse_expression()
+            return node
 
         _:
             # 表达式语句
@@ -1700,12 +1720,24 @@ func _parse_expression(p_level: int = 0):
             OpAssoc.BINOP_LEFT:
                 if left == null:
                     return null
-                var node = BinaryOpNode.new()
-                node.op = t.type
-                node.left = left
                 _advance()
-                node.right = _parse_expression(p_level)
-                left = node
+                # as → CastNode, is → TypeTestNode (特殊节点类型)
+                if t.type == GDScriptToken.Type.AS:
+                    var node = CastNode.new()
+                    node.expression = left
+                    node.type = _parse_type()
+                    left = node
+                elif t.type == GDScriptToken.Type.IS:
+                    var node = TypeTestNode.new()
+                    node.expression = left
+                    node.type = _parse_type()
+                    left = node
+                else:
+                    var node = BinaryOpNode.new()
+                    node.op = t.type
+                    node.left = left
+                    node.right = _parse_expression(p_level)
+                    left = node
 
             OpAssoc.BINOP_RIGHT:
                 if left == null:
@@ -1745,14 +1777,23 @@ func _parse_expression(p_level: int = 0):
                 left = node
 
             OpAssoc.UNOP:
-                # t.type 是相同的令牌但用作一元运算符
-                # 区分: 如果 left != null 则是二元, 否则是一元
+                # 一元运算符 — 始终在此级别被消费（不检查 left）
+                # 注意: MINUS 出现在两个级别 (13=二元, 17=一元)。在级别17, _parse_expression(18)
+                # 返回的 left 是更高优先级的表达式。如果当前token是 MINUS, 检查它是否作为
+                # 一元运算符使用: 需要判断前一个token的上下文。
+                # 简化方案: 在 OP_TABLE 中用不同哨兵标记二元/一元MINUS。
+                # 实际处理: 如果 left != null 且前一个token是运算符/括号开头 → 一元
+                # 如果 left == null → 一定是一元
+                # 
+                # 实践中: 级别17(unary -) 和级别18(unary ~) 中,
+                # 如果 left 已存在且前一个token不是运算符 → 这是二元的, 返回left
+                # 如果 left 不存在或前一个token是运算符 → 这是一元的
                 if left != null:
-                    return left
+                    return left  # 二元: 留给低级别处理
                 var node = UnaryOpNode.new()
                 node.op = t.type
                 _advance()
-                node.operand = _parse_expression(p_level)
+                node.operand = _parse_expression(p_level)  # 右结合
                 left = node
 
             OpAssoc.TRIOP:
@@ -2078,7 +2119,8 @@ func test_1_empty_class():
     print("Test 1: empty class with extends and class_name...")
     var source = "extends Node\nclass_name Player\n"
     var ast = parse(source)
-    # Phase 1: 验证解析不报错
+    assert(ast.extends_id == "Node", "Expected extends 'Node', got '%s'" % ast.extends_id)
+    assert(ast.classname_id == "Player", "Expected class_name 'Player', got '%s'" % ast.classname_id)
     print("  PASS")
 
 # Test 2: var hp := 100
