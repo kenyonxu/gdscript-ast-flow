@@ -19,6 +19,52 @@ var paren_level: int = 0               # 括号嵌套深度
 var at_line_start: bool = true         # 是否在行首（用于缩进检测）
 var last_was_newline: bool = false
 
+# 关键字映射表
+const KEYWORDS := {
+    "if": GDScriptToken.Type.IF,
+    "elif": GDScriptToken.Type.ELIF,
+    "else": GDScriptToken.Type.ELSE,
+    "for": GDScriptToken.Type.FOR,
+    "while": GDScriptToken.Type.WHILE,
+    "break": GDScriptToken.Type.BREAK,
+    "continue": GDScriptToken.Type.CONTINUE,
+    "pass": GDScriptToken.Type.PASS,
+    "return": GDScriptToken.Type.RETURN,
+    "match": GDScriptToken.Type.MATCH,
+    "when": GDScriptToken.Type.WHEN,
+    "func": GDScriptToken.Type.FUNC,
+    "class": GDScriptToken.Type.CLASS,
+    "class_name": GDScriptToken.Type.CLASS_NAME,
+    "extends": GDScriptToken.Type.EXTENDS,
+    "super": GDScriptToken.Type.SUPER,
+    "self": GDScriptToken.Type.SELF,
+    "var": GDScriptToken.Type.VAR,
+    "const": GDScriptToken.Type.TK_CONST,
+    "enum": GDScriptToken.Type.ENUM,
+    "signal": GDScriptToken.Type.SIGNAL,
+    "static": GDScriptToken.Type.STATIC,
+    "is": GDScriptToken.Type.IS,
+    "as": GDScriptToken.Type.AS,
+    "await": GDScriptToken.Type.AWAIT,
+    "assert": GDScriptToken.Type.ASSERT,
+    "preload": GDScriptToken.Type.PRELOAD,
+    "yield": GDScriptToken.Type.YIELD,
+    "breakpoint": GDScriptToken.Type.BREAKPOINT,
+    "void": GDScriptToken.Type.VOID,
+    "in": GDScriptToken.Type.IN,
+    "not": GDScriptToken.Type.NOT,
+    "and": GDScriptToken.Type.AND,
+    "or": GDScriptToken.Type.OR,
+}
+
+# 内置常量
+const BUILTIN_CONSTS := {
+    "PI": GDScriptToken.Type.CONST_PI,
+    "TAU": GDScriptToken.Type.CONST_TAU,
+    "INF": GDScriptToken.Type.CONST_INF,
+    "NAN": GDScriptToken.Type.CONST_NAN,
+}
+
 func tokenize(p_source: String) -> Array[GDScriptToken]:
     source = p_source
     _pos = 0
@@ -148,3 +194,70 @@ func _flush_indents(p_tokens: Array):
 func _skip_comment():
     while _pos < source.length() and _peek() != "\n":
         _advance()
+
+
+func _scan_token(p_first: String) -> GDScriptToken:
+    match p_first:
+        "_", "a".."z", "A".."Z":
+            return _scan_identifier(p_first)
+
+        "@":
+            return _scan_annotation()
+
+        "0".."9":
+            return _scan_number(p_first)
+
+        "\"", "'":
+            return _scan_string(p_first[0])
+
+        "$":
+            if _peek().is_valid_identifier():
+                # $NodePath 语法 — 视为特殊的标识符引用
+                return _scan_node_path()
+            return _make_token(GDScriptToken.Type.DOLLAR)
+
+        _:
+            return _scan_operator(p_first)
+
+func _scan_identifier(p_first: String) -> GDScriptToken:
+    var name = p_first
+    while _pos < source.length():
+        var c = _peek()
+        if c.is_valid_identifier() or c in ["0".."9"]:
+            name += c
+            _advance()
+        else:
+            break
+
+    if KEYWORDS.has(name):
+        return _make_token(KEYWORDS[name])
+
+    if BUILTIN_CONSTS.has(name):
+        return _make_token(BUILTIN_CONSTS[name])
+
+    # 普通标识符
+    return _make_token(GDScriptToken.Type.IDENTIFIER, name)
+
+
+func _scan_annotation() -> GDScriptToken:
+    var name = ""
+    while _pos < source.length():
+        var c = _peek()
+        if c.is_valid_identifier() or c in ["0".."9", "_"]:
+            name += c
+            _advance()
+        else:
+            break
+    return _make_token(GDScriptToken.Type.ANNOTATION, name)
+
+func _scan_node_path() -> GDScriptToken:
+    _advance()  # 跳过 $
+    var path = ""
+    while _pos < source.length():
+        var c = _peek()
+        if c == "/" or c.is_valid_identifier() or c in ["0".."9", "_", "%"]:
+            path += c
+            _advance()
+        else:
+            break
+    return _make_token(GDScriptToken.Type.IDENTIFIER, "$" + path)
