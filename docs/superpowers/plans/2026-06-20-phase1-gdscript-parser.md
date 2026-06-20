@@ -1040,9 +1040,14 @@ func parse(p_tokens: Array) -> ClassNode:
 
     var root = ClassNode.new()
 
-    # 解析文件级注解 (@tool, @icon...)
+    # 解析文件级注解 — 仅 @tool 和 @icon 是文件级的
+    # 成员注解 (@export, @onready...) 在 _parse_class_member 中处理
     while _peek() and _peek().type == GDScriptToken.Type.ANNOTATION:
-        root.annotations.append(_parse_annotation())
+        var ann_name = _peek().literal
+        if ann_name in ["tool", "icon"]:
+            root.annotations.append(_parse_annotation())
+        else:
+            break  # 成员注解留给 _parse_class_member
 
     # 解析 extends (文件级, 在 class body 之前)
     if _peek() and _peek().type == GDScriptToken.Type.EXTENDS:
@@ -1050,13 +1055,16 @@ func parse(p_tokens: Array) -> ClassNode:
         var id_t = _expect(GDScriptToken.Type.IDENTIFIER, "extends 后需要类名")
         if id_t:
             root.extends_id = id_t.literal
+        _match(GDScriptToken.Type.NEWLINE)  # extends 后的换行
 
-    # 解析 class_name (文件级)
+    # 解析 class_name (文件级, 可能在 extends 之后)
+    _skip_newlines()  # 跳过 extends 和 class_name 之间的空行
     if _peek() and _peek().type == GDScriptToken.Type.CLASS_NAME:
         _advance()
         var id_t = _expect(GDScriptToken.Type.IDENTIFIER, "class_name 后需要类名")
         if id_t:
             root.classname_id = id_t.literal
+    _skip_newlines()
 
     # 解析类体成员
     while _peek() and _peek().type != GDScriptToken.Type.TK_EOF:
@@ -1091,7 +1099,7 @@ func _match(p_type: int) -> bool:
 func _expect(p_type: int, p_error: String = "") -> GDScriptToken:
     if _match(p_type):
         return tokens[pos - 1]
-    _set_error(p_error if p_error != "" else "期望 %s" % GDScriptToken.Type.keys()[p_type])
+    _set_error(p_error if p_error != "" else "期望 %s" % GDScriptToken.Type.find_key(p_type))
     return null
 
 func _set_error(p_msg: String):
@@ -1100,6 +1108,10 @@ func _set_error(p_msg: String):
         if _peek():
             _error_line = _peek().start_line
             _error_column = _peek().start_column
+
+func _skip_newlines():
+    while _peek() and _peek().type == GDScriptToken.Type.NEWLINE:
+        _advance()
 
 func _skip_to_newline():
     while _peek() and _peek().type != GDScriptToken.Type.NEWLINE and _peek().type != GDScriptToken.Type.TK_EOF:
@@ -1328,11 +1340,27 @@ func _parse_variable(p_annotations: Array) -> VariableNode:
 
     return node
 
-func _parse_const(p_annotations: Array) -> VariableNode:
-    _advance()  # CONST token
-    # 注意: const 返回 VariableNode (复用var解析)，通过 datatype 和 initializer 字段
-    # Phase 1 不区分 const/var AST 节点类型，SymbolResolver Phase 2 中通过 Symbol.Kind.CONSTANT 区分
-    var node = _parse_variable([])
+func _parse_const(p_annotations: Array):
+    _advance()  # CONST token (已在 _parse_class_member 中匹配)
+    var name_t = _expect(GDScriptToken.Type.IDENTIFIER, "const 后需要常量名")
+    var node = VariableNode.new()
+    if name_t:
+        node.name = name_t.literal
+        node.line = name_t.start_line
+
+    # 类型标注
+    if _match(GDScriptToken.Type.COLON):
+        if _match(GDScriptToken.Type.EQUAL):
+            node.initializer = _parse_expression()
+        else:
+            node.datatype = _parse_type()
+            if _match(GDScriptToken.Type.EQUAL):
+                node.initializer = _parse_expression()
+    elif _match(GDScriptToken.Type.EQUAL):
+        node.initializer = _parse_expression()
+
+    # 注意: const 返回 VariableNode (无独立 ConstNode 类型)
+    # SymbolResolver Phase 2 通过检查源 Token 区分 const/var
     return node
 ```
 
@@ -1982,6 +2010,9 @@ func _parse_lambda():
     if _peek() and _peek().type == GDScriptToken.Type.NEWLINE:
         node.body = _parse_suite()
     else:
+        # 单行 lambda: func(): return 42 → body = LiteralNode(42) (解包 return)
+        if _peek() and _peek().type == GDScriptToken.Type.RETURN:
+            _advance()  # 消费 return, body 直接存储返回值表达式
         node.body = _parse_expression()
 
     return node
@@ -2179,12 +2210,16 @@ func test_5_if_else():
 # Test 6: @export var speed: float = 10.0
 func test_6_export_var():
     print("Test 6: @export variable...")
+    # @export 是成员注解, 在 _parse_class_member 中被消费
+    # 文件级注解仅 @tool/@icon 由 parse() 消费
     var source = "@export var speed: float = 10.0\n"
     var ast = parse(source)
-    assert(ast.annotations.size() > 0, "Expected file-level annotation")
-    assert(ast.annotations[0].name == "export", "Expected @export annotation")
+    assert(ast.members.size() > 0, "Expected member")
     var v = ast.members[0]
-    assert(v.is_export, "Expected is_export=true")
+    assert(v is VariableNode, "Expected VariableNode")
+    assert(v.is_export, "Expected is_export=true, got false")
+    assert(v.name == "speed", "Expected name 'speed'")
+    assert(v.datatype != null, "Expected type annotation")
     assert(v.datatype.type_name == "float", "Expected type 'float'")
     print("  PASS")
 
@@ -2220,7 +2255,9 @@ func test_9_lambda():
     var v = ast.members[0]
     assert(v.initializer is LambdaNode, "Expected LambdaNode")
     var lam = v.initializer
-    assert(lam.body is ReturnNode, "Expected ReturnNode as lambda body")
+    # spec: lambda 体直接存储返回值表达式 (单行 return 被解包)
+    assert(lam.body is LiteralNode, "Expected LiteralNode as lambda body, got %s" % lam.body.get_class())
+    assert(lam.body.value == 42, "Expected value 42, got %s" % lam.body.value)
     print("  PASS")
 
 # Test 10: await get_tree().process_frame
