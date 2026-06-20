@@ -191,7 +191,7 @@ class DefUseChain:
 # ---- GDScriptAnalysisResult — 统一结果容器 ----
 
 var file_path: String = ""
-var class_name: String = ""               # class_name 名称
+var classname_id: String = ""             # class_name 声明的类名
 var extends_path: String = ""             # extends 的父类路径
 var preloads: Array = []                  # of String — preload 路径列表
 
@@ -262,7 +262,7 @@ func get_dependency_tree() -> Dictionary:
 	return {
 		"extends": extends_path,
 		"preloads": preloads,
-		"class_name": class_name,
+		"class_name": classname_id,
 	}
 
 # 添加错误

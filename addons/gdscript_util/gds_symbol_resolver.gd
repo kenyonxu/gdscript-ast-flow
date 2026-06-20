@@ -28,7 +28,7 @@ func resolve(p_ast, p_file_path: String = "") -> GDScriptAnalysisResult:
 	result.symbol_table.scope_name = "class:%s" % p_ast.classname_id if p_ast.classname_id != "" else "class:<anonymous>"
 
 	# 填充基础信息
-	result.class_name = p_ast.classname_id
+	result.classname_id = p_ast.classname_id
 	result.extends_path = p_ast.extends_id
 
 	# 预处理 const/var 标记
@@ -229,7 +229,7 @@ func _resolve_class(p_node, p_parent_scope: GDScriptAnalysisResult.SymbolTable):
 
 	# 填充 class_name 到 extends_path
 	if p_node.classname_id != "":
-		result.class_name = p_node.classname_id
+		result.classname_id = p_node.classname_id
 	if p_node.extends_id != "":
 		result.extends_path = p_node.extends_id
 
