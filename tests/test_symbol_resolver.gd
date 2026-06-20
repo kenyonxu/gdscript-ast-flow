@@ -35,7 +35,7 @@ func resolve(p_source: String) -> GDScriptAnalysisResult:
 
 
 # 辅助: 从 SymbolTable 查找符号
-func find_symbol(p_table: SymbolTable, p_name: String) -> Symbol:
+func find_symbol(p_table: GDScriptAnalysisResult.SymbolTable, p_name: String) -> GDScriptAnalysisResult.Symbol:
 	return p_table.resolve(p_name)
 
 

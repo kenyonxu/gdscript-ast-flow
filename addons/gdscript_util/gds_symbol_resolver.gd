@@ -204,7 +204,7 @@ func _add_call_edge(p_caller: String, p_callee: String, p_line: int, p_call_type
 
 
 # 创建 Site 对象
-func _make_site(p_node, p_enclosing_function: String, p_arguments: Array = []) -> Site:
+func _make_site(p_node, p_enclosing_function: String, p_arguments: Array = []) -> GDScriptAnalysisResult.Site:
 	var site = GDScriptAnalysisResult.Site.new()
 	site.line = p_node.line if "line" in p_node else 0
 	site.node = p_node
