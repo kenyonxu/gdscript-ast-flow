@@ -190,3 +190,86 @@ class AwaitNode:
 class ExpressionStatementNode:
     extends ASTNode
     var expression = null               # ExpressionNode
+
+
+class BinaryOpNode:
+    extends ASTNode
+    var op: int = GDScriptToken.Type.EMPTY
+    var left = null                     # ExpressionNode
+    var right = null                    # ExpressionNode
+
+class UnaryOpNode:
+    extends ASTNode
+    var op: int = GDScriptToken.Type.EMPTY
+    var operand = null                  # ExpressionNode
+
+class TernaryOpNode:
+    extends ASTNode
+    var condition = null                # ExpressionNode
+    var true_expr = null                # ExpressionNode
+    var false_expr = null               # ExpressionNode
+
+class AssignmentNode:
+    extends ASTNode
+    var target = null                   # ExpressionNode
+    var value = null                    # ExpressionNode
+    var op: int = GDScriptToken.Type.EQUAL  # =, +=, -=, 等
+
+
+class CallNode:
+    extends ASTNode
+    var callee = null                   # ExpressionNode
+    var arguments: Array = []           # of ExpressionNode
+
+class SubscriptNode:
+    extends ASTNode
+    var base = null                     # ExpressionNode  — a[b] 中的 a
+    var index = null                    # ExpressionNode  — a[b] 中的 b
+
+class AttributeNode:
+    extends ASTNode
+    var base = null                     # ExpressionNode  — a.b 中的 a
+    var name: String = ""               # a.b 中的 b
+
+class CastNode:
+    extends ASTNode
+    var expression = null               # ExpressionNode
+    var type: TypeNode = null           # 目标类型
+
+class TypeTestNode:
+    extends ASTNode
+    var expression = null               # ExpressionNode
+    var type: TypeNode = null           # 测试类型
+
+
+class LambdaNode:
+    extends ASTNode
+    var params: Array[ParameterNode] = []
+    var body = null                     # ExpressionNode (单表达式) 或 SuiteNode (多语句)
+    var captured_vars: Array[String] = []  # 由 SymbolResolver 填充
+
+class ArrayNode:
+    extends ASTNode
+    var elements: Array = []            # of ExpressionNode
+
+class DictionaryNode:
+    extends ASTNode
+    var pairs: Array = []               # of Dictionary {key: ExpressionNode, value: ExpressionNode}
+
+class IdentifierNode:
+    extends ASTNode
+    var name: String = ""
+
+class LiteralNode:
+    extends ASTNode
+    var value: Variant = null
+
+class SelfNode:
+    extends ASTNode
+
+class SuperNode:
+    extends ASTNode
+
+class PreloadNode:
+    extends ASTNode
+    var path: String = ""
