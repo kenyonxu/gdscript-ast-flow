@@ -264,18 +264,6 @@ class LiteralNode:
     extends ASTNode
     var value: Variant = null
 
-class SelfNode:
-    extends RefCounted
-    var line: int = 0
-    var column: int = 0
-    var _kind: String = "self"
-
-class SuperNode:
-    extends RefCounted
-    var line: int = 0
-    var column: int = 0
-    var _kind: String = "super"
-
 class PreloadNode:
     extends ASTNode
     var path: String = ""

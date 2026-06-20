@@ -796,11 +796,11 @@ func _parse_atom():
 
         GDScriptToken.Type.SELF:
             _advance()
-            return GDScriptToken.SelfNode.new()
+            return GDScriptSelfNode.new()
 
         GDScriptToken.Type.SUPER:
             _advance()
-            return GDScriptToken.SuperNode.new()
+            return GDScriptSuperNode.new()
 
         GDScriptToken.Type.PRELOAD:
             _advance()

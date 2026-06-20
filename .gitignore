@@ -1,13 +1,3 @@
-.import/*
-*.import
-default_env.tres
-icon.png
-project.godot
-Main.tscn
-main.gd
-test.gd
-test_a.gd
-test_b.gd
-dev/*graphify-out/cache/
-.superpowers/
-.claude/
+# Godot 4+ specific ignores
+.godot/
+/android/

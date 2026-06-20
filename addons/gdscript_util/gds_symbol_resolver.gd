@@ -153,7 +153,7 @@ func _resolve_expression(p_expr, p_scope: GDScriptAnalysisResult.SymbolTable, p_
 		_resolve_expression(p_expr.expression, p_scope, p_current_function, p_lambda_node)
 	elif p_expr is GDScriptToken.TypeTestNode:
 		_resolve_expression(p_expr.expression, p_scope, p_current_function, p_lambda_node)
-	elif p_expr in [GDScriptToken.LiteralNode, GDScriptToken.SelfNode, GDScriptToken.SuperNode]:
+	elif p_expr in [GDScriptToken.LiteralNode, GDScriptSelfNode, GDScriptSuperNode]:
 		pass  # 叶子节点
 	elif p_expr is GDScriptToken.PreloadNode:
 		if result.preloads.find(p_expr.path) == -1:
@@ -409,9 +409,9 @@ func _resolve_attribute_call(p_call_node, p_attr, p_scope: GDScriptAnalysisResul
 	var method_name = p_attr.name
 
 	# 2a: self.method() / super.method()
-	if base.get("_kind") == "self":
+	if base is GDScriptSelfNode:
 		_add_call_edge(p_current_function, method_name, p_attr.line, GDScriptAnalysisResult.CallEdge.CallType.SELF, "", p_call_node.arguments)
-	elif base.get("_kind") == "super":
+	elif base is GDScriptSuperNode:
 		_add_call_edge(p_current_function, method_name, p_attr.line, GDScriptAnalysisResult.CallEdge.CallType.SUPER, "", p_call_node.arguments)
 
 	# 2c: obj.connect("sig", cb) -> CONNECT
