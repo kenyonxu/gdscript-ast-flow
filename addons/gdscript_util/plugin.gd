@@ -1,61 +1,138 @@
 @tool
 extends EditorPlugin
 
+var analysis_cache: Dictionary = {}  # String(path) → GDScriptAnalysisResult
+
+
 func _enter_tree():
-    add_tool_menu_item("GDScript Analysis – Parse Current", _on_parse_current)
-    print("[GDScriptUtil v2.0] Plugin loaded")
+	add_tool_menu_item("GDScript Analysis – Parse Current", _on_parse_current)
+	# Phase 2: 注册 resource_saved 信号实现自动分析
+	resource_saved.connect(_on_resource_saved)
+	print("[GDScriptUtil v2.0] Plugin loaded — Phase 2: Symbol Analysis")
+
 
 func _exit_tree():
-    remove_tool_menu_item("GDScript Analysis – Parse Current")
-    print("[GDScriptUtil v2.0] Plugin unloaded")
+	remove_tool_menu_item("GDScript Analysis – Parse Current")
+	resource_saved.disconnect(_on_resource_saved)
+	analysis_cache.clear()
+	print("[GDScriptUtil v2.0] Plugin unloaded")
+
+
+# Phase 2 新增: 脚本保存时自动分析
+func _on_resource_saved(p_resource: Resource):
+	if p_resource is GDScript and p_resource.resource_path.ends_with(".gd"):
+		_analyze_script(p_resource.resource_path)
+
 
 func _on_parse_current():
-    var editor = get_editor_interface()
-    var script_editor = editor.get_script_editor()
-    var current = script_editor.get_current_script()
-    if current == null:
-        print("[GDScriptUtil] No script open")
-        return
+	var editor = get_editor_interface()
+	var script_editor = editor.get_script_editor()
+	var current = script_editor.get_current_script()
+	if current == null:
+		print("[GDScriptUtil] No script open")
+		return
 
-    var source = current.source_code
-    if source == "":
-        print("[GDScriptUtil] Empty script")
-        return
+	var source = current.source_code
+	if source == "":
+		print("[GDScriptUtil] Empty script")
+		return
 
-    # Phase 1 pipeline
-    var tokenizer = GDScriptTokenizer.new()
-    var tokens = tokenizer.tokenize(source)
+	# Phase 1 pipeline
+	var tokenizer = GDScriptTokenizer.new()
+	var tokens = tokenizer.tokenize(source)
 
-    var parser = GDScriptParser.new()
-    var ast = parser.parse(tokens)
+	var parser = GDScriptParser.new()
+	var ast = parser.parse(tokens)
 
-    if parser.error != "":
-        printerr("[GDScriptUtil] Parse error: %s" % parser.error)
-    else:
-        _print_ast_summary(ast, current.resource_path)
+	if parser.error != "":
+		printerr("[GDScriptUtil] Parse error: %s" % parser.error)
+		return
 
-    # Phase 2: var result = GDScriptSymbolResolver.new().resolve(ast, path)
+	# Phase 2 pipeline — 符号解析
+	var resolver = GDScriptSymbolResolver.new()
+	var result = resolver.resolve(ast, current.resource_path)
+	analysis_cache[current.resource_path] = result
 
-func _print_ast_summary(p_ast: GDScriptToken.ClassNode, p_path: String):
-    var func_count = 0
-    var var_count = 0
-    var signal_count = 0
+	# 输出分析摘要
+	_print_analysis_summary(result)
 
-    for m in p_ast.members:
-        if m is GDScriptToken.FunctionNode:
-            func_count += 1
-        elif m is GDScriptToken.VariableNode:
-            var_count += 1
-        elif m is GDScriptToken.SignalNode:
-            signal_count += 1
 
-    print("[GDScriptUtil] %s — %d functions, %d variables, %d signals" % [
-        p_path, func_count, var_count, signal_count
-    ])
+# Phase 2 分析函数（resource_saved 调用）
+func _analyze_script(p_path: String) -> GDScriptAnalysisResult:
+	var script = load(p_path) as GDScript
+	if script == null:
+		return null
 
-func analyze_script(p_path: String):
-    var source = load(p_path).source_code
-    var tokenizer = GDScriptTokenizer.new()
-    var tokens = tokenizer.tokenize(source)
-    var parser = GDScriptParser.new()
-    return parser.parse(tokens)
+	var source = script.source_code
+	if source == "":
+		return null
+
+	# Phase 1 管道
+	var tokenizer = GDScriptTokenizer.new()
+	var tokens = tokenizer.tokenize(source)
+	var parser = GDScriptParser.new()
+	var ast = parser.parse(tokens)
+
+	if parser.error != "":
+		push_warning("[GDScriptUtil] Parse error in %s: %s" % [p_path, parser.error])
+		return null
+
+	# Phase 2 符号解析
+	var resolver = GDScriptSymbolResolver.new()
+	var result = resolver.resolve(ast, p_path)
+
+	# 缓存结果
+	analysis_cache[p_path] = result
+
+	# 静默分析（resource_saved 触发时不输出摘要，避免刷屏）
+	# 仅在手动触发时输出摘要
+	return result
+
+
+# 分析摘要输出
+func _print_analysis_summary(p_result: GDScriptAnalysisResult):
+	var func_count = p_result.get_all_functions().size()
+	var sig_count = p_result.get_all_signals().size()
+	var var_count = p_result.def_use_chain.variables.size()
+
+	print("[GDScriptUtil] %s — %d functions, %d signals, %d variables, %d calls, %d errors" % [
+		p_result.file_path,
+		func_count,
+		sig_count,
+		var_count,
+		p_result.call_graph.edges.size(),
+		p_result.errors.size()
+	])
+
+	# 输出错误
+	for err in p_result.errors:
+		push_warning(err)
+
+	# 输出调用图摘要
+	if p_result.call_graph.edges.size() > 0:
+		print("  Call Graph:")
+		for edge in p_result.call_graph.edges:
+			var type_str = _call_type_to_string(edge.call_type)
+			print("    %s() →%s %s() @line %d" % [edge.caller, type_str, edge.callee, edge.site_line])
+
+	# 输出信号流摘要
+	if p_result.signal_graph.signals.size() > 0:
+		print("  Signal Flow:")
+		for sig_name in p_result.signal_graph.signals:
+			var info = p_result.signal_graph.signals[sig_name]
+			var decl_line = info.declaration.line if info.declaration != null else "?"
+			print("    signal %s (decl @%s): %d emits, %d connects" % [
+				sig_name, decl_line, info.emit_sites.size(), info.connect_sites.size()
+			])
+
+
+func _call_type_to_string(p_type: int) -> String:
+	match p_type:
+		CallEdge.CallType.SELF: return "[self]"
+		CallEdge.CallType.SUPER: return "[super]"
+		CallEdge.CallType.EXTERNAL: return "[ext]"
+		CallEdge.CallType.CONNECT: return "[connect]"
+		CallEdge.CallType.SIGNAL_CONNECT: return "[sig-conn]"
+		CallEdge.CallType.LAMBDA: return "[lambda]"
+		CallEdge.CallType.EMIT: return "[emit]"
+		_: return "[?]"
