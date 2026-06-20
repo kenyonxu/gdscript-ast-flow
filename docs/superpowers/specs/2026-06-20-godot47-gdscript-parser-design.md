@@ -1,6 +1,6 @@
 # GDScript 解析器 Godot 4.7 重写规范
 
-> 日期: 2026-06-20 | 状态: 设计中 | 阶段: 规范制定
+> 日期: 2026-06-20 | 状态: Phase 1 已完成 ✅ | 阶段: 实现验证完成
 
 ## 一、项目背景与目标
 
@@ -656,3 +656,21 @@ func _print_analysis_summary(result: GDScriptAnalysisResult):
 | 文件数 | 2 | 6 |
 | 预估行数 | ~1478 | ~2810 |
 | 插件入口 | EditorPlugin (空实现) | EditorPlugin (功能入口) |
+
+---
+
+## 附录：Phase 1 实现完成记录
+
+**完成日期：** 2026-06-20  
+**提交：** `4655652` fix: Phase 1 LSP errors + 10 acceptance tests all pass  
+**分支：** master  
+**测试结果：** 10/10 验收测试全部通过
+
+**与规范的主要差异（均在实现中修复）：**
+- 哨兵值 `"\0"` → `""`：Godot 4 不支持八进制/十六进制字节转义
+- `match` → `if-elif`：规避 Godot 4.7 parser 对 `..` 范围和 `\"` 转义的解析 bug
+- AST 节点类型需 `GDScriptToken.ClassNode` 全路径：内部类引用限制
+- 旧版 `gds_bc_parser.gd` / `gds_ast_parser.gd`：Godot 3→4 API 兼容修复
+- 缩进系统重做：首行基线设值、INDENT 输出时序、EOF DEDENT 回填
+
+详见 `docs/superpowers/plans/2026-06-20-phase1-gdscript-parser.md` 末尾"实际实现与计划差异"。
