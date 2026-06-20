@@ -394,7 +394,7 @@ func _resolve_call(p_node, p_scope: GDScriptSymbolTable, p_current_function: Str
 			return
 		# 1b: 隐式 self 调用 foo()
 		var sym = p_scope.resolve(callee.name)
-		if sym != null and sym.kind == GDScriptSymbol.Kind.FUNCTION:
+		if sym == null or sym.kind == GDScriptSymbol.Kind.FUNCTION:
 			_add_call_edge(p_current_function, callee.name, callee.line, GDScriptCallEdge.CallType.SELF, "", p_node.arguments)
 		# 否则可能是内置函数 (print, range 等) — 不记录 CallEdge
 
