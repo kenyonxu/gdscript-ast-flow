@@ -543,3 +543,43 @@ func _resolve_assignment(p_node, p_scope: SymbolTable, p_current_function: Strin
 		# a[b] = value → a 是 READ, b 中的标识符是 READ
 		_resolve_expression(p_node.target.base, p_scope, p_current_function)
 		_resolve_expression(p_node.target.index, p_scope, p_current_function)
+
+
+# ---- Chunk 4: Lambda 闭包捕获 ----
+
+# 解析 Lambda 表达式 — 创建 lambda_scope (parent = 当前作用域)
+func _resolve_lambda(p_node, p_parent_scope: SymbolTable, p_current_function: String):
+	# 创建 lambda_scope
+	var lambda_scope = SymbolTable.new()
+	lambda_scope.parent = p_parent_scope
+	lambda_scope.scope_name = "lambda@%d" % p_node.line
+
+	# define lambda 参数到 lambda_scope
+	for param in p_node.params:
+		if param is GDScriptToken.ParameterNode:
+			lambda_scope.define(param.name, Symbol.Kind.PARAMETER, param, _type_to_string(param.datatype))
+			_record_def_use(param.name, param, p_current_function, DefUseSite.AccessType.DEFINE)
+
+	# 遍历 lambda body — 传入 p_node 自身用于捕获检测
+	_resolve_suite(p_node.body, lambda_scope, p_current_function, p_node)
+
+
+# Lambda 中的标识符解析 — 区分局部变量 vs 捕获变量
+func _resolve_identifier_in_lambda(p_node, p_lambda_scope: SymbolTable, p_lambda_node, p_current_function: String):
+	# 先检查 lambda 自己的局部作用域（参数）
+	var local = p_lambda_scope.resolve_local(p_node.name)
+	if local != null:
+		# lambda 局部变量（参数）— 正常记录 READ
+		_record_def_use(p_node.name, p_node, p_current_function, DefUseSite.AccessType.READ)
+		return
+
+	# 不在 lambda 局部 → 向父作用域查找（resolve 自动递归到 parent）
+	var sym = p_lambda_scope.resolve(p_node.name)
+	if sym != null:
+		# 这是捕获变量！记录到 LambdaNode.captured_vars
+		if p_lambda_node.captured_vars.find(p_node.name) == -1:
+			p_lambda_node.captured_vars.append(p_node.name)
+		_record_def_use(p_node.name, p_node, p_current_function, DefUseSite.AccessType.READ)
+		return
+
+	# 完全未解析 — 可能是内置函数/全局引用
