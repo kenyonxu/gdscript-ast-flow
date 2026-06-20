@@ -27,11 +27,11 @@ addons/gdscript_util/
 │   ├── gds_analysis_bridge.gd           # 信号中继桥（参考 clef_station_editor_bridge）
 │   │
 │   ├── panels/
-│   │   ├── gds_call_graph_panel.gd      # 调用图面板 — Tree + 详情
-│   │   ├── gds_signal_flow_panel.gd     # 信号流面板
-│   │   ├── gds_def_use_panel.gd         # 变量读写面板
-│   │   ├── gds_analysis_summary.gd      # 分析摘要面板
-│   │   └── gds_error_panel.gd           # 错误/告警面板
+│   │   ├── gds_analysis_main_panel.gd   # 底部主面板 — TabBar + 3 子面板
+│   │   ├── gds_call_graph_panel.gd      # 调用图子面板
+│   │   ├── gds_signal_flow_panel.gd     # 信号流子面板
+│   │   ├── gds_def_use_panel.gd         # 变量读写子面板
+│   │   └── gds_analysis_summary.gd      # Dock 摘要面板
 │   │
 │   ├── widgets/
 │   │   ├── gds_call_graph_canvas.gd     # 调用图 _draw() 可视化
@@ -50,53 +50,103 @@ addons/gdscript_util/
 
 ### 4.1 容器布局
 
-采用 **3 容器方案**（参考 Fuse 插件的 5 种容器用法）：
+采用 **1 个 Bottom Panel（内含子 Tab）+ 1 Dock + Toolbar** 的克制方案：
 
-| 容器 | 面板 | API |
+```
+┌─ Godot Editor ─────────────────────────────────────────────┐
+│ [Toolbar] 🟢 GDScriptUtil: analyzed Player.gd               │
+├────────────────────────────────────────────────────────────┤
+│                       Viewport                              │
+│                                                             │
+├────────────────────────────────────────────────────────────┤
+│ Bottom: ┌─ GDScript Analysis ────────────────────────────┐ │
+│         │ [Call Graph] [Signal Flow] [Def-Use]           │ │
+│         ├───────────────────────────────────────────────┤ │
+│         │           (当前子 Tab 内容)                     │ │
+│         └───────────────────────────────────────────────┘ │
+└────────────────────────────────────────────────────────────┘
+```
+
+| 容器 | 内容 | API |
 |------|------|-----|
-| Bottom Panel (左侧 Tab) | 调用图 | `add_control_to_bottom_panel(call_graph_panel, "Call Graph")` |
-| Bottom Panel (中间 Tab) | 信号流 | `add_control_to_bottom_panel(signal_flow_panel, "Signal Flow")` |
-| Bottom Panel (右侧 Tab) | 变量读写 | `add_control_to_bottom_panel(def_use_panel, "Def-Use")` |
+| Bottom Panel (1 个) | 含 3 个内部子 Tab 的主面板 | `add_control_to_bottom_panel(main_panel, "GDScript Analysis")` |
 | Dock (右侧) | 分析摘要 + 错误 | `add_control_to_dock(DOCK_SLOT_RIGHT_BR, summary_panel)` |
 | Toolbar | 状态指示器 | `add_control_to_container(CONTAINER_TOOLBAR, status_label)` |
 
-### 4.2 模块化启动（Bootstrap）
+### 4.2 主面板 TabBar 结构
 
-`gds_editor_bootstrap.gd` 将 plugin.gd 中的初始化逻辑拆分为独立模块：
+`gds_analysis_main_panel.gd` — 使用 `TabBar` + 内容区切换，干净且不侵占底部栏：
+
+```gdscript
+class_name GDSAnalysisMainPanel
+extends VBoxContainer
+
+var _bridge: GDSAnalysisBridge
+var _tab_bar: TabBar
+var _content_stack: Control  # 当前子面板的容器 (VBoxContainer/MarginContainer)
+var _call_graph_panel: GDSCallGraphPanel
+var _signal_flow_panel: GDSSignalFlowPanel
+var _def_use_panel: GDSDefUsePanel
+
+func setup(bridge: GDSAnalysisBridge) -> void:
+    _bridge = bridge
+    _build_ui()
+    _connect_bridge()
+
+func _build_ui() -> void:
+    # TabBar
+    _tab_bar = TabBar.new()
+    _tab_bar.add_tab("Call Graph")
+    _tab_bar.add_tab("Signal Flow")
+    _tab_bar.add_tab("Def-Use")
+    _tab_bar.tab_changed.connect(_on_tab_changed)
+    add_child(_tab_bar)
+
+    # 内容区
+    _content_stack = Control.new()
+    _content_stack.size_flags_horizontal = SIZE_EXPAND_FILL
+    _content_stack.size_flags_vertical = SIZE_EXPAND_FILL
+    add_child(_content_stack)
+
+    # 子面板
+    _call_graph_panel = GDSCallGraphPanel.new()
+    _call_graph_panel.setup(_bridge)
+    _content_stack.add_child(_call_graph_panel)
+
+    _signal_flow_panel = GDSSignalFlowPanel.new()
+    _signal_flow_panel.setup(_bridge)
+    _signal_flow_panel.visible = false
+    _content_stack.add_child(_signal_flow_panel)
+
+    _def_use_panel = GDSDefUsePanel.new()
+    _def_use_panel.setup(_bridge)
+    _def_use_panel.visible = false
+    _content_stack.add_child(_def_use_panel)
+
+func _on_tab_changed(tab: int) -> void:
+    _call_graph_panel.visible = (tab == 0)
+    _signal_flow_panel.visible = (tab == 1)
+    _def_use_panel.visible = (tab == 2)
+```
+
+### 4.3 模块化启动（Bootstrap）
 
 ```gdscript
 class_name GDSEditorBootstrap
 extends RefCounted
 
-var _plugin: EditorPlugin
-var _panels: Array[Control] = []
-var _bridge: GDSAnalysisBridge
-
-func setup(plugin: EditorPlugin) -> void:
-    _plugin = plugin
-    _bridge = GDSAnalysisBridge.new()
-    _register_panels()
-    _register_inspector_plugin()
-    _register_context_menu()
-    _connect_signals()
-
-func teardown() -> void:
-    for panel in _panels:
-        if is_instance_valid(panel):
-            panel.queue_free()
-    _panels.clear()
-
 func _register_panels() -> void:
-    # Bottom Panel Tabs
-    var call_graph_panel = GDSCallGraphPanel.new()
-    call_graph_panel.setup(_bridge)
-    _plugin.add_control_to_bottom_panel(call_graph_panel, "Call Graph")
-    _panels.append(call_graph_panel)
-    # ... signal_flow_panel, def_use_panel ...
+    # 底部面板 — 1 个 Tab，内含 3 个子 Tab
+    var main_panel = GDSAnalysisMainPanel.new()
+    main_panel.setup(_bridge)
+    _plugin.add_control_to_bottom_panel(main_panel, "GDScript Analysis")
+    _panels.append(main_panel)
 
-func _connect_signals() -> void:
-    _plugin.resource_saved.connect(_on_resource_saved)
-    _bridge.analysis_completed.connect(_on_analysis_completed)
+    # 右侧 Dock — 摘要
+    var summary_panel = GDSAnalysisSummary.new()
+    summary_panel.setup(_bridge)
+    _plugin.add_control_to_dock(DOCK_SLOT_RIGHT_BR, summary_panel)
+    _panels.append(summary_panel)
 ```
 
 ### 4.3 信号中继桥（Bridge）
@@ -329,11 +379,10 @@ func parse(p_tokens: Array) -> ClassNode:
 |------|------|------|
 | `editor/gds_editor_bootstrap.gd` | 新增 | 模块化启动 |
 | `editor/gds_analysis_bridge.gd` | 新增 | 信号中继桥 |
-| `editor/panels/gds_call_graph_panel.gd` | 新增 | 调用图面板 |
-| `editor/panels/gds_signal_flow_panel.gd` | 新增 | 信号流面板 |
-| `editor/panels/gds_def_use_panel.gd` | 新增 | 变量读写面板 |
-| `editor/panels/gds_analysis_summary.gd` | 新增 | 分析摘要面板 |
-| `editor/panels/gds_error_panel.gd` | 新增 | 错误面板 |
+| `editor/panels/gds_analysis_main_panel.gd` | 新增 | 底部主面板 — TabBar + 子面板 |
+| `editor/panels/gds_call_graph_panel.gd` | 新增 | 调用图子面板 |
+| `editor/panels/gds_signal_flow_panel.gd` | 新增 | 信号流子面板 |
+| `editor/panels/gds_analysis_summary.gd      # Dock 摘要面板
 | `editor/widgets/gds_call_graph_canvas.gd` | 新增 | 调用图可视化 |
 | `editor/widgets/gds_signal_flow_canvas.gd` | 新增 | 信号流可视化 |
 | `editor/dialogs/gds_find_references_dialog.gd` | 新增 | 查找引用 |
