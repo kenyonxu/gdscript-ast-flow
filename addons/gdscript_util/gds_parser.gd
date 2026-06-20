@@ -10,6 +10,96 @@ var error: String = ""
 var _error_line: int = 0
 var _error_column: int = 0
 
+# 运算符优先级表 — 从最低(0)到最高(19)
+# 每个条目: {tokens: Array[int], type: int, right_assoc: bool}
+#
+# type: 0=BINOP_LEFT, 1=BINOP_RIGHT, 2=UNOP, 3=TRIOP, 4=POSTFIX
+
+enum OpAssoc { BINOP_LEFT, BINOP_RIGHT, UNOP, TRIOP, POSTFIX }
+
+const OP_TABLE: Array[Dictionary] = [
+    # 0: 赋值 (右结合)
+    {tokens = [
+        GDScriptToken.Type.EQUAL,
+        GDScriptToken.Type.PLUS_EQUAL,
+        GDScriptToken.Type.MINUS_EQUAL,
+        GDScriptToken.Type.STAR_EQUAL,
+        GDScriptToken.Type.STAR_STAR_EQUAL,
+        GDScriptToken.Type.SLASH_EQUAL,
+        GDScriptToken.Type.PERCENT_EQUAL,
+        GDScriptToken.Type.AMPERSAND_EQUAL,
+        GDScriptToken.Type.PIPE_EQUAL,
+        GDScriptToken.Type.CARET_EQUAL,
+        GDScriptToken.Type.LESS_LESS_EQUAL,
+        GDScriptToken.Type.GREATER_GREATER_EQUAL,
+    ], assoc = OpAssoc.BINOP_RIGHT},
+
+    # 1: as
+    {tokens = [GDScriptToken.Type.AS], assoc = OpAssoc.BINOP_LEFT},
+
+    # 2: 三目 if ... else
+    {tokens = [GDScriptToken.Type.IF], assoc = OpAssoc.TRIOP},
+
+    # 3: or
+    {tokens = [GDScriptToken.Type.OR], assoc = OpAssoc.BINOP_LEFT},
+
+    # 4: and
+    {tokens = [GDScriptToken.Type.AND], assoc = OpAssoc.BINOP_LEFT},
+
+    # 5: not (一元)
+    {tokens = [GDScriptToken.Type.NOT], assoc = OpAssoc.UNOP},
+
+    # 6: in
+    {tokens = [GDScriptToken.Type.IN], assoc = OpAssoc.BINOP_LEFT},
+
+    # 7: 比较
+    {tokens = [
+        GDScriptToken.Type.LESS, GDScriptToken.Type.GREATER,
+        GDScriptToken.Type.EQUAL_EQUAL, GDScriptToken.Type.BANG_EQUAL,
+        GDScriptToken.Type.LESS_EQUAL, GDScriptToken.Type.GREATER_EQUAL,
+    ], assoc = OpAssoc.BINOP_LEFT},
+
+    # 8: is
+    {tokens = [GDScriptToken.Type.IS], assoc = OpAssoc.BINOP_LEFT},
+
+    # 9: |
+    {tokens = [GDScriptToken.Type.PIPE], assoc = OpAssoc.BINOP_LEFT},
+
+    # 10: ^
+    {tokens = [GDScriptToken.Type.CARET], assoc = OpAssoc.BINOP_LEFT},
+
+    # 11: &
+    {tokens = [GDScriptToken.Type.AMPERSAND], assoc = OpAssoc.BINOP_LEFT},
+
+    # 12: <<, >>
+    {tokens = [GDScriptToken.Type.LESS_LESS, GDScriptToken.Type.GREATER_GREATER], assoc = OpAssoc.BINOP_LEFT},
+
+    # 13: - (二元)
+    {tokens = [GDScriptToken.Type.MINUS], assoc = OpAssoc.BINOP_LEFT},
+
+    # 14: + (二元)
+    {tokens = [GDScriptToken.Type.PLUS], assoc = OpAssoc.BINOP_LEFT},
+
+    # 15: *, /, %
+    {tokens = [GDScriptToken.Type.STAR, GDScriptToken.Type.SLASH, GDScriptToken.Type.PERCENT], assoc = OpAssoc.BINOP_LEFT},
+
+    # 16: ** (右结合)
+    {tokens = [GDScriptToken.Type.STAR_STAR], assoc = OpAssoc.BINOP_RIGHT},
+
+    # 17: - (一元)
+    {tokens = [GDScriptToken.Type.MINUS], assoc = OpAssoc.UNOP},
+
+    # 18: ~ (一元)
+    {tokens = [GDScriptToken.Type.TILDE], assoc = OpAssoc.UNOP},
+
+    # 19: . (属性) / [ (索引) / ( (调用) — postfix
+    {tokens = [
+        GDScriptToken.Type.PERIOD,
+        GDScriptToken.Type.BRACKET_OPEN,
+        GDScriptToken.Type.PAREN_OPEN,
+    ], assoc = OpAssoc.POSTFIX},
+]
+
 func parse(p_tokens: Array) -> ClassNode:
     tokens = p_tokens
     pos = 0
@@ -531,4 +621,291 @@ func _parse_await() -> AwaitNode:
     _advance()  # AWAIT token
     var node = AwaitNode.new()
     node.expression = _parse_expression()
+    return node
+
+
+func _parse_expression(p_level: int = 0):
+    if error != "":
+        return null
+    if p_level >= OP_TABLE.size():
+        return _parse_atom()
+
+    # 先解析更高优先级的子表达式
+    var left = _parse_expression(p_level + 1)
+
+    var level_ops = OP_TABLE[p_level]
+    while true:
+        var t = _peek()
+        if t == null:
+            return left
+        if not level_ops.tokens.has(t.type):
+            return left
+
+        match level_ops.assoc:
+            OpAssoc.BINOP_LEFT:
+                if left == null:
+                    return null
+                _advance()
+                # as → CastNode, is → TypeTestNode (特殊节点类型)
+                if t.type == GDScriptToken.Type.AS:
+                    var node = CastNode.new()
+                    node.expression = left
+                    node.type = _parse_type()
+                    left = node
+                elif t.type == GDScriptToken.Type.IS:
+                    var node = TypeTestNode.new()
+                    node.expression = left
+                    node.type = _parse_type()
+                    left = node
+                else:
+                    var node = BinaryOpNode.new()
+                    node.op = t.type
+                    node.left = left
+                    node.right = _parse_expression(p_level)
+                    left = node
+
+            OpAssoc.BINOP_RIGHT:
+                if left == null:
+                    return null
+                if t.type == GDScriptToken.Type.EQUAL:
+                    # 赋值语句
+                    var node = AssignmentNode.new()
+                    node.target = left
+                    node.op = t.type
+                    _advance()
+                    node.value = _parse_expression(0)
+                    return node
+                # 复合赋值
+                if t.type in [GDScriptToken.Type.PLUS_EQUAL,
+                              GDScriptToken.Type.MINUS_EQUAL,
+                              GDScriptToken.Type.STAR_EQUAL,
+                              GDScriptToken.Type.STAR_STAR_EQUAL,
+                              GDScriptToken.Type.SLASH_EQUAL,
+                              GDScriptToken.Type.PERCENT_EQUAL,
+                              GDScriptToken.Type.AMPERSAND_EQUAL,
+                              GDScriptToken.Type.PIPE_EQUAL,
+                              GDScriptToken.Type.CARET_EQUAL,
+                              GDScriptToken.Type.LESS_LESS_EQUAL,
+                              GDScriptToken.Type.GREATER_GREATER_EQUAL]:
+                    var node = AssignmentNode.new()
+                    node.target = left
+                    node.op = t.type
+                    _advance()
+                    node.value = _parse_expression(0)
+                    return node
+                # 二元右结合 (如 **)
+                var node = BinaryOpNode.new()
+                node.op = t.type
+                node.left = left
+                _advance()
+                node.right = _parse_expression(p_level)
+                left = node
+
+            OpAssoc.UNOP:
+                # 一元运算符 — 始终在此级别被消费（不检查 left）
+                # 注意: MINUS 出现在两个级别 (13=二元, 17=一元)。在级别17, _parse_expression(18)
+                # 返回的 left 是更高优先级的表达式。如果当前token是 MINUS, 检查它是否作为
+                # 一元运算符使用: 需要判断前一个token的上下文。
+                # 简化方案: 在 OP_TABLE 中用不同哨兵标记二元/一元MINUS。
+                # 实际处理: 如果 left != null 且前一个token是运算符/括号开头 → 一元
+                # 如果 left == null → 一定是一元
+                #
+                # 实践中: 级别17(unary -) 和级别18(unary ~) 中,
+                # 如果 left 已存在且前一个token不是运算符 → 这是二元的, 返回left
+                # 如果 left 不存在或前一个token是运算符 → 这是一元的
+                if left != null:
+                    return left  # 二元: 留给低级别处理
+                var node = UnaryOpNode.new()
+                node.op = t.type
+                _advance()
+                node.operand = _parse_expression(p_level)  # 右结合
+                left = node
+
+            OpAssoc.TRIOP:
+                # if ... else (三目运算符)
+                if left == null:
+                    return null
+                var node = TernaryOpNode.new()
+                node.true_expr = left
+                _advance()  # IF token
+                node.condition = _parse_expression(0)
+                _expect(GDScriptToken.Type.ELSE, "三目运算符需要 else")
+                node.false_expr = _parse_expression(0)
+                left = node
+
+            OpAssoc.POSTFIX:
+                # 后缀操作: . [ (
+                if left == null:
+                    # . 作为一元(如 .method() 的 super 调用)
+                    return _parse_atom()
+                if t.type == GDScriptToken.Type.PERIOD:
+                    _advance()
+                    var attr = AttributeNode.new()
+                    attr.base = left
+                    var id_t = _expect(GDScriptToken.Type.IDENTIFIER, "属性访问需要标识符")
+                    if id_t:
+                        attr.name = id_t.literal
+                    left = attr
+                elif t.type == GDScriptToken.Type.BRACKET_OPEN:
+                    _advance()
+                    var sub = SubscriptNode.new()
+                    sub.base = left
+                    sub.index = _parse_expression(0)
+                    _expect(GDScriptToken.Type.BRACKET_CLOSE)
+                    left = sub
+                elif t.type == GDScriptToken.Type.PAREN_OPEN:
+                    # 函数调用
+                    var call = CallNode.new()
+                    call.callee = left
+                    call.arguments = _parse_call_args()
+                    left = call
+                continue  # postfix 可链式调用 a.b().c[0]()
+
+    return left
+
+
+func _parse_atom():
+    var t = _peek()
+    if t == null:
+        return null
+
+    match t.type:
+        GDScriptToken.Type.PAREN_OPEN:
+            _advance()
+            var expr = _parse_expression()
+            _expect(GDScriptToken.Type.PAREN_CLOSE)
+            return expr
+
+        GDScriptToken.Type.IDENTIFIER:
+            _advance()
+            var node = IdentifierNode.new()
+            node.name = t.literal
+            return node
+
+        GDScriptToken.Type.LITERAL:
+            _advance()
+            var node = LiteralNode.new()
+            node.value = t.literal
+            return node
+
+        GDScriptToken.Type.SELF:
+            _advance()
+            return SelfNode.new()
+
+        GDScriptToken.Type.SUPER:
+            _advance()
+            return SuperNode.new()
+
+        GDScriptToken.Type.PRELOAD:
+            _advance()
+            _expect(GDScriptToken.Type.PAREN_OPEN)
+            var path_t = _expect(GDScriptToken.Type.LITERAL)
+            _expect(GDScriptToken.Type.PAREN_CLOSE)
+            var node = PreloadNode.new()
+            if path_t:
+                node.path = path_t.literal
+            return node
+
+        GDScriptToken.Type.MINUS:
+            # 一元负号 — 已由上层 UNOP 处理
+            return null
+
+        GDScriptToken.Type.BRACKET_OPEN:
+            return _parse_array()
+
+        GDScriptToken.Type.BRACE_OPEN:
+            return _parse_dictionary()
+
+        GDScriptToken.Type.FUNC:
+            return _parse_lambda()
+
+        GDScriptToken.Type.DOLLAR:
+            _advance()
+            # $NodePath
+            var id_t = _peek()
+            var node = IdentifierNode.new()
+            if id_t and id_t.type == GDScriptToken.Type.IDENTIFIER:
+                node.name = "$" + _advance().literal
+            else:
+                node.name = "$"
+            return node
+
+        GDScriptToken.Type.CONST_PI, GDScriptToken.Type.CONST_TAU, GDScriptToken.Type.CONST_INF, GDScriptToken.Type.CONST_NAN:
+            _advance()
+            var node = LiteralNode.new()
+            match t.type:
+                GDScriptToken.Type.CONST_PI: node.value = PI
+                GDScriptToken.Type.CONST_TAU: node.value = TAU
+                GDScriptToken.Type.CONST_INF: node.value = INF
+                GDScriptToken.Type.CONST_NAN: node.value = NAN
+            return node
+
+        _:
+            return null
+
+func _parse_call_args() -> Array:
+    var args: Array = []
+    if _peek() and _peek().type == GDScriptToken.Type.PAREN_CLOSE:
+        _advance()
+        return args
+
+    while _peek() and _peek().type != GDScriptToken.Type.TK_EOF:
+        args.append(_parse_expression())
+        if not _match(GDScriptToken.Type.COMMA):
+            break
+
+    _expect(GDScriptToken.Type.PAREN_CLOSE)
+    return args
+
+func _parse_array():
+    _advance()  # [
+    var node = ArrayNode.new()
+    if _match(GDScriptToken.Type.BRACKET_CLOSE):
+        return node
+
+    while _peek() and _peek().type != GDScriptToken.Type.TK_EOF:
+        node.elements.append(_parse_expression())
+        if not _match(GDScriptToken.Type.COMMA):
+            break
+    _expect(GDScriptToken.Type.BRACKET_CLOSE)
+    return node
+
+func _parse_dictionary():
+    _advance()  # {
+    var node = DictionaryNode.new()
+    if _match(GDScriptToken.Type.BRACE_CLOSE):
+        return node
+
+    while _peek() and _peek().type != GDScriptToken.Type.TK_EOF:
+        var pair = {"key": _parse_expression(), "value": null}
+        _expect(GDScriptToken.Type.COLON, "字典需要 key: value")
+        pair["value"] = _parse_expression()
+        node.pairs.append(pair)
+        if not _match(GDScriptToken.Type.COMMA):
+            break
+    _expect(GDScriptToken.Type.BRACE_CLOSE)
+    return node
+
+func _parse_lambda():
+    _advance()  # FUNC token
+    var node = LambdaNode.new()
+
+    # 参数
+    node.params = _parse_parameters()
+
+    # 返回类型 (可选)
+    if _match(GDScriptToken.Type.FORWARD_ARROW):
+        pass  # Phase 2: node.return_type
+
+    _expect(GDScriptToken.Type.COLON)
+
+    # lambda 体: 单表达式 或 块
+    if _peek() and _peek().type == GDScriptToken.Type.NEWLINE:
+        node.body = _parse_suite()
+    else:
+        # 单行 lambda: func(): return 42 → body = LiteralNode(42) (解包 return)
+        if _peek() and _peek().type == GDScriptToken.Type.RETURN:
+            _advance()  # 消费 return, body 直接存储返回值表达式
+        node.body = _parse_expression()
+
     return node
