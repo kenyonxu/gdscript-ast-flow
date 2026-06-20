@@ -221,13 +221,13 @@ func _next( ) -> void:
 	if self.p + 1 < self.token_list_len:
 		self.p += 1
 
-func _get_token_and_next( ) -> GDScriptByteCodeParser.GDScriptToken:
-	var n:GDScriptByteCodeParser.GDScriptToken = self.token_list[self.p]
+func _get_token_and_next( ) -> GDScriptByteCodeParser.ByteToken:
+	var n:GDScriptByteCodeParser.ByteToken = self.token_list[self.p]
 	if self.p + 1 < self.token_list_len:
 		self.p += 1
 	return n
 
-func _get_token( ) -> GDScriptByteCodeParser.GDScriptToken:
+func _get_token( ) -> GDScriptByteCodeParser.ByteToken:
 	return self.token_list[self.p]
 
 # -----------------------------------------------------------------------------
@@ -239,7 +239,7 @@ func _optimize_token_list( ) -> void:
 	var paren_level:int = 0
 
 	while i < len( self.token_list ):
-		var t:GDScriptByteCodeParser.GDScriptToken = self.token_list[i]
+		var t:GDScriptByteCodeParser.ByteToken = self.token_list[i]
 
 		match t.token_id:
 			GDScriptByteCodeParser.Token.PARENTHESIS_OPEN, GDScriptByteCodeParser.Token.BRACKET_OPEN, GDScriptByteCodeParser.Token.CURLY_BRACKET_OPEN:
@@ -251,12 +251,12 @@ func _optimize_token_list( ) -> void:
 
 			GDScriptByteCodeParser.Token.NEWLINE:
 				if 0 < paren_level:
-					self.token_list.remove( i )
+					self.token_list.remove_at( i )
 				else:
 					while i+1 < len( self.token_list ):
 						t = self.token_list[i+1]
 						if t.token_id == GDScriptByteCodeParser.Token.NEWLINE:
-							self.token_list.remove( i )
+							self.token_list.remove_at( i )
 						else:
 							break
 					i += 1

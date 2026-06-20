@@ -36,17 +36,17 @@ func _on_parse_current():
 
     # Phase 2: var result = GDScriptSymbolResolver.new().resolve(ast, path)
 
-func _print_ast_summary(p_ast: ClassNode, p_path: String):
+func _print_ast_summary(p_ast: GDScriptToken.ClassNode, p_path: String):
     var func_count = 0
     var var_count = 0
     var signal_count = 0
 
     for m in p_ast.members:
-        if m is FunctionNode:
+        if m is GDScriptToken.FunctionNode:
             func_count += 1
-        elif m is VariableNode:
+        elif m is GDScriptToken.VariableNode:
             var_count += 1
-        elif m is SignalNode:
+        elif m is GDScriptToken.SignalNode:
             signal_count += 1
 
     print("[GDScriptUtil] %s — %d functions, %d variables, %d signals" % [

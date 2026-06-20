@@ -100,12 +100,12 @@ const OP_TABLE: Array[Dictionary] = [
     ], assoc = OpAssoc.POSTFIX},
 ]
 
-func parse(p_tokens: Array) -> ClassNode:
+func parse(p_tokens: Array) -> GDScriptToken.ClassNode:
     tokens = p_tokens
     pos = 0
     error = ""
 
-    var root = ClassNode.new()
+    var root = GDScriptToken.ClassNode.new()
 
     # 解析文件级注解 — 仅 @tool 和 @icon 是文件级的
     # 成员注解 (@export, @onready...) 在 _parse_class_member 中处理
@@ -135,6 +135,9 @@ func parse(p_tokens: Array) -> ClassNode:
 
     # 解析类体成员
     while _peek() and _peek().type != GDScriptToken.Type.TK_EOF:
+        _skip_newlines()
+        if _peek() and _peek().type == GDScriptToken.Type.TK_EOF:
+            break
         var member = _parse_class_member()
         if member != null:
             root.members.append(member)
@@ -185,9 +188,9 @@ func _skip_to_newline():
         _advance()
 
 
-func _parse_annotation() -> AnnotationNode:
+func _parse_annotation() -> GDScriptToken.AnnotationNode:
     var t = _advance()  # ANNOTATION token
-    var node = AnnotationNode.new()
+    var node = GDScriptToken.AnnotationNode.new()
     node.line = t.start_line
     node.name = t.literal
     # 注解参数（如 @export_range(0, 100)）
@@ -205,7 +208,7 @@ func _parse_class_member():
         return null
 
     # 处理成员注解 (@export, @onready, @static...)
-    var annotations: Array[AnnotationNode] = []
+    var annotations: Array[GDScriptToken.AnnotationNode] = []
     while t and t.type == GDScriptToken.Type.ANNOTATION:
         annotations.append(_parse_annotation())
         t = _peek()
@@ -254,10 +257,10 @@ func _parse_class_member():
             return null
 
 
-func _parse_inner_class() -> ClassNode:
+func _parse_inner_class() -> GDScriptToken.ClassNode:
     _advance()  # CLASS token
     var name_t = _expect(GDScriptToken.Type.IDENTIFIER, "class 后需要类名")
-    var node = ClassNode.new()
+    var node = GDScriptToken.ClassNode.new()
     if name_t:
         node.classname_id = name_t.literal
 
@@ -279,10 +282,10 @@ func _parse_inner_class() -> ClassNode:
     _expect(GDScriptToken.Type.DEDENT)
     return node
 
-func _parse_function(p_annotations: Array) -> FunctionNode:
+func _parse_function(p_annotations: Array) -> GDScriptToken.FunctionNode:
     _advance()  # FUNC token
     var name_t = _expect(GDScriptToken.Type.IDENTIFIER, "func 后需要函数名")
-    var node = FunctionNode.new()
+    var node = GDScriptToken.FunctionNode.new()
     if name_t:
         node.name = name_t.literal
         node.line = name_t.start_line
@@ -299,17 +302,17 @@ func _parse_function(p_annotations: Array) -> FunctionNode:
 
     return node
 
-func _parse_parameters() -> Array[ParameterNode]:
+func _parse_parameters() -> Array[GDScriptToken.ParameterNode]:
     if not _match(GDScriptToken.Type.PAREN_OPEN):
         return []
 
-    var params: Array[ParameterNode] = []
+    var params: Array[GDScriptToken.ParameterNode] = []
     if _peek() and _peek().type == GDScriptToken.Type.PAREN_CLOSE:
         _advance()
         return params
 
     while _peek() and _peek().type != GDScriptToken.Type.TK_EOF:
-        var p = ParameterNode.new()
+        var p = GDScriptToken.ParameterNode.new()
         var id_t = _expect(GDScriptToken.Type.IDENTIFIER, "参数需要标识符")
         if id_t == null:
             break
@@ -338,10 +341,10 @@ func _parse_parameters() -> Array[ParameterNode]:
     return params
 
 
-func _parse_variable(p_annotations: Array) -> VariableNode:
+func _parse_variable(p_annotations: Array) -> GDScriptToken.VariableNode:
     _advance()  # VAR token
     var name_t = _expect(GDScriptToken.Type.IDENTIFIER, "var 后需要变量名")
-    var node = VariableNode.new()
+    var node = GDScriptToken.VariableNode.new()
     if name_t:
         node.name = name_t.literal
         node.line = name_t.start_line
@@ -375,7 +378,7 @@ func _parse_variable(p_annotations: Array) -> VariableNode:
 func _parse_const(p_annotations: Array):
     _advance()  # CONST token (已在 _parse_class_member 中匹配)
     var name_t = _expect(GDScriptToken.Type.IDENTIFIER, "const 后需要常量名")
-    var node = VariableNode.new()
+    var node = GDScriptToken.VariableNode.new()
     if name_t:
         node.name = name_t.literal
         node.line = name_t.start_line
@@ -396,22 +399,21 @@ func _parse_const(p_annotations: Array):
     return node
 
 
-func _parse_signal() -> SignalNode:
+func _parse_signal() -> GDScriptToken.SignalNode:
     _advance()  # SIGNAL token
     var name_t = _expect(GDScriptToken.Type.IDENTIFIER, "signal 后需要信号名")
-    var node = SignalNode.new()
+    var node = GDScriptToken.SignalNode.new()
     if name_t:
         node.name = name_t.literal
         node.line = name_t.start_line
 
-    # 信号参数
-    if _match(GDScriptToken.Type.PAREN_OPEN):
-        node.params = _parse_parameters()
+    # 信号参数 (_parse_parameters 内部自己消费 PAREN_OPEN)
+    node.params = _parse_parameters()
     return node
 
-func _parse_enum() -> EnumNode:
+func _parse_enum() -> GDScriptToken.EnumNode:
     _advance()  # ENUM token
-    var node = EnumNode.new()
+    var node = GDScriptToken.EnumNode.new()
 
     # 可选枚举名
     if _peek() and _peek().type == GDScriptToken.Type.IDENTIFIER:
@@ -434,10 +436,13 @@ func _parse_enum() -> EnumNode:
     _expect(GDScriptToken.Type.BRACE_CLOSE)
     return node
 
-func _parse_type() -> TypeNode:
-    var node = TypeNode.new()
+func _parse_type() -> GDScriptToken.TypeNode:
+    var node = GDScriptToken.TypeNode.new()
 
-    if _peek() and _peek().type == GDScriptToken.Type.IDENTIFIER:
+    if _peek() and _peek().type == GDScriptToken.Type.VOID:
+        _advance()
+        node.type_name = "void"
+    elif _peek() and _peek().type == GDScriptToken.Type.IDENTIFIER:
         node.type_name = _advance().literal
 
     # 泛型参数: Array[int], Dictionary[String, int]
@@ -451,8 +456,8 @@ func _parse_type() -> TypeNode:
     return node
 
 
-func _parse_suite() -> SuiteNode:
-    var suite = SuiteNode.new()
+func _parse_suite() -> GDScriptToken.SuiteNode:
+    var suite = GDScriptToken.SuiteNode.new()
 
     # 单行语句: func foo(): return 1
     if _peek() == null or _peek().type != GDScriptToken.Type.NEWLINE:
@@ -494,13 +499,13 @@ func _parse_statement():
             return _parse_return()
         GDScriptToken.Type.BREAK:
             _advance()
-            return BreakNode.new()
+            return GDScriptToken.BreakNode.new()
         GDScriptToken.Type.CONTINUE:
             _advance()
-            return ContinueNode.new()
+            return GDScriptToken.ContinueNode.new()
         GDScriptToken.Type.PASS:
             _advance()
-            return PassNode.new()
+            return GDScriptToken.PassNode.new()
         GDScriptToken.Type.ASSERT:
             return _parse_assert()
         GDScriptToken.Type.AWAIT:
@@ -509,13 +514,13 @@ func _parse_statement():
             return _parse_variable([])
         GDScriptToken.Type.BREAKPOINT:
             _advance()
-            var bp = BreakNode.new()  # breakpoint 语法上类似 break
+            var bp = GDScriptToken.BreakNode.new()  # breakpoint 语法上类似 break
             return bp
 
         GDScriptToken.Type.YIELD:
             _advance()
             # yield() 在 4.x 中仅保留兼容性，内部转为 await
-            var node = AwaitNode.new()
+            var node = GDScriptToken.AwaitNode.new()
             node.expression = _parse_expression()
             return node
 
@@ -523,15 +528,15 @@ func _parse_statement():
             # 表达式语句
             var expr = _parse_expression()
             if expr != null:
-                var es = ExpressionStatementNode.new()
+                var es = GDScriptToken.ExpressionStatementNode.new()
                 es.expression = expr
                 return es
             return null
 
 
-func _parse_if() -> IfNode:
+func _parse_if() -> GDScriptToken.IfNode:
     _advance()  # IF token
-    var node = IfNode.new()
+    var node = GDScriptToken.IfNode.new()
     node.condition = _parse_expression()
     _expect(GDScriptToken.Type.COLON)
     node.true_branch = _parse_suite()
@@ -547,17 +552,17 @@ func _parse_if() -> IfNode:
 
     return node
 
-func _parse_while() -> WhileNode:
+func _parse_while() -> GDScriptToken.WhileNode:
     _advance()  # WHILE token
-    var node = WhileNode.new()
+    var node = GDScriptToken.WhileNode.new()
     node.condition = _parse_expression()
     _expect(GDScriptToken.Type.COLON)
     node.body = _parse_suite()
     return node
 
-func _parse_for() -> ForNode:
+func _parse_for() -> GDScriptToken.ForNode:
     _advance()  # FOR token
-    var node = ForNode.new()
+    var node = GDScriptToken.ForNode.new()
     var id_t = _expect(GDScriptToken.Type.IDENTIFIER, "for 需要变量名")
     if id_t:
         node.var_name = id_t.literal
@@ -568,16 +573,16 @@ func _parse_for() -> ForNode:
     return node
 
 
-func _parse_match() -> MatchNode:
+func _parse_match() -> GDScriptToken.MatchNode:
     _advance()  # MATCH token
-    var node = MatchNode.new()
+    var node = GDScriptToken.MatchNode.new()
     node.test = _parse_expression()
     _expect(GDScriptToken.Type.COLON)
     _match(GDScriptToken.Type.NEWLINE)
     _expect(GDScriptToken.Type.INDENT)
 
     while _peek() and _peek().type not in [GDScriptToken.Type.DEDENT, GDScriptToken.Type.TK_EOF]:
-        var branch = MatchBranchNode.new()
+        var branch = GDScriptToken.MatchBranchNode.new()
 
         # when 关键字
         if _match(GDScriptToken.Type.WHEN):
@@ -602,24 +607,24 @@ func _parse_match_patterns() -> Array:
             break
     return patterns
 
-func _parse_return() -> ReturnNode:
+func _parse_return() -> GDScriptToken.ReturnNode:
     _advance()  # RETURN token
-    var node = ReturnNode.new()
+    var node = GDScriptToken.ReturnNode.new()
     if _peek() and _peek().type != GDScriptToken.Type.NEWLINE:
         node.value = _parse_expression()
     return node
 
-func _parse_assert() -> AssertNode:
+func _parse_assert() -> GDScriptToken.AssertNode:
     _advance()  # ASSERT token
-    var node = AssertNode.new()
+    var node = GDScriptToken.AssertNode.new()
     node.condition = _parse_expression()
     if _match(GDScriptToken.Type.COMMA):
         node.message = _parse_expression()
     return node
 
-func _parse_await() -> AwaitNode:
+func _parse_await() -> GDScriptToken.AwaitNode:
     _advance()  # AWAIT token
-    var node = AwaitNode.new()
+    var node = GDScriptToken.AwaitNode.new()
     node.expression = _parse_expression()
     return node
 
@@ -648,17 +653,17 @@ func _parse_expression(p_level: int = 0):
                 _advance()
                 # as → CastNode, is → TypeTestNode (特殊节点类型)
                 if t.type == GDScriptToken.Type.AS:
-                    var node = CastNode.new()
+                    var node = GDScriptToken.CastNode.new()
                     node.expression = left
                     node.type = _parse_type()
                     left = node
                 elif t.type == GDScriptToken.Type.IS:
-                    var node = TypeTestNode.new()
+                    var node = GDScriptToken.TypeTestNode.new()
                     node.expression = left
                     node.type = _parse_type()
                     left = node
                 else:
-                    var node = BinaryOpNode.new()
+                    var node = GDScriptToken.BinaryOpNode.new()
                     node.op = t.type
                     node.left = left
                     node.right = _parse_expression(p_level)
@@ -669,7 +674,7 @@ func _parse_expression(p_level: int = 0):
                     return null
                 if t.type == GDScriptToken.Type.EQUAL:
                     # 赋值语句
-                    var node = AssignmentNode.new()
+                    var node = GDScriptToken.AssignmentNode.new()
                     node.target = left
                     node.op = t.type
                     _advance()
@@ -687,14 +692,14 @@ func _parse_expression(p_level: int = 0):
                               GDScriptToken.Type.CARET_EQUAL,
                               GDScriptToken.Type.LESS_LESS_EQUAL,
                               GDScriptToken.Type.GREATER_GREATER_EQUAL]:
-                    var node = AssignmentNode.new()
+                    var node = GDScriptToken.AssignmentNode.new()
                     node.target = left
                     node.op = t.type
                     _advance()
                     node.value = _parse_expression(0)
                     return node
                 # 二元右结合 (如 **)
-                var node = BinaryOpNode.new()
+                var node = GDScriptToken.BinaryOpNode.new()
                 node.op = t.type
                 node.left = left
                 _advance()
@@ -715,7 +720,7 @@ func _parse_expression(p_level: int = 0):
                 # 如果 left 不存在或前一个token是运算符 → 这是一元的
                 if left != null:
                     return left  # 二元: 留给低级别处理
-                var node = UnaryOpNode.new()
+                var node = GDScriptToken.UnaryOpNode.new()
                 node.op = t.type
                 _advance()
                 node.operand = _parse_expression(p_level)  # 右结合
@@ -725,7 +730,7 @@ func _parse_expression(p_level: int = 0):
                 # if ... else (三目运算符)
                 if left == null:
                     return null
-                var node = TernaryOpNode.new()
+                var node = GDScriptToken.TernaryOpNode.new()
                 node.true_expr = left
                 _advance()  # IF token
                 node.condition = _parse_expression(0)
@@ -740,7 +745,7 @@ func _parse_expression(p_level: int = 0):
                     return _parse_atom()
                 if t.type == GDScriptToken.Type.PERIOD:
                     _advance()
-                    var attr = AttributeNode.new()
+                    var attr = GDScriptToken.AttributeNode.new()
                     attr.base = left
                     var id_t = _expect(GDScriptToken.Type.IDENTIFIER, "属性访问需要标识符")
                     if id_t:
@@ -748,14 +753,15 @@ func _parse_expression(p_level: int = 0):
                     left = attr
                 elif t.type == GDScriptToken.Type.BRACKET_OPEN:
                     _advance()
-                    var sub = SubscriptNode.new()
+                    var sub = GDScriptToken.SubscriptNode.new()
                     sub.base = left
                     sub.index = _parse_expression(0)
                     _expect(GDScriptToken.Type.BRACKET_CLOSE)
                     left = sub
                 elif t.type == GDScriptToken.Type.PAREN_OPEN:
                     # 函数调用
-                    var call = CallNode.new()
+                    _advance()  # 消费 (
+                    var call = GDScriptToken.CallNode.new()
                     call.callee = left
                     call.arguments = _parse_call_args()
                     left = call
@@ -778,30 +784,30 @@ func _parse_atom():
 
         GDScriptToken.Type.IDENTIFIER:
             _advance()
-            var node = IdentifierNode.new()
+            var node = GDScriptToken.IdentifierNode.new()
             node.name = t.literal
             return node
 
         GDScriptToken.Type.LITERAL:
             _advance()
-            var node = LiteralNode.new()
+            var node = GDScriptToken.LiteralNode.new()
             node.value = t.literal
             return node
 
         GDScriptToken.Type.SELF:
             _advance()
-            return SelfNode.new()
+            return GDScriptToken.SelfNode.new()
 
         GDScriptToken.Type.SUPER:
             _advance()
-            return SuperNode.new()
+            return GDScriptToken.SuperNode.new()
 
         GDScriptToken.Type.PRELOAD:
             _advance()
             _expect(GDScriptToken.Type.PAREN_OPEN)
             var path_t = _expect(GDScriptToken.Type.LITERAL)
             _expect(GDScriptToken.Type.PAREN_CLOSE)
-            var node = PreloadNode.new()
+            var node = GDScriptToken.PreloadNode.new()
             if path_t:
                 node.path = path_t.literal
             return node
@@ -823,7 +829,7 @@ func _parse_atom():
             _advance()
             # $NodePath
             var id_t = _peek()
-            var node = IdentifierNode.new()
+            var node = GDScriptToken.IdentifierNode.new()
             if id_t and id_t.type == GDScriptToken.Type.IDENTIFIER:
                 node.name = "$" + _advance().literal
             else:
@@ -832,7 +838,7 @@ func _parse_atom():
 
         GDScriptToken.Type.CONST_PI, GDScriptToken.Type.CONST_TAU, GDScriptToken.Type.CONST_INF, GDScriptToken.Type.CONST_NAN:
             _advance()
-            var node = LiteralNode.new()
+            var node = GDScriptToken.LiteralNode.new()
             match t.type:
                 GDScriptToken.Type.CONST_PI: node.value = PI
                 GDScriptToken.Type.CONST_TAU: node.value = TAU
@@ -859,7 +865,7 @@ func _parse_call_args() -> Array:
 
 func _parse_array():
     _advance()  # [
-    var node = ArrayNode.new()
+    var node = GDScriptToken.ArrayNode.new()
     if _match(GDScriptToken.Type.BRACKET_CLOSE):
         return node
 
@@ -872,7 +878,7 @@ func _parse_array():
 
 func _parse_dictionary():
     _advance()  # {
-    var node = DictionaryNode.new()
+    var node = GDScriptToken.DictionaryNode.new()
     if _match(GDScriptToken.Type.BRACE_CLOSE):
         return node
 
@@ -888,7 +894,7 @@ func _parse_dictionary():
 
 func _parse_lambda():
     _advance()  # FUNC token
-    var node = LambdaNode.new()
+    var node = GDScriptToken.LambdaNode.new()
 
     # 参数
     node.params = _parse_parameters()

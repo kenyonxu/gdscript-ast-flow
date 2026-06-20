@@ -234,7 +234,7 @@ class GDScriptByteCodeParseResult:
 	func _init( ):
 		pass
 
-class GDScriptToken:
+class ByteToken:
 	var token_id:int
 	var param:int
 
@@ -242,7 +242,7 @@ class GDScriptToken:
 		self.token_id = _token_id
 		self.param = _param
 
-static func parse( code:PoolByteArray ) -> GDScriptByteCodeParseResult:
+static func parse( code:PackedByteArray ) -> GDScriptByteCodeParseResult:
 	var result: = GDScriptByteCodeParseResult.new( )
 	var stream: = StreamPeerBuffer.new( )
 	stream.set_data_array( code )
@@ -290,14 +290,14 @@ static func _parse_constants( stream:StreamPeerBuffer, count:int ) -> Array:
 
 	var start_pos:int = stream.get_position( )
 	var all_const_size:int = 0
-	var data:PoolByteArray = stream.get_data( stream.get_available_bytes( ) )[1]
+	var data:PackedByteArray = stream.get_data( stream.get_available_bytes( ) )[1]
 
 	for i in range( count ):
-		var c = bytes2var( data )
-		var const_size:int = var2bytes( c ).size( )
+		var c = bytes_to_var( data )
+		var const_size:int = var_to_bytes( c ).size( )
 		all_const_size += const_size
 		r.append( c )
-		data = data.subarray( const_size, data.size( ) - 1 )
+		data = data.slice( const_size, data.size( ) - 1 )
 
 	stream.seek( start_pos + all_const_size )
 

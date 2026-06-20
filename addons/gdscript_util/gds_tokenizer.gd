@@ -77,7 +77,7 @@ func tokenize(p_source: String) -> Array[GDScriptToken]:
     last_was_newline = false
 
     var tokens: Array[GDScriptToken] = []
-    while _pos < source.length():
+    while _pos < source.length() or not _pending_tokens.is_empty():
         var token = _scan()
         if token != null:
             tokens.append(token)
@@ -85,8 +85,11 @@ func tokenize(p_source: String) -> Array[GDScriptToken]:
                 # 记录错误但继续扫描
                 pass
 
-    # 文件末尾生成剩余的 DEDENT + NEWLINE + EOF
-    _flush_indents(tokens)
+    # 文件末尾: 弹出所有剩余缩进级别 (除基线外)
+    while indent_stack.size() > 1:
+        indent_stack.pop_back()
+        tokens.append(_make_token(GDScriptToken.Type.DEDENT))
+
     tokens.append(_make_token(GDScriptToken.Type.TK_EOF))
     return tokens
 
@@ -104,12 +107,12 @@ func _make_token(p_type: int, p_literal = null) -> GDScriptToken:
 func _peek(p_offset: int = 0) -> String:
     var idx = _pos + p_offset
     if idx >= source.length():
-        return "\0"
+        return ""
     return source[idx]
 
 func _advance() -> String:
     if _pos >= source.length():
-        return "\0"
+        return ""
     var c = source[_pos]
     _pos += 1
     if c == "\n":
@@ -138,16 +141,20 @@ func _scan() -> GDScriptToken:
     while _peek() in [" ", "\t", "\r"]:
         _advance()
 
-    # 检查缩进 (仅在行首且不在括号内)
-    if at_line_start and paren_level == 0:
+    # 检查缩进 (仅在行首且不在括号内，且非 EOS)
+    # indent_stack==[0] 时自动设基线，不产生 INDENT
+    if at_line_start and paren_level == 0 and _peek() != "":
         if _peek() != "\n":
             var col = _column
             _check_indent(col)
+            # 缩进变化生成的 INDENT/DEDENT 必须优先输出
+            if not _pending_tokens.is_empty():
+                return _pending_tokens.pop_front()
 
     var c = _advance()
 
     # 空字符保护
-    if c == "\0":
+    if c == "":
         return null
 
     match c:
@@ -172,6 +179,11 @@ func _scan() -> GDScriptToken:
 
 
 func _check_indent(p_column: int):
+    # 首行: 设基线缩进，不产生 INDENT
+    if indent_stack == [0]:
+        indent_stack = [p_column]
+        return
+
     var current_indent = indent_stack[-1]
     if p_column > current_indent:
         indent_stack.append(p_column)
@@ -197,33 +209,31 @@ func _skip_comment():
 
 
 func _scan_token(p_first: String) -> GDScriptToken:
-    match p_first:
-        "_", "a".."z", "A".."Z":
-            return _scan_identifier(p_first)
+    if p_first == "_" or (p_first >= "a" and p_first <= "z") or (p_first >= "A" and p_first <= "Z"):
+        return _scan_identifier(p_first)
 
-        "@":
-            return _scan_annotation()
+    if p_first == "@":
+        return _scan_annotation()
 
-        "0".."9":
-            return _scan_number(p_first)
+    if p_first >= "0" and p_first <= "9":
+        return _scan_number(p_first)
 
-        "\"", "'":
-            return _scan_string(p_first[0])
+    if p_first == "\"" or p_first == "'":
+        return _scan_string(p_first[0])
 
-        "$":
-            if _peek().is_valid_identifier():
-                # $NodePath 语法 — 视为特殊的标识符引用
-                return _scan_node_path()
-            return _make_token(GDScriptToken.Type.DOLLAR)
+    if p_first == "$":
+        if _peek().is_valid_identifier():
+            # $NodePath 语法 — 视为特殊的标识符引用
+            return _scan_node_path()
+        return _make_token(GDScriptToken.Type.DOLLAR)
 
-        _:
-            return _scan_operator(p_first)
+    return _scan_operator(p_first)
 
 func _scan_identifier(p_first: String) -> GDScriptToken:
     var name = p_first
     while _pos < source.length():
         var c = _peek()
-        if c.is_valid_identifier() or c in ["0".."9"]:
+        if c.is_valid_identifier() or (c >= "0" and c <= "9"):
             name += c
             _advance()
         else:
@@ -243,7 +253,7 @@ func _scan_annotation() -> GDScriptToken:
     var name = ""
     while _pos < source.length():
         var c = _peek()
-        if c.is_valid_identifier() or c in ["0".."9", "_"]:
+        if c.is_valid_identifier() or (c >= "0" and c <= "9") or c == "_":
             name += c
             _advance()
         else:
@@ -255,7 +265,7 @@ func _scan_node_path() -> GDScriptToken:
     var path = ""
     while _pos < source.length():
         var c = _peek()
-        if c == "/" or c.is_valid_identifier() or c in ["0".."9", "_", "%"]:
+        if c == "/" or c.is_valid_identifier() or (c >= "0" and c <= "9") or c == "_" or c == "%":
             path += c
             _advance()
         else:
@@ -287,10 +297,10 @@ func _scan_number(p_first: String) -> GDScriptToken:
     # 整数 / 浮点数
     while _pos < source.length():
         var c = _peek()
-        if c in ["0".."9"]:
+        if c >= "0" and c <= "9":
             num_str += c
             _advance()
-        elif c == "." and not is_float and _peek(1) in ["0".."9"]:
+        elif c == "." and not is_float and _peek(1) >= "0" and _peek(1) <= "9":
             is_float = true
             num_str += c
             _advance()
@@ -308,18 +318,24 @@ func _scan_string(p_quote: String) -> GDScriptToken:
     var str_value = ""
     while _pos < source.length():
         var c = _advance()
-        if c == "\0":
+        if c == "":
             return _make_token(GDScriptToken.Type.ERROR, "未终止的字符串")
         if c == "\\":
             var next = _advance()
-            match next:
-                "n": str_value += "\n"
-                "t": str_value += "\t"
-                "r": str_value += "\r"
-                "\\": str_value += "\\"
-                "\"": str_value += "\""
-                "'": str_value += "'"
-                _: str_value += next
+            if next == "n":
+                str_value += "\n"
+            elif next == "t":
+                str_value += "\t"
+            elif next == "r":
+                str_value += "\r"
+            elif next == "\\":
+                str_value += "\\"
+            elif next == "\"":
+                str_value += "\""
+            elif next == "'":
+                str_value += "'"
+            else:
+                str_value += next
         elif c == p_quote:
             break
         else:
