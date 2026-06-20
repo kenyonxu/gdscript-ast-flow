@@ -8,4 +8,4 @@ main.gd
 test.gd
 test_a.gd
 test_b.gd
-dev/*
+dev/*graphify-out/cache/
