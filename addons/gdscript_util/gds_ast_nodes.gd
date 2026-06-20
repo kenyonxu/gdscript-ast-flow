@@ -85,3 +85,48 @@ class AnnotationNode:
     extends ASTNode
     var name: String = ""               # @export, @onready, @tool ...
     var arguments: Array = []           # of ExpressionNode
+
+
+class ClassNode:
+    extends ASTNode
+    var extends_id: String = ""         # extends 的类路径
+    var classname_id: String = ""       # class_name 名称
+    var is_tool: bool = false           # @tool 注解
+    var annotations: Array[AnnotationNode] = []
+    var members: Array = []             # of ASTNode (FunctionNode, VariableNode, ...)
+
+class FunctionNode:
+    extends ASTNode
+    var name: String = ""
+    var params: Array = []              # of ParameterNode
+    var return_type: TypeNode = null
+    var body = null                     # SuiteNode
+    var is_static: bool = false
+    var is_coroutine: bool = false      # 使用 await 的函数
+
+class ParameterNode:
+    extends ASTNode
+    var name: String = ""
+    var datatype: TypeNode = null
+    var default_value = null            # ExpressionNode or null
+
+
+class VariableNode:
+    extends ASTNode
+    var name: String = ""
+    var datatype: TypeNode = null
+    var initializer = null              # ExpressionNode or null
+    var setter = null                   # FunctionNode or null (内联 setter)
+    var getter = null                   # FunctionNode or null (内联 getter)
+    var is_onready: bool = false
+    var is_export: bool = false
+
+class SignalNode:
+    extends ASTNode
+    var name: String = ""
+    var params: Array[ParameterNode] = []
+
+class EnumNode:
+    extends ASTNode
+    var name: String = ""
+    var values: Array = []              # of Dictionary {name: String, value: ExpressionNode}
