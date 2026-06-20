@@ -261,3 +261,68 @@ func _scan_node_path() -> GDScriptToken:
         else:
             break
     return _make_token(GDScriptToken.Type.IDENTIFIER, "$" + path)
+
+
+func _scan_number(p_first: String) -> GDScriptToken:
+    var num_str = p_first
+    var is_float = false
+    var is_hex = false
+
+    # 十六进制前缀
+    if p_first == "0" and _peek().to_lower() == "x":
+        is_hex = true
+        num_str += _advance()
+        while _pos < source.length():
+            var c = _peek()
+            if c.is_valid_hex_number():
+                num_str += c
+                _advance()
+            elif c == "_":  # 数字分隔符
+                _advance()
+            else:
+                break
+        var value = num_str.hex_to_int()
+        return _make_token(GDScriptToken.Type.LITERAL, value)
+
+    # 整数 / 浮点数
+    while _pos < source.length():
+        var c = _peek()
+        if c in ["0".."9"]:
+            num_str += c
+            _advance()
+        elif c == "." and not is_float and _peek(1) in ["0".."9"]:
+            is_float = true
+            num_str += c
+            _advance()
+        elif c == "_":
+            _advance()
+        else:
+            break
+
+    if is_float:
+        return _make_token(GDScriptToken.Type.LITERAL, float(num_str))
+    return _make_token(GDScriptToken.Type.LITERAL, int(num_str))
+
+
+func _scan_string(p_quote: String) -> GDScriptToken:
+    var str_value = ""
+    while _pos < source.length():
+        var c = _advance()
+        if c == "\0":
+            return _make_token(GDScriptToken.Type.ERROR, "未终止的字符串")
+        if c == "\\":
+            var next = _advance()
+            match next:
+                "n": str_value += "\n"
+                "t": str_value += "\t"
+                "r": str_value += "\r"
+                "\\": str_value += "\\"
+                "\"": str_value += "\""
+                "'": str_value += "'"
+                _: str_value += next
+        elif c == p_quote:
+            break
+        else:
+            str_value += c
+
+    return _make_token(GDScriptToken.Type.LITERAL, str_value)
