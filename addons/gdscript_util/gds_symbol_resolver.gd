@@ -372,3 +372,139 @@ func _resolve_identifier_read(p_node, p_scope: SymbolTable, p_current_function: 
 
 	# 记录 READ
 	_record_def_use(sym.name, p_node, p_current_function, DefUseSite.AccessType.READ)
+
+
+# ---- Chunk 3: 调用图 + 信号图 ----
+
+# 解析函数调用 — 6 种调用模式检测
+func _resolve_call(p_node, p_scope: SymbolTable, p_current_function: String):
+	# 先解析参数中的标识符引用（都是 READ）
+	for arg in p_node.arguments:
+		_resolve_expression(arg, p_scope, p_current_function)
+
+	var callee = p_node.callee
+
+	# 模式 1: 裸标识符调用 — foo() / emit("sig")
+	if callee is GDScriptToken.IdentifierNode:
+		# 1a: emit("signal_name") → EMIT
+		if callee.name == "emit":
+			_resolve_emit_call(p_node, p_current_function)
+			return
+		# 1b: 隐式 self 调用 foo()
+		var sym = p_scope.resolve(callee.name)
+		if sym != null and sym.kind == Symbol.Kind.FUNCTION:
+			_add_call_edge(p_current_function, callee.name, callee.line, CallEdge.CallType.SELF, "", p_node.arguments)
+		# 否则可能是内置函数 (print, range 等) — 不记录 CallEdge
+
+	# 模式 2: 属性调用 — self.foo() / obj.method() / super.foo() / sig.connect() / sig.emit()
+	elif callee is GDScriptToken.AttributeNode:
+		_resolve_attribute_call(p_node, callee, p_scope, p_current_function)
+
+
+# 属性调用分析 — AttributeNode(callee) 的 7 种子模式
+func _resolve_attribute_call(p_call_node, p_attr, p_scope: SymbolTable, p_current_function: String):
+	var base = p_attr.base
+	var method_name = p_attr.name
+
+	# 2a: self.method() → SELF
+	if base is GDScriptToken.SelfNode:
+		_add_call_edge(p_current_function, method_name, p_attr.line, CallEdge.CallType.SELF, "", p_call_node.arguments)
+
+	# 2b: super.method() → SUPER
+	elif base is GDScriptToken.SuperNode:
+		_add_call_edge(p_current_function, method_name, p_attr.line, CallEdge.CallType.SUPER, "", p_call_node.arguments)
+
+	# 2c: signal_name.connect(cb) → SIGNAL_CONNECT 或 LAMBDA
+	elif method_name == "connect" and base is GDScriptToken.IdentifierNode:
+		_resolve_signal_connect(p_call_node, base.name, p_scope, p_current_function)
+
+	# 2d: obj.connect("sig", cb) → CONNECT（base 不是 IdentifierNode 或 base 是但非信号名）
+	elif method_name == "connect":
+		_resolve_object_connect(p_call_node, p_scope, p_current_function)
+
+	# 2e: signal_name.emit() → EMIT
+	elif method_name == "emit" and base is GDScriptToken.IdentifierNode:
+		_resolve_signal_emit(p_call_node, base.name, p_current_function, "dot_emit")
+
+	# 2f: obj.method() → EXTERNAL
+	elif base is GDScriptToken.IdentifierNode:
+		_add_call_edge(p_current_function, method_name, p_attr.line, CallEdge.CallType.EXTERNAL, base.name, p_call_node.arguments)
+
+	# 2g: 链式调用 a.b.method() 或 ClassName.method() — [Phase 3] STATIC 调用
+
+
+# emit("signal_name") 形式 — 已在 _resolve_call 中通过 callee.name == "emit" 触发
+func _resolve_emit_call(p_node, p_current_function: String):
+	if p_node.arguments.size() > 0 and p_node.arguments[0] is GDScriptToken.LiteralNode:
+		var sig_name = str(p_node.arguments[0].value)
+		# 记录 emit_site
+		var info = result.signal_graph.get_signal_flow(sig_name)
+		if info == null:
+			# 未声明的信号 — 创建临时 SignalInfo
+			info = SignalInfo.new()
+			info.name = sig_name
+			result.signal_graph.signals[sig_name] = info
+			result.add_error("[SymbolResolver] %d: 信号 '%s' 未声明，通过 emit() 发射" % [p_node.line, sig_name])
+		info.emit_sites.append(_make_site(p_node, p_current_function, p_node.arguments))
+		# 同时记录为 EMIT 类型的 CallEdge
+		_add_call_edge(p_current_function, sig_name, p_node.callee.line, CallEdge.CallType.EMIT, "", p_node.arguments)
+
+
+# signal_name.emit() 形式 — 从 _resolve_attribute_call 调用
+func _resolve_signal_emit(p_call_node, p_signal_name: String, p_current_function: String, p_form: String):
+	var info = result.signal_graph.get_signal_flow(p_signal_name)
+	if info == null:
+		info = SignalInfo.new()
+		info.name = p_signal_name
+		result.signal_graph.signals[p_signal_name] = info
+		result.add_error("[SymbolResolver] %d: 信号 '%s' 未声明，通过 .emit() 发射" % [p_call_node.line, p_signal_name])
+	info.emit_sites.append(_make_site(p_call_node, p_current_function, p_call_node.arguments))
+	_add_call_edge(p_current_function, p_signal_name, p_call_node.callee.line, CallEdge.CallType.EMIT, "", p_call_node.arguments)
+
+
+# signal_name.connect(cb/lambda) 形式
+func _resolve_signal_connect(p_call_node, p_signal_name: String, p_scope: SymbolTable, p_current_function: String):
+	var info = result.signal_graph.get_signal_flow(p_signal_name)
+	if info == null:
+		info = SignalInfo.new()
+		info.name = p_signal_name
+		result.signal_graph.signals[p_signal_name] = info
+		result.add_error("[SymbolResolver] %d: 信号 '%s' 未声明，通过 .connect() 连接" % [p_call_node.line, p_signal_name])
+
+	# 记录 connect_site
+	info.connect_sites.append(_make_site(p_call_node, p_current_function, p_call_node.arguments))
+
+	# 判断回调类型并记录 CallEdge
+	if p_call_node.arguments.size() > 0:
+		var cb = p_call_node.arguments[0]
+		if cb is GDScriptToken.IdentifierNode:
+			# signal_name.connect(callback_func) → SIGNAL_CONNECT
+			_add_call_edge(p_current_function, cb.name, p_call_node.callee.line, CallEdge.CallType.SIGNAL_CONNECT, p_signal_name, p_call_node.arguments)
+		elif cb is GDScriptToken.LambdaNode:
+			# signal_name.connect(lambda) → LAMBDA
+			_add_call_edge(p_current_function, "<lambda@%d>" % cb.line, p_call_node.callee.line, CallEdge.CallType.LAMBDA, p_signal_name, p_call_node.arguments)
+			# 同时解析 lambda（其 captured_vars 提供闭包上下文）
+			_resolve_lambda(cb, p_scope, p_current_function)
+
+
+# obj.connect("signal_name", cb) 形式
+func _resolve_object_connect(p_call_node, p_scope: SymbolTable, p_current_function: String):
+	if p_call_node.arguments.size() >= 1 and p_call_node.arguments[0] is GDScriptToken.LiteralNode:
+		var sig_name = str(p_call_node.arguments[0].value)
+
+		# 记录 connect_site（可能是未声明的外部信号）
+		var info = result.signal_graph.get_signal_flow(sig_name)
+		if info == null:
+			info = SignalInfo.new()
+			info.name = sig_name
+			result.signal_graph.signals[sig_name] = info
+		info.connect_sites.append(_make_site(p_call_node, p_current_function, p_call_node.arguments))
+
+		# 判断回调
+		if p_call_node.arguments.size() >= 2:
+			var cb = p_call_node.arguments[1]
+			if cb is GDScriptToken.IdentifierNode:
+				_add_call_edge(p_current_function, cb.name, p_call_node.callee.line, CallEdge.CallType.CONNECT, sig_name, p_call_node.arguments)
+			elif cb is GDScriptToken.LambdaNode:
+				_add_call_edge(p_current_function, "<lambda@%d>" % cb.line, p_call_node.callee.line, CallEdge.CallType.LAMBDA, sig_name, p_call_node.arguments)
+				_resolve_lambda(cb, p_scope, p_current_function)
