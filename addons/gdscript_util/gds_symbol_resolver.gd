@@ -305,3 +305,70 @@ func _resolve_enum(p_node, p_scope: SymbolTable):
 	for entry in p_node.values:
 		var value_name = entry["name"]
 		p_scope.define(value_name, Symbol.Kind.ENUM_VALUE, p_node)
+
+
+# ---- Task 4: 语句节点遍历 + scope chain 查找 ----
+
+# 解析 if 语句 — 不创建新作用域
+func _resolve_if(p_node, p_scope: SymbolTable, p_current_function: String, p_lambda_node = null):
+	_resolve_expression(p_node.condition, p_scope, p_current_function, p_lambda_node)
+	_resolve_suite(p_node.true_branch, p_scope, p_current_function, p_lambda_node)
+	if p_node.false_branch != null:
+		# false_branch 可能是 IfNode (elif) 或 SuiteNode (else)
+		if p_node.false_branch is GDScriptToken.IfNode:
+			_resolve_if(p_node.false_branch, p_scope, p_current_function, p_lambda_node)
+		else:
+			_resolve_suite(p_node.false_branch, p_scope, p_current_function, p_lambda_node)
+
+
+# 解析 while — 不创建新作用域
+func _resolve_while(p_node, p_scope: SymbolTable, p_current_function: String, p_lambda_node = null):
+	_resolve_expression(p_node.condition, p_scope, p_current_function, p_lambda_node)
+	_resolve_suite(p_node.body, p_scope, p_current_function, p_lambda_node)
+
+
+# 解析 match — 不创建新作用域
+func _resolve_match(p_node, p_scope: SymbolTable, p_current_function: String, p_lambda_node = null):
+	_resolve_expression(p_node.test, p_scope, p_current_function, p_lambda_node)
+	for branch in p_node.branches:
+		if branch is GDScriptToken.MatchBranchNode:
+			for pattern in branch.patterns:
+				_resolve_expression(pattern, p_scope, p_current_function, p_lambda_node)
+			_resolve_suite(branch.body, p_scope, p_current_function, p_lambda_node)
+
+
+# 解析 for 循环 — 不创建新作用域，循环变量 define 到当前作用域
+func _resolve_for(p_node, p_scope: SymbolTable, p_current_function: String, p_lambda_node = null):
+	# for i in range(10): — i define 到当前作用域
+	p_scope.define(p_node.var_name, Symbol.Kind.FOR_VAR, p_node, "Variant")
+	_record_def_use(p_node.var_name, p_node, p_current_function, DefUseSite.AccessType.DEFINE)
+
+	# iterable 中的标识符是 READ
+	_resolve_expression(p_node.iterable, p_scope, p_current_function, p_lambda_node)
+
+	# body 中可能有 for 循环变量的 READ 或 WRITE
+	_resolve_suite(p_node.body, p_scope, p_current_function, p_lambda_node)
+
+
+# 解析 return 语句
+func _resolve_return(p_node, p_scope: SymbolTable, p_current_function: String, p_lambda_node = null):
+	if p_node.value != null:
+		_resolve_expression(p_node.value, p_scope, p_current_function, p_lambda_node)
+
+
+# 解析标识符读取
+func _resolve_identifier_read(p_node, p_scope: SymbolTable, p_current_function: String, p_lambda_node = null):
+	# lambda 捕获检测优先
+	if p_lambda_node != null:
+		_resolve_identifier_in_lambda(p_node, p_scope, p_lambda_node, p_current_function)
+		return
+
+	var sym = p_scope.resolve(p_node.name)
+	if sym == null:
+		# 未解析 — 可能是内置函数/全局引用
+		# 不记录错误，因为可能是内置函数（print, range 等）
+		# [Phase 3] 引入内置函数列表做精确判断
+		return
+
+	# 记录 READ
+	_record_def_use(sym.name, p_node, p_current_function, DefUseSite.AccessType.READ)
