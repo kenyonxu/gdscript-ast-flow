@@ -218,3 +218,90 @@ func _type_to_string(p_type) -> String:
 	if p_type == null:
 		return ""
 	return p_type.type_name if "type_name" in p_type else ""
+
+
+# ---- Chunk 2: 符号表 + 作用域链 ----
+
+# 解析类体 — 创建 class_scope，define 类级符号，遍历成员
+func _resolve_class(p_node, p_parent_scope: SymbolTable):
+	# 如果传入的不是 SymbolTable（首次调用从 resolve() 传入），直接使用
+	var class_scope: SymbolTable = p_parent_scope
+
+	# 填充 class_name 到 extends_path
+	if p_node.classname_id != "":
+		result.class_name = p_node.classname_id
+	if p_node.extends_id != "":
+		result.extends_path = p_node.extends_id
+
+	# 遍历所有成员
+	for member in p_node.members:
+		_resolve_node(member, class_scope, "<class>")
+
+
+# 解析函数 — 创建 func_scope（parent = class_scope），define 函数符号和参数
+func _resolve_function(p_node, p_parent_scope: SymbolTable):
+	# define 函数到父作用域（class_scope）
+	var func_sym = p_parent_scope.define(p_node.name, Symbol.Kind.FUNCTION, p_node, _type_to_string(p_node.return_type))
+	if p_node.is_static:
+		func_sym.datatype = "static:" + func_sym.datatype
+
+	# 创建函数作用域
+	var func_scope = SymbolTable.new()
+	func_scope.parent = p_parent_scope
+	func_scope.scope_name = "func:%s" % p_node.name
+
+	# define 参数
+	for param in p_node.params:
+		if param is GDScriptToken.ParameterNode:
+			func_scope.define(param.name, Symbol.Kind.PARAMETER, param, _type_to_string(param.datatype))
+			# 记录参数 def site
+			_record_def_use(param.name, param, p_node.name, DefUseSite.AccessType.DEFINE)
+
+	# 遍历函数体
+	if p_node.body != null:
+		_resolve_suite(p_node.body, func_scope, p_node.name)
+
+
+# 解析变量声明 — 用方案 A 区分 const/var
+func _resolve_variable(p_node, p_scope: SymbolTable, p_current_function: String):
+	# 方案 A: 通过源码行确定是 const 还是 var
+	var kind = Symbol.Kind.CONSTANT if _const_set.has(p_node) else Symbol.Kind.VARIABLE
+
+	# define 到当前作用域
+	var sym = p_scope.define(p_node.name, kind, p_node, _type_to_string(p_node.datatype))
+	sym.is_exported = p_node.is_export
+
+	# 记录 def site
+	_record_def_use(p_node.name, p_node, p_current_function, DefUseSite.AccessType.DEFINE)
+
+	# 解析初始化表达式中的标识符引用（这些是 READ）
+	if p_node.initializer != null:
+		_resolve_expression(p_node.initializer, p_scope, p_current_function)
+
+
+# 解析信号声明
+func _resolve_signal(p_node, p_scope: SymbolTable):
+	# define 信号符号
+	p_scope.define(p_node.name, Symbol.Kind.SIGNAL, p_node)
+
+	# 注册 SignalInfo 到 SignalGraph
+	var info = SignalInfo.new()
+	info.name = p_node.name
+	info.declaration = p_node
+	for param in p_node.params:
+		if param is GDScriptToken.ParameterNode:
+			info.params.append(param.name)
+
+	result.signal_graph.signals[p_node.name] = info
+
+
+# 解析枚举声明
+func _resolve_enum(p_node, p_scope: SymbolTable):
+	# define 枚举到当前作用域
+	var enum_name = p_node.name if p_node.name != "" else "<anonymous_enum>"
+	p_scope.define(enum_name, Symbol.Kind.ENUM, p_node)
+
+	# define 枚举值到当前作用域（GDScript 枚举值在 class scope 直接可用）
+	for entry in p_node.values:
+		var value_name = entry["name"]
+		p_scope.define(value_name, Symbol.Kind.ENUM_VALUE, p_node)
