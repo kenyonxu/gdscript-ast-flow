@@ -1642,10 +1642,77 @@ Phase 2 严格遵循"读取但不修改"原则。所有 AST 节点通过 `GDScri
 
 ---
 
-## 与实际实现的差异（待实现后填写）
+## 完成检查清单
 
-此节将在实现完成后记录与计划的偏差，参考 Phase 1 PLAN 的"实际实现与计划差异"章节格式。
+- [x] `gds_analysis_result.gd` — 统一结果容器 + 查询 API
+- [x] `gds_symbol_resolver.gd` — AST Visitor 符号解析器（~600行）
+- [x] `plugin.gd` — Phase 2 集成（resource_saved 自动分析 + 摘要输出）
+- [x] `tests/test_symbol_resolver.gd` — 10 个验收测试用例全部通过
+- [x] `gds_symbol.gd` 等 10 个独立数据类文件
+- [x] `gds_self_node.gd` / `gds_super_node.gd` — Self/Super AST 节点
+- [x] LSP 零错误
+- [x] 分支：`master`
+
+---
+
+## 与实际实现的差异
+
+以下差异源于 Godot 4.7 GDScript 运行时限制，在 Phase 2 验收过程中发现并修复。
+
+### 1. 数据类架构
 
 | 项目 | 计划 | 实际 |
 |------|------|------|
-| — | — | — |
+| 数据类定义 | 10 个内部类定义在 `gds_analysis_result.gd` 中 | 10 个独立 `class_name` 文件 |
+| 原因 | — | 内部类 `is` 运算符运行时失效；内部类方法（`CallGraph.add_edge`）跨文件调用静默失败 |
+| 修复提交 | — | `7487b3a` + `49b2d24` |
+
+### 2. AST 节点类型
+
+| 项目 | 计划 | 实际 |
+|------|------|------|
+| SelfNode/SuperNode | `GDScriptToken` 内部类，`extends ASTNode` | 独立 `class_name GDScriptSelfNode`/`GDScriptSuperNode`，`extends RefCounted` |
+| 原因 | — | `is GDScriptToken.SelfNode` 运行时返回 false；内部类继承内部类链断裂 |
+| 修复提交 | — | `7487b3a` |
+
+### 3. 方法调用图 — 前向引用
+
+| 项目 | 计划 | 实际 |
+|------|------|------|
+| 隐式 self 调用检测 | `if sym != null and sym.kind == FUNCTION:` | `if sym == null or sym.kind == FUNCTION:` |
+| 原因 | — | 解析 `foo()` 时 `bar()` 定义在后面，`sym == null` 导致调用边跳过 |
+| 影响 | — | Test 2 (`bar()` 隐式调用) FAIL |
+| 修复提交 | — | `6353de2` |
+
+### 4. connect 路由
+
+| 项目 | 计划 | 实际 |
+|------|------|------|
+| connect 匹配顺序 | 先 `signal.connect(cb)` 后 `obj.connect("sig", cb)` | 先 `obj.connect("sig", cb)` 后 `signal.connect(cb)` |
+| 原因 | — | `$AnimationPlayer.connect("finished", cb)` 的 base 是 `IdentifierNode("$AnimationPlayer")`，被误匹配为 `signal.connect` |
+| 修复提交 | — | `4209f93` |
+
+### 5. 表达式解析
+
+| 项目 | 计划 | 实际 |
+|------|------|------|
+| `_resolve_expression` | 无 `AssignmentNode` 分支 | 新增 `AssignmentNode` → `_resolve_assignment` |
+| 原因 | — | `hp -= amount` 被 `ExpressionStatementNode` 包裹后走 `_resolve_expression`，AssignmentNode 被忽略 |
+| 修复提交 | — | `4209f93` |
+
+### 6. 其他 Bug 修复
+
+| Bug | 症状 | 修复 |
+|-----|------|------|
+| `class_name` 位置错误 | LSP: "Unexpected class_name in class body" | `class_name` 移到文件顶部 |
+| `class_name` 作变量名 | LSP: "Unexpected class_name in class body" | `var class_name` → `var classname_id` |
+| 内部类返回类型 | LSP: "Could not find type Site" | `-> Site:` → `-> GDScriptAnalysisResult.Site:` |
+| 内部类参数类型 | LSP: "Could not find type SymbolTable" | `: SymbolTable` → `: GDScriptAnalysisResult.SymbolTable` |
+
+### 7. 文件结构差异
+
+| 计划 | 实际 |
+|------|------|
+| `gds_analysis_result.gd`（含 10 个内部类） | `gds_analysis_result.gd`（容器类）+ 10 个独立 `.gd` 文件 |
+| 2 个新增文件 | 14 个新增文件 |
+| — | `gds_self_node.gd` + `gds_super_node.gd`（Phase 1 残留问题） |

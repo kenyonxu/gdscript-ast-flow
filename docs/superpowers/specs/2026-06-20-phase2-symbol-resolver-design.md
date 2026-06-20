@@ -1,6 +1,6 @@
 # Phase 2: GDScript 符号解析器 设计规范
 
-> 日期: 2026-06-20 | 状态: Phase 2 规划 | 依赖: Phase 1 (已完成 ✅)
+> 日期: 2026-06-20 | 状态: Phase 2 已完成 ✅ | 依赖: Phase 1 (已完成 ✅)
 
 ## 一、目标与范围
 
@@ -1034,3 +1034,36 @@ for member in p_ast.members:
 **方案 B（Phase 3 备选 — 更干净）：** 在 `VariableNode` 上添加 `is_const: bool` 字段，由 Parser 在 Phase 1 中设置。这样 SymbolResolver 不需要访问源码文本。
 
 Phase 2 实现时选择方案 A（最小改动原则）。
+
+---
+
+## 附录：Phase 2 实现完成记录
+
+**完成日期：** 2026-06-20
+**关键提交：**
+- `4209f93` fix: Phase 2 — 5/6 bugs resolved, 9/10 tests pass
+- `7487b3a` fix: extract SelfNode/SuperNode as independent class_name
+- `49b2d24` refactor: extract 10 data classes as independent class_name (remote)
+- `6353de2` fix: forward reference call edge tracking (Phase 2 10/10)
+**分支：** master
+**测试结果：** 10/10 验收测试全部通过，LSP 零错误
+
+### 与规范的偏差（均在实现中修复）
+
+| 项目 | 规范 | 实际 |
+|------|------|------|
+| 类架构 | 10 数据类为 `GDScriptAnalysisResult` 内部类 | 提取为 10 个独立 `class_name` 文件（运行时限制） |
+| 文件数 | 3（analysis_result + symbol_resolver + plugin 扩展） | 15（+12 独立数据类文件） |
+| AST 节点 | 2 新增（GDScriptSelfNode/GDScriptSuperNode） | 同规范，独立 `class_name` |
+| SelfNode/SuperNode | `GDScriptToken` 内部类，`extends ASTNode` | 独立 `class_name`，`extends RefCounted`（修复 `is` 运算符） |
+| 方法调用图 | `sym != null and kind == FUNCTION` 才记录 | `sym == null or kind == FUNCTION`（修复前向引用） |
+| connect 路由 | `signal_name.connect()` > `obj.connect("sig")` | `obj.connect("sig")` > `signal_name.connect()`（修复 `$Anim.connect`） |
+| enum 引用 | `Symbol.Kind.FUNCTION` | `GDScriptSymbol.Kind.FUNCTION`（类提取后命名变更） |
+| `class_name` 变量 | `var class_name: String` | `var classname_id: String`（GDScript 保留关键字冲突） |
+| `_resolve_expression` | 无 `AssignmentNode` 分支 | 新增分支（修复复合赋值不追踪 bug） |
+
+### 已知限制
+
+- Godot 4.7 GDScript 内部类 `is` 运算符运行时失效（导致所有数据类提取为独立文件）
+- 内置函数列表缺失 — `resolve(name)` 返回 null 时不做判断直接记录调用边，可能误记录 `print()` 等内置函数
+- Enum 值未保证编译时常量 — 跨文件引用 `GDScriptSymbol.Kind.FUNCTION` 等可能运行时为 0
