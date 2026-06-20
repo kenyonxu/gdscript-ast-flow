@@ -35,7 +35,7 @@ func resolve(p_source: String) -> GDScriptAnalysisResult:
 
 
 # 辅助: 从 SymbolTable 查找符号
-func find_symbol(p_table: GDScriptAnalysisResult.SymbolTable, p_name: String) -> GDScriptAnalysisResult.Symbol:
+func find_symbol(p_table: GDScriptSymbolTable, p_name: String) -> GDScriptSymbol:
 	return p_table.resolve(p_name)
 
 
@@ -60,7 +60,7 @@ func assert_not_null(p_obj, p_msg: String = ""):
 # Test 1: SymbolTable + DefUseChain
 # 源码: extends Node\nclass_name Player\nvar hp := 100\nfunc take_damage(amount: int):\n\thp -= amount
 func test_1_symbol_table_def_use():
-	print("Test 1: SymbolTable + GDScriptAnalysisResult.DefUseChain...")
+	print("Test 1: SymbolTable + GDScriptDefUseChain...")
 	var source = "extends Node\nclass_name Player\nvar hp := 100\nfunc take_damage(amount: int):\n\thp -= amount\n"
 	var result = resolve(source)
 
@@ -69,12 +69,12 @@ func test_1_symbol_table_def_use():
 	var hp_sym = find_symbol(result.symbol_table, "hp")
 	assert_not_null(hp_sym, "hp should be in symbol table")
 	if hp_sym:
-		assert_eq(GDScriptAnalysisResult.Symbol.Kind.VARIABLE, hp_sym.kind, "hp should be VARIABLE")
+		assert_eq(GDScriptSymbol.Kind.VARIABLE, hp_sym.kind, "hp should be VARIABLE")
 
 	var func_sym = find_symbol(result.symbol_table, "take_damage")
 	assert_not_null(func_sym, "take_damage should be in symbol table")
 	if func_sym:
-		assert_eq(GDScriptAnalysisResult.Symbol.Kind.FUNCTION, func_sym.kind, "take_damage should be FUNCTION")
+		assert_eq(GDScriptSymbol.Kind.FUNCTION, func_sym.kind, "take_damage should be FUNCTION")
 
 	# DefUseChain 检查
 	var hp_usage = result.get_variable_usages("hp")
@@ -103,7 +103,7 @@ func test_2_call_graph_implicit_self():
 	assert_eq(1, callers.size(), "bar should have 1 caller")
 	if callers.size() > 0:
 		assert_eq("foo", callers[0].caller, "caller should be foo")
-		assert_eq(GDScriptAnalysisResult.CallEdge.CallType.SELF, callers[0].call_type, "call_type should be SELF")
+		assert_eq(GDScriptCallEdge.CallType.SELF, callers[0].call_type, "call_type should be SELF")
 	print("  PASS")
 
 
@@ -117,7 +117,7 @@ func test_3_call_graph_explicit_self():
 	var callers = result.get_callers_of("bar")
 	assert_eq(1, callers.size(), "bar should have 1 caller")
 	if callers.size() > 0:
-		assert_eq(GDScriptAnalysisResult.CallEdge.CallType.SELF, callers[0].call_type, "call_type should be SELF")
+		assert_eq(GDScriptCallEdge.CallType.SELF, callers[0].call_type, "call_type should be SELF")
 	print("  PASS")
 
 
@@ -131,7 +131,7 @@ func test_4_call_graph_super():
 	var callers = result.get_callers_of("_ready")
 	assert_eq(1, callers.size(), "_ready should have 1 caller")
 	if callers.size() > 0:
-		assert_eq(GDScriptAnalysisResult.CallEdge.CallType.SUPER, callers[0].call_type, "call_type should be SUPER")
+		assert_eq(GDScriptCallEdge.CallType.SUPER, callers[0].call_type, "call_type should be SUPER")
 	print("  PASS")
 
 
@@ -200,7 +200,7 @@ func test_8_signal_connect():
 	var callers = result.get_callers_of("_on_health")
 	assert_eq(1, callers.size(), "_on_health should have 1 caller")
 	if callers.size() > 0:
-		assert_eq(GDScriptAnalysisResult.CallEdge.CallType.SIGNAL_CONNECT, callers[0].call_type, "call_type should be SIGNAL_CONNECT")
+		assert_eq(GDScriptCallEdge.CallType.SIGNAL_CONNECT, callers[0].call_type, "call_type should be SIGNAL_CONNECT")
 	print("  PASS")
 
 
@@ -225,7 +225,7 @@ func test_9_external_connect():
 	var callers = result.get_callers_of("_on_anim_end")
 	assert_eq(1, callers.size(), "_on_anim_end should have 1 caller")
 	if callers.size() > 0:
-		assert_eq(GDScriptAnalysisResult.CallEdge.CallType.CONNECT, callers[0].call_type, "call_type should be CONNECT")
+		assert_eq(GDScriptCallEdge.CallType.CONNECT, callers[0].call_type, "call_type should be CONNECT")
 	print("  PASS")
 
 
