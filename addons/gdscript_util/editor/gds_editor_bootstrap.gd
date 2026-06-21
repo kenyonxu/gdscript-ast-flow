@@ -8,20 +8,16 @@ extends RefCounted
 var _plugin: EditorPlugin = null
 var _bridge: GDSAnalysisBridge = null
 var _main_panel: GDSAnalysisMainPanel = null
-var _summary_panel: GDSAnalysisSummary = null
 
 func setup(p_plugin: EditorPlugin) -> void:
 	_plugin = p_plugin
 	_bridge = GDSAnalysisBridge.new()
 
+	# 底部面板 — 含 4 个子 tab（Summary / Call Graph / Signal Flow / Def-Use）
+	# Summary 作为第 1 个 tab，不再用右侧 Dock（避免侵入检查器区域）
 	_main_panel = GDSAnalysisMainPanel.new()
 	_main_panel.setup(_bridge)
 	_plugin.add_control_to_bottom_panel(_main_panel, "GDScript Analysis")
-
-	_summary_panel = GDSAnalysisSummary.new()
-	_summary_panel.setup(_bridge)
-	_summary_panel.name = "Analysis Summary"  # dock tab 标题取自 .name
-	_plugin.add_control_to_dock(EditorPlugin.DOCK_SLOT_RIGHT_BR, _summary_panel)
 
 	_plugin.resource_saved.connect(_on_resource_saved)
 
@@ -32,9 +28,6 @@ func teardown() -> void:
 	if _main_panel and is_instance_valid(_main_panel):
 		_plugin.remove_control_from_bottom_panel(_main_panel)
 		_main_panel.queue_free()
-	if _summary_panel and is_instance_valid(_summary_panel):
-		_plugin.remove_control_from_docks(_summary_panel)
-		_summary_panel.queue_free()
 
 func _on_resource_saved(resource: Resource) -> void:
 	if resource is GDScript and resource.resource_path.ends_with(".gd"):
