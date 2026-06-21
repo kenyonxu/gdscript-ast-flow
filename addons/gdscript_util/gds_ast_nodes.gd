@@ -304,5 +304,5 @@ class GuardedMatchBranchNode:
 # ---- Phase 3: inline setter/getter ----
 class SetterGetterNode:
     extends ASTNode
-    var setter: FunctionNode = null
-    var getter: FunctionNode = null
+    var setter = null   # SuiteNode or ExpressionNode
+    var getter = null   # SuiteNode or ExpressionNode
