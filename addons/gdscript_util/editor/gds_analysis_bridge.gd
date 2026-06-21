@@ -17,10 +17,19 @@ signal variable_selected(var_name: String)
 
 var _current_result: GDScriptAnalysisResult = null
 var _cache: Dictionary = {}  # String(path) → GDScriptAnalysisResult
+var _timestamps: Dictionary = {}  # String(path) → int(mtime)
+
 
 func run_analysis(p_file_path: String) -> void:
 	analysis_started.emit(p_file_path)
-	# 调用 Phase 1+2 管道 — plugin.gd 中已有的 analyze_script()
+
+	# Phase 3: 时间戳缓存 — 未修改文件跳过分析
+	if not should_reanalyze(p_file_path) and _cache.has(p_file_path):
+		_current_result = _cache[p_file_path]
+		analysis_completed.emit(_current_result)
+		return
+
+	# 调用 Phase 1+2 管道 — plugin.gd 中的静态 analyze_script()
 	var result = GDScriptUtil.analyze_script(p_file_path)
 	if result == null:
 		analysis_failed.emit(p_file_path, "Parse error or file not found")
@@ -28,6 +37,7 @@ func run_analysis(p_file_path: String) -> void:
 	_current_result = result
 	_cache[p_file_path] = result
 	analysis_completed.emit(result)
+
 
 func get_current_result() -> GDScriptAnalysisResult:
 	return _current_result
@@ -43,3 +53,13 @@ func select_signal(signal_name: String) -> void:
 
 func select_variable(var_name: String) -> void:
 	variable_selected.emit(var_name)
+
+# Phase 3: 时间戳缓存
+func should_reanalyze(p_path: String) -> bool:
+	if not FileAccess.file_exists(p_path):
+		return false
+	var mtime = FileAccess.get_modified_time(p_path)
+	if _timestamps.has(p_path) and _timestamps[p_path] == mtime:
+		return false
+	_timestamps[p_path] = mtime
+	return true
