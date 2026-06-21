@@ -242,6 +242,12 @@ func _parse_class_member():
         GDScriptToken.Type.CLASS:
             return _parse_inner_class()
 
+        GDScriptToken.Type.NAMESPACE:
+            return _parse_namespace()
+
+        GDScriptToken.Type.TRAIT:
+            return _parse_trait()
+
         GDScriptToken.Type.STATIC:
             _advance()
             if _peek() and _peek().type == GDScriptToken.Type.FUNC:
@@ -279,6 +285,51 @@ func _parse_inner_class() -> GDScriptToken.ClassNode:
         var m = _parse_class_member()
         if m:
             node.members.append(m)
+    _expect(GDScriptToken.Type.DEDENT)
+    return node
+
+func _parse_namespace() -> GDScriptToken.NamespaceNode:
+    _advance()  # NAMESPACE
+    var node = GDScriptToken.NamespaceNode.new()
+    var id_t = _expect(GDScriptToken.Type.IDENTIFIER, "namespace 后需要名称")
+    if id_t:
+        node.name = id_t.literal
+    _expect(GDScriptToken.Type.COLON)
+    _match(GDScriptToken.Type.NEWLINE)
+    _expect(GDScriptToken.Type.INDENT)
+    while _peek() and _peek().type not in [GDScriptToken.Type.DEDENT, GDScriptToken.Type.TK_EOF]:
+        _skip_newlines()
+        if _peek() and _peek().type == GDScriptToken.Type.TK_EOF:
+            break
+        var member = _parse_class_member()
+        if member != null:
+            node.members.append(member)
+        else:
+            _skip_to_newline()
+    _expect(GDScriptToken.Type.DEDENT)
+    return node
+
+func _parse_trait() -> GDScriptToken.TraitNode:
+    _advance()  # TRAIT
+    var node = GDScriptToken.TraitNode.new()
+    var id_t = _expect(GDScriptToken.Type.IDENTIFIER, "trait 后需要名称")
+    if id_t:
+        node.name = id_t.literal
+    _expect(GDScriptToken.Type.COLON)
+    _match(GDScriptToken.Type.NEWLINE)
+    _expect(GDScriptToken.Type.INDENT)
+    while _peek() and _peek().type not in [GDScriptToken.Type.DEDENT, GDScriptToken.Type.TK_EOF]:
+        _skip_newlines()
+        if _peek() and _peek().type == GDScriptToken.Type.TK_EOF:
+            break
+        var member = _parse_class_member()
+        if member != null:
+            if member is GDScriptToken.FunctionNode:
+                node.methods.append(member)
+            elif member is GDScriptToken.VariableNode:
+                node.properties.append(member)
+        else:
+            _skip_to_newline()
     _expect(GDScriptToken.Type.DEDENT)
     return node
 
@@ -368,10 +419,50 @@ func _parse_variable(p_annotations: Array) -> GDScriptToken.VariableNode:
     elif _match(GDScriptToken.Type.EQUAL):
         node.initializer = _parse_expression()
 
-    # setget (Phase 1: 仅支持声明式，不支持内联 setter/getter)
-    if _match(GDScriptToken.Type.IDENTIFIER):
-        # 忽略遗留 setget 语法
-        pass
+    # Phase 3: 内联 setter/getter — var hp: set(v): body | var hp: int:\n    set(v):\n        body
+    # 先检查多行形式: 类型标注后的 COLON + NEWLINE + INDENT
+    if _match(GDScriptToken.Type.COLON) and _match(GDScriptToken.Type.NEWLINE) and _match(GDScriptToken.Type.INDENT):
+        while _peek() and _peek().type not in [GDScriptToken.Type.DEDENT, GDScriptToken.Type.TK_EOF]:
+            if _peek() and _peek().type == GDScriptToken.Type.IDENTIFIER and _peek().literal == "set":
+                _advance()  # "set"
+                if _match(GDScriptToken.Type.PAREN_OPEN):
+                    _match(GDScriptToken.Type.IDENTIFIER)  # param name, ignored
+                    _expect(GDScriptToken.Type.PAREN_CLOSE)
+                _expect(GDScriptToken.Type.COLON)
+                var sg = GDScriptToken.SetterGetterNode.new()
+                sg.setter = _parse_expression()
+                node.setter = sg
+                _match(GDScriptToken.Type.NEWLINE)
+            elif _peek() and _peek().type == GDScriptToken.Type.IDENTIFIER and _peek().literal == "get":
+                _advance()  # "get"
+                _expect(GDScriptToken.Type.COLON)
+                var sg = GDScriptToken.SetterGetterNode.new()
+                sg.getter = _parse_expression()
+                node.getter = sg
+                _match(GDScriptToken.Type.NEWLINE)
+            else:
+                break
+        _match(GDScriptToken.Type.DEDENT)
+    # 单行形式: var hp: set(v): expr
+    elif _peek() and _peek().type == GDScriptToken.Type.IDENTIFIER and _peek().literal == "set":
+        _advance()  # "set"
+        if _match(GDScriptToken.Type.PAREN_OPEN):
+            _match(GDScriptToken.Type.IDENTIFIER)  # param name, ignored
+            _expect(GDScriptToken.Type.PAREN_CLOSE)
+            _expect(GDScriptToken.Type.COLON)
+            var sg = GDScriptToken.SetterGetterNode.new()
+            sg.setter = _parse_expression()
+            node.setter = sg
+    elif _peek() and _peek().type == GDScriptToken.Type.IDENTIFIER and _peek().literal == "get":
+        _advance()  # "get"
+        _expect(GDScriptToken.Type.COLON)
+        var sg = GDScriptToken.SetterGetterNode.new()
+        sg.getter = _parse_expression()
+        node.getter = sg
+    else:
+        # setget (Phase 1: 仅支持声明式)
+        if _match(GDScriptToken.Type.IDENTIFIER):
+            pass  # 忽略遗留 setget 语法
 
     return node
 
@@ -582,15 +673,33 @@ func _parse_match() -> GDScriptToken.MatchNode:
     _expect(GDScriptToken.Type.INDENT)
 
     while _peek() and _peek().type not in [GDScriptToken.Type.DEDENT, GDScriptToken.Type.TK_EOF]:
-        var branch = GDScriptToken.MatchBranchNode.new()
+        var branch: GDScriptToken.MatchBranchNode = null
 
-        # when 关键字
+        # Phase 3: match guard — when 后跟表达式而非逗号分隔模式
         if _match(GDScriptToken.Type.WHEN):
-            pass  # when 是可选的
+            # 检查是否 guard 表达式 (when x > 0:)
+            # 尝试解析一个表达式，如果下一个 token 是 COLON 则为 guard
+            var saved_pos = pos
+            var guard_expr = _parse_expression()
+            if guard_expr != null and _peek() and _peek().type == GDScriptToken.Type.COLON:
+                # 这是 guard 分支: when x > 0:
+                branch = GDScriptToken.GuardedMatchBranchNode.new()
+                branch.guard = guard_expr
+                _advance()  # COLON
+            else:
+                # 不是 guard，恢复位置并走普通 when 分支
+                pos = saved_pos
+                branch = GDScriptToken.MatchBranchNode.new()
 
-        # 模式列表
-        branch.patterns = _parse_match_patterns()
-        _expect(GDScriptToken.Type.COLON)
+        if branch == null:
+            branch = GDScriptToken.MatchBranchNode.new()
+
+        # 如果还没处理完整分支（没有 guard），解析模式列表
+        if branch.guard == null:
+            # 模式列表
+            branch.patterns = _parse_match_patterns()
+            _expect(GDScriptToken.Type.COLON)
+
         branch.body = _parse_suite()
         node.branches.append(branch)
 
