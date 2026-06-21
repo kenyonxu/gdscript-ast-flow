@@ -297,9 +297,10 @@ class ImplementsNode:
     var trait_name: String = ""
 
 # ---- Phase 3: match guard ----
+# GuardedMatchBranchNode 继承 MatchBranchNode 的 guard 字段，仅作类型标记
+# (MatchBranchNode 已有 var guard = null，此处不可重复声明)
 class GuardedMatchBranchNode:
     extends MatchBranchNode
-    var guard = null  # ExpressionNode
 
 # ---- Phase 3: inline setter/getter ----
 class SetterGetterNode:

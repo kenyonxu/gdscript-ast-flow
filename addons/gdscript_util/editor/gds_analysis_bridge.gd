@@ -29,14 +29,39 @@ func run_analysis(p_file_path: String) -> void:
 		analysis_completed.emit(_current_result)
 		return
 
-	# 调用 Phase 1+2 管道 — plugin.gd 中的静态 analyze_script()
-	var result = GDScriptUtil.analyze_script(p_file_path)
+	# 直接运行 Phase 1+2 管道（不依赖 plugin.gd — 避免 class_name 依赖问题）
+	var result = _run_pipeline(p_file_path)
 	if result == null:
 		analysis_failed.emit(p_file_path, "Parse error or file not found")
 		return
 	_current_result = result
 	_cache[p_file_path] = result
 	analysis_completed.emit(result)
+
+
+# Phase 1+2 分析管道 — tokenizer → parser → symbol resolver
+func _run_pipeline(p_file_path: String) -> GDScriptAnalysisResult:
+	var script = load(p_file_path) as GDScript
+	if script == null:
+		return null
+
+	var source = script.source_code
+	if source == "":
+		return null
+
+	# Phase 1: tokenize + parse
+	var tokenizer = GDScriptTokenizer.new()
+	var tokens = tokenizer.tokenize(source)
+	var parser = GDScriptParser.new()
+	var ast = parser.parse(tokens)
+
+	if parser.error != "":
+		push_warning("[GDSAnalysisBridge] Parse error in %s: %s" % [p_file_path, parser.error])
+		return null
+
+	# Phase 2: symbol resolution
+	var resolver = GDScriptSymbolResolver.new()
+	return resolver.resolve(ast, p_file_path)
 
 
 func get_current_result() -> GDScriptAnalysisResult:

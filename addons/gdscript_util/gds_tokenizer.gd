@@ -331,7 +331,7 @@ func _scan_format_string(p_quote: String) -> GDScriptToken:
     var cur_text = ""
     while _pos < source.length():
         var c = _advance()
-        if c == "\x00":
+        if c == "":
             return _make_token(GDScriptToken.Type.ERROR, "Unterminated format string")
         if c == "{" and _peek() != "{":  # {{ 是 literal {
             if cur_text != "":
