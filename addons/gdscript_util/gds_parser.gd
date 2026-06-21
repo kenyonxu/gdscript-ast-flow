@@ -444,8 +444,7 @@ func _parse_variable(p_annotations: Array) -> GDScriptToken.VariableNode:
     elif _match(GDScriptToken.Type.EQUAL):
         node.initializer = _parse_expression()
 
-    # Phase 3: 内联 setter/getter — var hp: set(v): body | var hp: int:\n    set(v):\n        body
-    # 先检查多行形式: 类型标注后的 COLON + NEWLINE + INDENT
+    # Phase 3: 内联 setter/getter block — var hp: int:\n    set(value):\n        hp = value
     if _match(GDScriptToken.Type.COLON) and _match(GDScriptToken.Type.NEWLINE) and _match(GDScriptToken.Type.INDENT):
         while _peek() and _peek().type not in [GDScriptToken.Type.DEDENT, GDScriptToken.Type.TK_EOF]:
             if _peek() and _peek().type == GDScriptToken.Type.IDENTIFIER and _peek().literal == "set":
@@ -455,14 +454,14 @@ func _parse_variable(p_annotations: Array) -> GDScriptToken.VariableNode:
                     _expect(GDScriptToken.Type.PAREN_CLOSE)
                 _expect(GDScriptToken.Type.COLON)
                 var sg = GDScriptToken.SetterGetterNode.new()
-                sg.setter = _parse_expression()
+                sg.setter = _parse_expression() if _peek() and _peek().type != GDScriptToken.Type.NEWLINE else _parse_suite()
                 node.setter = sg
                 _match(GDScriptToken.Type.NEWLINE)
             elif _peek() and _peek().type == GDScriptToken.Type.IDENTIFIER and _peek().literal == "get":
                 _advance()  # "get"
                 _expect(GDScriptToken.Type.COLON)
                 var sg = GDScriptToken.SetterGetterNode.new()
-                sg.getter = _parse_expression()
+                sg.getter = _parse_expression() if _peek() and _peek().type != GDScriptToken.Type.NEWLINE else _parse_suite()
                 node.getter = sg
                 _match(GDScriptToken.Type.NEWLINE)
             else:
@@ -474,10 +473,10 @@ func _parse_variable(p_annotations: Array) -> GDScriptToken.VariableNode:
         if _match(GDScriptToken.Type.PAREN_OPEN):
             _match(GDScriptToken.Type.IDENTIFIER)  # param name, ignored
             _expect(GDScriptToken.Type.PAREN_CLOSE)
-            _expect(GDScriptToken.Type.COLON)
-            var sg = GDScriptToken.SetterGetterNode.new()
-            sg.setter = _parse_expression()
-            node.setter = sg
+        _expect(GDScriptToken.Type.COLON)
+        var sg = GDScriptToken.SetterGetterNode.new()
+        sg.setter = _parse_expression()
+        node.setter = sg
     elif _peek() and _peek().type == GDScriptToken.Type.IDENTIFIER and _peek().literal == "get":
         _advance()  # "get"
         _expect(GDScriptToken.Type.COLON)
