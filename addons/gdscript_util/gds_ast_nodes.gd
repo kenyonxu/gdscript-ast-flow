@@ -278,3 +278,31 @@ class LiteralNode:
 class PreloadNode:
     extends ASTNode
     var path: String = ""
+
+
+# ---- Phase 3: namespace / trait ----
+class NamespaceNode:
+    extends ASTNode
+    var name: String = ""
+    var members: Array = []
+
+class TraitNode:
+    extends ASTNode
+    var name: String = ""
+    var methods: Array = []     # of FunctionNode (abstract)
+    var properties: Array = []  # of VariableNode
+
+class ImplementsNode:
+    extends ASTNode
+    var trait_name: String = ""
+
+# ---- Phase 3: match guard ----
+class GuardedMatchBranchNode:
+    extends MatchBranchNode
+    var guard = null  # ExpressionNode
+
+# ---- Phase 3: inline setter/getter ----
+class SetterGetterNode:
+    extends ASTNode
+    var setter: FunctionNode = null
+    var getter: FunctionNode = null
