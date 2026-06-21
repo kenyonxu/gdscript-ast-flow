@@ -2,20 +2,28 @@
 extends EditorPlugin
 
 var analysis_cache: Dictionary = {}  # String(path) → GDScriptAnalysisResult
+var _phase3_bootstrap: GDSEditorBootstrap = null
 
 
 func _enter_tree():
 	add_tool_menu_item("GDScript Analysis – Parse Current", _on_parse_current)
 	# Phase 2: 注册 resource_saved 信号实现自动分析
 	resource_saved.connect(_on_resource_saved)
-	print("[GDScriptUtil v2.0] Plugin loaded — Phase 2: Symbol Analysis")
+	# Phase 3: 编辑器面板
+	_phase3_bootstrap = GDSEditorBootstrap.new()
+	_phase3_bootstrap.setup(self)
+	print("[GDScriptUtil v3.0] Plugin loaded — Phase 3: Editor Integration")
 
 
 func _exit_tree():
+	# Phase 3: 拆卸编辑器面板
+	if _phase3_bootstrap:
+		_phase3_bootstrap.teardown()
+		_phase3_bootstrap = null
 	remove_tool_menu_item("GDScript Analysis – Parse Current")
 	resource_saved.disconnect(_on_resource_saved)
 	analysis_cache.clear()
-	print("[GDScriptUtil v2.0] Plugin unloaded")
+	print("[GDScriptUtil v3.0] Plugin unloaded")
 
 
 # Phase 2 新增: 脚本保存时自动分析
@@ -136,3 +144,29 @@ func _call_type_to_string(p_type: int) -> String:
 		GDScriptCallEdge.CallType.LAMBDA: return "[lambda]"
 		GDScriptCallEdge.CallType.EMIT: return "[emit]"
 		_: return "[?]"
+
+
+# Phase 3: Bridge 使用的静态分析函数
+static func analyze_script(p_path: String) -> GDScriptAnalysisResult:
+	var script = load(p_path) as GDScript
+	if script == null:
+		return null
+
+	var source = script.source_code
+	if source == "":
+		return null
+
+	# Phase 1 管道
+	var tokenizer = GDScriptTokenizer.new()
+	var tokens = tokenizer.tokenize(source)
+	var parser = GDScriptParser.new()
+	var ast = parser.parse(tokens)
+
+	if parser.error != "":
+		push_warning("[GDScriptUtil] Parse error in %s: %s" % [p_path, parser.error])
+		return null
+
+	# Phase 2 符号解析
+	var resolver = GDScriptSymbolResolver.new()
+	var result = resolver.resolve(ast, p_path)
+	return result
