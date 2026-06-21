@@ -55,6 +55,10 @@ const KEYWORDS := {
     "not": GDScriptToken.Type.NOT,
     "and": GDScriptToken.Type.AND,
     "or": GDScriptToken.Type.OR,
+    # Phase 3: namespace / trait
+    "namespace": GDScriptToken.Type.NAMESPACE,
+    "trait": GDScriptToken.Type.TRAIT,
+    "implements": GDScriptToken.Type.IMPLEMENTS,
 }
 
 # 内置常量
@@ -209,6 +213,13 @@ func _skip_comment():
 
 
 func _scan_token(p_first: String) -> GDScriptToken:
+    # Phase 3: f-string 前缀检测 — 必须在标识符之前
+    if p_first == "f":
+        var next = _peek()
+        if next == "\"" or next == "'":
+            _advance()  # skip the opening quote
+            return _scan_format_string(next)
+
     if p_first == "_" or (p_first >= "a" and p_first <= "z") or (p_first >= "A" and p_first <= "Z"):
         return _scan_identifier(p_first)
 
@@ -312,6 +323,33 @@ func _scan_number(p_first: String) -> GDScriptToken:
     if is_float:
         return _make_token(GDScriptToken.Type.LITERAL, float(num_str))
     return _make_token(GDScriptToken.Type.LITERAL, int(num_str))
+
+
+func _scan_format_string(p_quote: String) -> GDScriptToken:
+    # f"...{expr}..." 格式化字符串
+    var segments: Array = []  # of {text: String, expr: Variant}
+    var cur_text = ""
+    while _pos < source.length():
+        var c = _advance()
+        if c == "\x00":
+            return _make_token(GDScriptToken.Type.ERROR, "Unterminated format string")
+        if c == "{" and _peek() != "{":  # {{ 是 literal {
+            if cur_text != "":
+                segments.append({"text": cur_text, "expr": null})
+                cur_text = ""
+            # 简化: 读取到 } 作为表达式文本（由 parser 进一步解析）
+            var expr_text = ""
+            while _pos < source.length() and _peek() != "}":
+                expr_text += _advance()
+            _advance()  # skip }
+            segments.append({"text": "", "expr": expr_text})
+        elif c == p_quote:
+            if cur_text != "":
+                segments.append({"text": cur_text, "expr": null})
+            break
+        else:
+            cur_text += c
+    return _make_token(GDScriptToken.Type.FORMAT_STRING_LITERAL, segments)
 
 
 func _scan_string(p_quote: String) -> GDScriptToken:

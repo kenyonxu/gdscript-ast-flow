@@ -46,7 +46,18 @@ enum Type {
     # 注解
     ANNOTATION,
     # 特殊
-    ERROR, TK_EOF, TK_MAX
+    ERROR, TK_EOF,
+    # Phase 3: namespace / trait
+    NAMESPACE,
+    TRAIT,
+    TRAIT_EXTENDS,
+    IMPLEMENTS,
+    # Phase 3: f-string / StringName
+    FORMAT_STRING_LITERAL,
+    STRING_NAME_LITERAL,
+    # Phase 3: Callable
+    CALLABLE,
+    TK_MAX
 }
 
 # Token 实例字段
