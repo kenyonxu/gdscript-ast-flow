@@ -269,6 +269,22 @@ func get_result(file_path: String = "") -> GDScriptAnalysisResult:
 - DEF = 绿色, READ = 蓝色, WRITE = 橙色, READ_WRITE = 红色
 - 支持导出 JSON
 
+### 4.5 参考 LimboAI 的可视化经验
+
+LimboAI（成熟 BT 插件）验证了**Tree + 自定义绘制回调**对层次数据比 GraphEdit 更优。Phase 3 v1 采纳其核心模式：
+
+| LimboAI 模式 | Phase 3 v1 采纳 |
+|-------------|----------------|
+| `set_metadata(col, obj)` 存节点对象引用 | ✅ 所有子面板用 metadata 存 CallEdge/Site/DefUseSite，避免文本反查 |
+| `TreeSearch` 高亮系统（保留上下文，叠加高亮） | ✅ 新增 `gds_tree_search.gd`，搜索时高亮而非隐藏 |
+| `SELECT_MULTI` + 右键上下文菜单 | ✅ CallGraphPanel 多选 + 右键（Jump to Def / Find Callers / Find Callees） |
+| `set_custom_draw_callback` 画状态/频率条 | ⏳ **Phase 3.2 迭代**（v1 用 `set_custom_color` 够用） |
+| Drag-drop 重排 | ❌ 不采纳（只读分析工具，YAGNI） |
+
+**Phase 3.2 迭代项（v1 之后）：**
+- 调用图热路径：`set_custom_draw_callback` 按调用频率画条形指示
+- 信号流连接强度：连线粗细/颜色按 emit 次数
+
 ## 八、模块 5: 完整 4.7 语法覆盖
 
 ### 8.1 Tokenizer 新增

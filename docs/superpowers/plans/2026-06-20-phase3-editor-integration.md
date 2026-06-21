@@ -35,7 +35,8 @@ addons/gdscript_util/
 │   │   └── gds_analysis_summary.gd          # Dock 摘要面板
 │   │
 │   ├── widgets/
-│   │   └── gds_graph_canvas.gd              # 通用图 _draw() 可视化
+│   │   ├── gds_tree_search.gd              # Tree 搜索高亮工具（参考 limboai）
+│   │   └── gds_graph_canvas.gd             # 通用图 _draw() 可视化（Phase 3.2）
 │   │
 │   └── dialogs/
 │       └── gds_export_report_dialog.gd      # 导出报告弹窗
@@ -246,9 +247,57 @@ git commit -m "feat: GDSAnalysisMainPanel — bottom panel with TabBar and 3 sub
 
 ---
 
-## Chunk B: 三个子面板
+## Chunk B: 三个子面板 + 搜索工具
 
-### Task B1: 创建 GDSCallGraphPanel — 调用图
+### Task B1: 创建 GDSTreeSearch — 搜索高亮工具
+
+**Files:** Create: `addons/gdscript_util/editor/widgets/gds_tree_search.gd`
+
+参考 LimboAI 的 `tree_search.cpp`：搜索时**保留上下文 + 叠加高亮**，而非隐藏不匹配项（分析场景下上下文重要）。
+
+- [ ] **Step 1: 创建文件**
+
+```gdscript
+# addons/gdscript_util/editor/widgets/gds_tree_search.gd
+# Tree 搜索高亮工具 — 搜索时高亮匹配项，保留上下文（不隐藏）
+# 参考: limboai/editor/tree_search.cpp
+
+class_name GDSTreeSearch
+extends RefCounted
+
+# 对一棵 Tree 的所有可见项执行搜索高亮
+# p_query: 搜索词（空串则清除高亮）
+# p_text_column: 文本所在列
+static func highlight(p_tree: Tree, p_query: String, p_text_column: int = 0) -> void:
+    var query_lower = p_query.to_lower()
+    var root = p_tree.get_root()
+    if root == null:
+        return
+    var item = root.get_first_child()
+    while item != null:
+        _highlight_item(item, query_lower, p_text_column)
+        item = item.get_next_in_tree()
+
+static func _highlight_item(p_item: TreeItem, p_query_lower: String, p_col: int) -> void:
+    var text = p_item.get_text(p_col)
+    if p_query_lower.is_empty():
+        p_item.clear_custom_color(p_col)
+    elif text.to_lower().find(p_query_lower) != -1:
+        p_item.set_custom_color(p_col, Color.YELLOW)
+    else:
+        p_item.clear_custom_color(p_col)
+```
+
+- [ ] **Step 2: 提交**
+
+```bash
+git add addons/gdscript_util/editor/widgets/gds_tree_search.gd
+git commit -m "feat: GDSTreeSearch — search highlight utility (context-preserving, no hide)"
+```
+
+---
+
+### Task B2: 创建 GDSCallGraphPanel — 调用图
 
 **Files:** Create: `addons/gdscript_util/editor/panels/gds_call_graph_panel.gd`
 
@@ -256,8 +305,9 @@ git commit -m "feat: GDSAnalysisMainPanel — bottom panel with TabBar and 3 sub
 
 ```gdscript
 # addons/gdscript_util/editor/panels/gds_call_graph_panel.gd
-# 调用图子面板 — Tree 按 caller 分组 + 右侧详情
+# 调用图子面板 — Tree 按 caller 分组 + 右侧详情 + 多选 + 右键菜单
 # 参考: project-juicy-godot/addons/fuse/editor/topology/fuse_topology.gd
+#        limboai/editor/task_tree.cpp (metadata + multi-select + context menu)
 
 class_name GDSCallGraphPanel
 extends HSplitContainer
@@ -265,12 +315,14 @@ extends HSplitContainer
 var _bridge: GDSAnalysisBridge = null
 var _tree: Tree = null
 var _detail: RichTextLabel = null
+var _search_edit: LineEdit = null
+var _context_menu: PopupMenu = null
 
 const COLORS := {
-    0: Color.GREEN,      # SELF
-    1: Color.DODGER_BLUE, # SUPER
-    2: Color.ORANGE,      # EXTERNAL
-    3: Color.MEDIUM_PURPLE, # CONNECT
+    0: Color.GREEN,        # SELF
+    1: Color.DODGER_BLUE,  # SUPER
+    2: Color.ORANGE,       # EXTERNAL
+    3: Color.MEDIUM_PURPLE,# CONNECT
     4: Color.PURPLE,       # SIGNAL_CONNECT
     5: Color.CYAN,         # LAMBDA
     7: Color.RED,          # EMIT
@@ -279,24 +331,43 @@ const COLORS := {
 func setup(p_bridge: GDSAnalysisBridge) -> void:
     _bridge = p_bridge
     _bridge.analysis_completed.connect(_refresh)
-    _bridge.function_selected.connect(_on_function_selected)
     _build_ui()
 
 func _build_ui() -> void:
-    # 左侧 Tree
+    # 左侧容器: 搜索栏 + Tree
+    var left = VBoxContainer.new()
+    left.size_flags_horizontal = SIZE_EXPAND_FILL
+    add_child(left)
+
+    _search_edit = LineEdit.new()
+    _search_edit.placeholder_text = "搜索函数..."
+    _search_edit.text_changed.connect(_on_search_changed)
+    left.add_child(_search_edit)
+
     _tree = Tree.new()
-    _tree.size_flags_horizontal = 3  # expand
+    _tree.size_flags_horizontal = SIZE_EXPAND_FILL
+    _tree.size_flags_vertical = SIZE_EXPAND_FILL
     _tree.hide_root = true
     _tree.columns = 1
+    _tree.select_mode = Tree.SELECT_MULTI  # 多选 — 参考 limboai
     _tree.item_selected.connect(_on_item_selected)
-    add_child(_tree)
+    _tree.item_mouse_selected.connect(_on_item_rmb)  # 右键
+    left.add_child(_tree)  # Tree 加到 left 容器
 
     # 右侧详情
     _detail = RichTextLabel.new()
-    _detail.size_flags_horizontal = 3
+    _detail.size_flags_horizontal = SIZE_EXPAND_FILL
     _detail.bbcode_enabled = true
     _detail.fit_content = true
     add_child(_detail)
+
+    # 右键上下文菜单
+    _context_menu = PopupMenu.new()
+    _context_menu.add_item("Jump to Definition", 0)
+    _context_menu.add_item("Find Callers", 1)
+    _context_menu.add_item("Find Callees", 2)
+    _context_menu.id_pressed.connect(_on_context_action)
+    add_child(_context_menu)
 
 func _refresh(p_result: GDScriptAnalysisResult) -> void:
     _tree.clear()
@@ -314,10 +385,11 @@ func _refresh(p_result: GDScriptAnalysisResult) -> void:
     for caller in groups:
         var caller_item = _tree.create_item(root)
         caller_item.set_text(0, caller + "()")
+        caller_item.set_metadata(0, {"kind": "caller", "name": caller})
         for edge in groups[caller]:
             var child = _tree.create_item(caller_item)
-            var arrow = "→"
-            child.set_text(0, "  %s %s()" % [arrow, edge.callee])
+            child.set_text(0, "  → %s()" % edge.callee)
+            child.set_metadata(0, {"kind": "edge", "edge": edge})  # 存对象引用
             if COLORS.has(edge.call_type):
                 child.set_custom_color(0, COLORS[edge.call_type])
 
@@ -325,25 +397,55 @@ func _on_item_selected() -> void:
     var item = _tree.get_selected()
     if item == null:
         return
-    # 找到对应的 CallEdge
-    var result = _bridge.get_current_result()
-    if result == null:
+    var meta = item.get_metadata(0)
+    if meta == null or meta.get("kind", "") != "edge":
         return
-    var callee_name = item.get_text(0).strip_edges().trim_prefix("→ ")
-    # 查找匹配的 edge 并填充详情
-    for edge in result.call_graph.edges:
-        if edge.callee == callee_name:
-            _detail.clear()
-            _detail.append_text("[b]Caller:[/b] %s()\n" % edge.caller)
-            _detail.append_text("[b]Callee:[/b] %s()\n" % edge.callee)
-            _detail.append_text("[b]Type:[/b] %d\n" % edge.call_type)
-            _detail.append_text("[b]Line:[/b] %d\n" % edge.site_line)
-            _bridge.select_function(edge.callee)
-            break
+    var edge = meta["edge"]
+    _detail.clear()
+    _detail.append_text("[b]Caller:[/b] %s()\n" % edge.caller)
+    _detail.append_text("[b]Callee:[/b] %s()\n" % edge.callee)
+    _detail.append_text("[b]Type:[/b] %d\n" % edge.call_type)
+    _detail.append_text("[b]Line:[/b] %d\n" % edge.site_line)
+    _bridge.select_function(edge.callee)
 
-func _on_function_selected(p_name: String) -> void:
-    # 外部联动 — 高亮匹配项
-    pass  # Phase 3.1: 简单实现，后续迭代加高亮
+func _on_item_rmb(_pos: Vector2, _btn: int) -> void:
+    if _tree.get_selected() != null:
+        _context_menu.popup_on_parent(Rect2(get_global_mouse_position(), Vector2.ZERO))
+
+func _on_context_action(p_id: int) -> void:
+    var item = _tree.get_selected()
+    if item == null:
+        return
+    var meta = item.get_metadata(0)
+    var name = ""
+    if meta != null:
+        name = meta.get("name", meta.get("edge", GDScriptCallEdge.new()).callee if meta.has("edge") else "")
+    match p_id:
+        0: _jump_to_definition(name)
+        1: _bridge.select_function(name)  # Find Callers — 联动其他面板
+        2: _bridge.select_function(name)  # Find Callees — 联动
+
+func _jump_to_definition(p_func_name: String) -> void:
+    var result = _bridge.get_current_result()
+    if result == null or result.file_path == "":
+        return
+    # 找到函数声明行
+    for func_node in result.get_all_functions():
+        if func_node.name == p_func_name:
+            EditorInterface.edit_script(load(result.file_path), func_node.line)
+            return
+
+func _on_search_changed(p_text: String) -> void:
+    GDSTreeSearch.highlight(_tree, p_text, 0)
+```
+
+> **注意：** Tree 加到 `left` 容器（搜索栏下方），不是直接加到 HSplitContainer。
+
+- [ ] **Step 2: 提交**
+
+```bash
+git add addons/gdscript_util/editor/panels/gds_call_graph_panel.gd
+git commit -m "feat: GDSCallGraphPanel — metadata mapping, multi-select, context menu, search"
 ```
 
 - [ ] **Step 2: 提交**
@@ -355,7 +457,7 @@ git commit -m "feat: GDSCallGraphPanel — call graph tree grouped by caller wit
 
 ---
 
-### Task B2: 创建 GDSSignalFlowPanel — 信号流
+### Task B3: 创建 GDSSignalFlowPanel — 信号流
 
 **Files:** Create: `addons/gdscript_util/editor/panels/gds_signal_flow_panel.gd`
 
@@ -395,24 +497,35 @@ func _refresh(p_result: GDScriptAnalysisResult) -> void:
         var info = p_result.signal_graph.signals[sig_name]
         var sig_item = _tree.create_item(root)
         sig_item.set_text(0, "signal %s" % sig_name)
+        sig_item.set_metadata(0, {"kind": "signal", "name": sig_name})
 
         for site in info.emit_sites:
             var emit_item = _tree.create_item(sig_item)
             emit_item.set_text(0, "  EMIT: %s() @line %d" % [site.enclosing_function, site.line])
+            emit_item.set_metadata(0, {"kind": "site", "site": site})  # 存对象引用
             emit_item.set_custom_color(0, Color.RED)
 
         for site in info.connect_sites:
             var conn_item = _tree.create_item(sig_item)
             conn_item.set_text(0, "  CONNECT: %s() @line %d" % [site.enclosing_function, site.line])
+            conn_item.set_metadata(0, {"kind": "site", "site": site})
             conn_item.set_custom_color(0, Color.DODGER_BLUE)
 
 func _on_item_selected() -> void:
     var item = _tree.get_selected()
     if item == null:
         return
-    var text = item.get_text(0).strip_edges()
-    if text.begins_with("signal "):
-        _bridge.select_signal(text.trim_prefix("signal "))
+    var meta = item.get_metadata(0)
+    if meta == null:
+        return
+    # 用 metadata 取信号名，避免文本解析
+    if meta.get("kind", "") == "signal":
+        _bridge.select_signal(meta["name"])
+    elif meta.get("kind", "") == "site" and item.get_parent() != null:
+        # site 项 — 取父节点的信号名
+        var parent_meta = item.get_parent().get_metadata(0)
+        if parent_meta != null and parent_meta.get("kind", "") == "signal":
+            _bridge.select_signal(parent_meta["name"])
 ```
 
 - [ ] **Step 2: 提交**
@@ -424,7 +537,7 @@ git commit -m "feat: GDSSignalFlowPanel — signal emit/connect tree view"
 
 ---
 
-### Task B3: 创建 GDSDefUsePanel — 变量读写
+### Task B4: 创建 GDSDefUsePanel — 变量读写
 
 **Files:** Create: `addons/gdscript_util/editor/panels/gds_def_use_panel.gd`
 
@@ -482,6 +595,7 @@ func _refresh(p_result: GDScriptAnalysisResult) -> void:
             info.read_sites.size(),
             info.write_sites.size()
         ])
+        item.set_metadata(0, {"kind": "variable", "name": var_name})  # 存变量名
 
         # 子项 — 每个 site 一行
         _add_site_items(item, info.def_site, "DEF")
@@ -497,6 +611,7 @@ func _add_site_items(p_parent: TreeItem, p_site, p_label: String) -> void:
     child.set_text(0, "  %s" % p_label)
     child.set_text(1, p_site.enclosing_function + "()")
     child.set_text(2, "line %d" % p_site.line)
+    child.set_metadata(0, {"kind": "site", "site": p_site})  # 存 site 引用
     if COLORS.has(p_site.access_type):
         child.set_custom_color(0, COLORS[p_site.access_type])
 
@@ -507,10 +622,18 @@ func _kind_string(p_info) -> String:
 
 func _on_item_selected() -> void:
     var item = _tree.get_selected()
-    if item == null or item.get_parent() == _tree.get_root():
+    if item == null:
         return
-    var var_name = item.get_text(0).strip_edges()
-    _bridge.select_variable(var_name)
+    var meta = item.get_metadata(0)
+    if meta == null:
+        return
+    # 用 metadata 取变量名，避免文本解析
+    if meta.get("kind", "") == "variable":
+        _bridge.select_variable(meta["name"])
+    elif meta.get("kind", "") == "site" and item.get_parent() != null:
+        var parent_meta = item.get_parent().get_metadata(0)
+        if parent_meta != null and parent_meta.get("kind", "") == "variable":
+            _bridge.select_variable(parent_meta["name"])
 
 func _on_variable_selected(p_name: String) -> void:
     pass  # Phase 3.1: 联动预留
@@ -525,7 +648,7 @@ git commit -m "feat: GDSDefUsePanel — variable def-use chain tree view with co
 
 ---
 
-### Task B4: 创建 GDSAnalysisSummary — Dock 摘要
+### Task B5: 创建 GDSAnalysisSummary — Dock 摘要
 
 **Files:** Create: `addons/gdscript_util/editor/panels/gds_analysis_summary.gd`
 
@@ -590,7 +713,7 @@ git commit -m "feat: GDSAnalysisSummary — dock panel with file-level stats and
 
 ---
 
-### Task B5: 集成 Bootstrap 到 plugin.gd
+### Task B6: 集成 Bootstrap 到 plugin.gd
 
 **Files:** Modify: `addons/gdscript_util/plugin.gd`
 
@@ -1040,10 +1163,11 @@ git commit -m "test: Phase 3 syntax — f-string, match guard, namespace"
 
 - [ ] `editor/gds_analysis_bridge.gd` — 信号中继桥
 - [ ] `editor/gds_editor_bootstrap.gd` — 模块化启动
+- [ ] `editor/widgets/gds_tree_search.gd` — 搜索高亮工具（参考 limboai）
 - [ ] `editor/panels/gds_analysis_main_panel.gd` — TabBar 主面板
-- [ ] `editor/panels/gds_call_graph_panel.gd` — 调用图子面板
-- [ ] `editor/panels/gds_signal_flow_panel.gd` — 信号流子面板
-- [ ] `editor/panels/gds_def_use_panel.gd` — 变量读写子面板
+- [ ] `editor/panels/gds_call_graph_panel.gd` — 调用图子面板（metadata + 多选 + 右键菜单）
+- [ ] `editor/panels/gds_signal_flow_panel.gd` — 信号流子面板（metadata）
+- [ ] `editor/panels/gds_def_use_panel.gd` — 变量读写子面板（metadata）
 - [ ] `editor/panels/gds_analysis_summary.gd` — Dock 摘要面板
 - [ ] `plugin.gd` + `plugin.cfg` — Bootstrap 集成 + v3.0.0
 - [ ] Tokenizer — namespace/trait/implements/f-string
