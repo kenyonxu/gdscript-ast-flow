@@ -20,6 +20,7 @@ func setup(p_plugin: EditorPlugin) -> void:
 
 	_summary_panel = GDSAnalysisSummary.new()
 	_summary_panel.setup(_bridge)
+	_summary_panel.name = "Analysis Summary"  # dock tab 标题取自 .name
 	_plugin.add_control_to_dock(EditorPlugin.DOCK_SLOT_RIGHT_BR, _summary_panel)
 
 	_plugin.resource_saved.connect(_on_resource_saved)

@@ -17,6 +17,10 @@ func _build_ui() -> void:
 	_summary_label = RichTextLabel.new()
 	_summary_label.bbcode_enabled = true
 	_summary_label.fit_content = true
+	_summary_label.custom_minimum_size = Vector2(200, 120)
+	_summary_label.size_flags_horizontal = SIZE_EXPAND_FILL
+	# 空状态占位 — 分析前不显示空白
+	_summary_label.append_text("[i]Save a .gd file to analyze.[/i]")
 	add_child(_summary_label)
 
 	_error_list = Tree.new()
