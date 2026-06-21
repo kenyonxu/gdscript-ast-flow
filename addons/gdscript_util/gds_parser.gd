@@ -927,6 +927,14 @@ func _parse_atom():
             node.value = t.literal
             return node
 
+        GDScriptToken.Type.FORMAT_STRING_LITERAL:
+            # f"...{expr}..." — segments 数组 [{text, expr}, ...] 暂存为 LiteralNode
+            # (Phase 3.2: 升级为独立 FormattedStringNode 并解析 expr 文本)
+            _advance()
+            var fnode = GDScriptToken.LiteralNode.new()
+            fnode.value = t.literal
+            return fnode
+
         GDScriptToken.Type.SELF:
             _advance()
             return GDScriptSelfNode.new()
