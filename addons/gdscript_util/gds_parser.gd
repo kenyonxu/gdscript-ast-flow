@@ -10,6 +10,10 @@ var error: String = ""
 var _error_line: int = 0
 var _error_column: int = 0
 
+# Phase 3: 错误恢复 — 错误计数和上限
+var _error_count: int = 0
+const MAX_ERRORS := 20
+
 # 运算符优先级表 — 从最低(0)到最高(19)
 # 每个条目: {tokens: Array[int], type: int, right_assoc: bool}
 #
@@ -104,6 +108,7 @@ func parse(p_tokens: Array) -> GDScriptToken.ClassNode:
     tokens = p_tokens
     pos = 0
     error = ""
+    _error_count = 0
 
     var root = GDScriptToken.ClassNode.new()
 
@@ -141,9 +146,11 @@ func parse(p_tokens: Array) -> GDScriptToken.ClassNode:
         var member = _parse_class_member()
         if member != null:
             root.members.append(member)
+        elif _error_count >= MAX_ERRORS:
+            break
         else:
-            # 错误恢复: 跳过当前行
-            _skip_to_newline()
+            # Phase 3: 错误恢复 — 跳过到下一个有效的成员关键字
+            _skip_to_next_member()
 
     return root
 
@@ -173,6 +180,11 @@ func _expect(p_type: int, p_error: String = "") -> GDScriptToken:
     return null
 
 func _set_error(p_msg: String):
+    _error_count += 1
+    if _error_count > MAX_ERRORS:
+        if error == "":
+            error = p_msg
+        return
     if error == "":  # 只记录第一个错误
         error = p_msg
         if _peek():
@@ -185,6 +197,19 @@ func _skip_newlines():
 
 func _skip_to_newline():
     while _peek() and _peek().type != GDScriptToken.Type.NEWLINE and _peek().type != GDScriptToken.Type.TK_EOF:
+        _advance()
+
+# Phase 3: 跳过到下一个有效的顶级成员关键字（错误恢复）
+func _skip_to_next_member():
+    var member_keywords = [
+        GDScriptToken.Type.FUNC, GDScriptToken.Type.VAR,
+        GDScriptToken.Type.TK_CONST, GDScriptToken.Type.SIGNAL,
+        GDScriptToken.Type.ENUM, GDScriptToken.Type.CLASS,
+        GDScriptToken.Type.NAMESPACE, GDScriptToken.Type.TRAIT,
+        GDScriptToken.Type.DEDENT, GDScriptToken.Type.TK_EOF,
+        GDScriptToken.Type.STATIC,
+    ]
+    while _peek() and _peek().type not in member_keywords:
         _advance()
 
 
