@@ -5,11 +5,8 @@ class_name GDSProjectGraphView
 extends RefCounted
 
 func build(p_graph: GraphEdit, p_project: GDScriptProjectResult, p_graph_kind: int) -> void:
-	print("[D project_view] build called, project=%s kind=%d" % [p_project, p_graph_kind])
 	if p_project == null:
-		print("[D project_view] project null — abort")
 		return
-	print("[D project_view] files=%d cross_edges=%d" % [p_project.files.size(), p_project.cross_edges.size()])
 	if p_graph_kind == 1:
 		_build_signal_view(p_graph, p_project)
 	else:
@@ -48,7 +45,6 @@ func _build_call_view(p_graph: GraphEdit, p_project: GDScriptProjectResult) -> v
 		var to_node = nodes.get(key[1])
 		if from_node and to_node:
 			p_graph.connect_node(from_node.name, 0, to_node.name, 0)
-	print("[D project_view] call view: %d file nodes" % [nodes.size()])
 
 
 # Signal 视图: 信号中心节点 + 跨文件 emit/connect 边
@@ -80,4 +76,3 @@ func _build_signal_view(p_graph: GraphEdit, p_project: GDScriptProjectResult) ->
 		var fn = file_nodes[edge.source_file]
 		var sn = sig_nodes[edge.target_symbol]
 		p_graph.connect_node(fn.name, 0, sn.name, 0)
-	print("[D project_view] signal view: %d signals, %d source files" % [sig_nodes.size(), file_nodes.size()])
