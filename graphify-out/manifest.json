@@ -125,13 +125,28 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-06-21-phase3-2-cross-file-analysis.md": {
-    "mtime": 1782103842.2713497,
-    "ast_hash": "7eb4cc6b9390e0a93b9b756258f1d91a",
+    "mtime": 1782108324.1396766,
+    "ast_hash": "421a7344f453b12fbc14f2808b499b26",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-06-21-phase3-2-cross-file-analysis.md": {
-    "mtime": 1782103842.2693498,
-    "ast_hash": "d28b74fecb06fe611d78d17cae03adde",
+    "mtime": 1782108324.1399782,
+    "ast_hash": "916c86d2bfb24ae17f4cb1db6229a917",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/decisions/0001-defer-csharp-rewrite.md": {
+    "mtime": 1782108324.1385686,
+    "ast_hash": "604f89769c5aec1346313664fd68f30d",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-06-21-phase3-3-graph-visualization.md": {
+    "mtime": 1782123335.2237458,
+    "ast_hash": "377079dd9f981c786429805e49073ee5",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md": {
+    "mtime": 1782108324.1401756,
+    "ast_hash": "ed76efb6e9d754b078e2da0d0b74223a",
     "semantic_hash": ""
   }
 }

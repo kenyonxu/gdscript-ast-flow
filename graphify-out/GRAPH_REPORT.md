@@ -1,16 +1,16 @@
 # Graph Report - godot-byte-code-parser  (2026-06-22)
 
 ## Corpus Check
-- 14 files · ~36,003 words
+- 17 files · ~39,674 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 395 nodes · 391 edges · 24 communities (21 shown, 3 thin omitted)
+- 469 nodes · 462 edges · 26 communities (23 shown, 3 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `ba44c367`
+- Built from commit: `3a4117f7`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -36,18 +36,20 @@
 - [[_COMMUNITY_Community 21|Community 21]]
 - [[_COMMUNITY_Community 22|Community 22]]
 - [[_COMMUNITY_Community 23|Community 23]]
+- [[_COMMUNITY_Community 24|Community 24]]
+- [[_COMMUNITY_Community 25|Community 25]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `Phase 2 内部类提取 实现计划` - 19 edges
-2. `Phase 2: GDScript 符号解析器 设计规范` - 14 edges
-3. `Phase 3: 编辑器集成 + 完整语法 设计规范` - 14 edges
-4. `TreeBase` - 13 edges
-5. `Phase 3.2: 跨文件分析 设计规范` - 12 edges
-6. `Phase 2: GDScript 符号解析器 实现计划` - 11 edges
-7. `_parse_expr(lv)` - 11 edges
-8. `GDScript 解析器 Godot 4.7 重写规范` - 10 edges
-9. `Phase 3: 编辑器集成 + 完整语法 实现计划` - 9 edges
-10. `Phase 3.2: 跨文件分析 实现计划` - 9 edges
+2. `Phase 3.3: 图可视化 设计规范` - 15 edges
+3. `Phase 2: GDScript 符号解析器 设计规范` - 14 edges
+4. `Phase 3: 编辑器集成 + 完整语法 设计规范` - 14 edges
+5. `Phase 3.2: 跨文件分析 设计规范` - 13 edges
+6. `TreeBase` - 13 edges
+7. `Phase 2: GDScript 符号解析器 实现计划` - 11 edges
+8. `_parse_expr(lv)` - 11 edges
+9. `Phase 3.2: 跨文件分析 实现计划` - 10 edges
+10. `GDScript 解析器 Godot 4.7 重写规范` - 10 edges
 
 ## Surprising Connections (you probably didn't know these)
 - None detected - all connections are within the same source files.
@@ -55,7 +57,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (24 total, 3 thin omitted)
+## Communities (26 total, 3 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.11
@@ -82,8 +84,8 @@ Cohesion: 0.06
 Nodes (34): 10.1 目标, 10.2 实现, 4.1 容器布局, 4.2 主面板 TabBar 结构, 4.3 信号中继桥（Bridge）, 4.3 模块化启动（Bootstrap）, 4.4 面板联动, 4.5 参考 LimboAI 的可视化经验 (+26 more)
 
 ### Community 12 - "Community 12"
-Cohesion: 0.07
-Nodes (28): 1.1 背景, 1.2 目标, 1.3 约束, 1.4 Phase 1 核心子集 — 语法覆盖精确定义, 2.1 管道架构, 2.2 文件规划, 2.3 错误处理策略, 3.1 Token 数据结构 (+20 more)
+Cohesion: 0.05
+Nodes (37): 1.1 背景, 1.2 目标, 1.3 约束, 1.4 Phase 1 核心子集 — 语法覆盖精确定义, 2.1 管道架构, 2.2 文件规划, 2.3 错误处理策略, 3.1 Token 数据结构 (+29 more)
 
 ### Community 13 - "Community 13"
 Cohesion: 0.06
@@ -106,16 +108,16 @@ Cohesion: 0.12
 Nodes (16): `.new()` 调用, Phase 2 内部类提取规范, Step 1: 创建 10 个独立文件, Step 2: 更新 `gds_analysis_result.gd`, Step 3: 更新 `gds_symbol_resolver.gd`, Step 4: 更新 `plugin.gd`, Step 5: 更新 `tests/test_symbol_resolver.gd`, Step 6: 验收 (+8 more)
 
 ### Community 18 - "Community 18"
-Cohesion: 0.22
-Nodes (9): 4.1 AST 节点体系, 4.2 递归下降解析, 4.3 运算符优先级表, 4.4 SuiteNode 缩进模型, 四、组件 2：GDScriptParser（语法分析器）, 声明节点, 表达式节点, 语句节点 (+1 more)
+Cohesion: 0.06
+Nodes (31): 4.1 数据流, 5.1 EditorPlugin 主屏, 5.2 主屏布局, 6.1 节点, 6.2 边, 6.3 度数驱动, 7.1 节点, 7.2 边 (+23 more)
 
 ### Community 19 - "Community 19"
 Cohesion: 0.25
 Nodes (6): 仓库, 开发命令, 架构：三阶段管道, 语言, 项目概述, 项目结构
 
 ### Community 20 - "Community 20"
-Cohesion: 0.08
-Nodes (25): 3.1 分析流程, 3.2 增量分析, 4.1 类型表（加到 GDScriptAnalysisResult）, 4.2 跨文件边, 4.3 项目结果容器, 5.1 类型来源（静态可知）, 5.2 解析 `obj.method()`, 5.3 解析 `obj.connect("sig", cb)` / `obj.emit("sig")` (+17 more)
+Cohesion: 0.07
+Nodes (29): 3.1 分析流程, 3.2 增量分析, 4.1 类型表（加到 GDScriptAnalysisResult）, 4.2 跨文件边, 4.3 项目结果容器, 5.1 类型来源（静态可知）, 5.2 解析 `obj.method()`, 5.3 解析 `obj.connect("sig", cb)` / `obj.emit("sig")` (+21 more)
 
 ### Community 21 - "Community 21"
 Cohesion: 0.25
@@ -126,11 +128,19 @@ Cohesion: 0.40
 Nodes (4): Author, Documents, GDScript Parsers for Godot Engine 3.4, License
 
 ### Community 23 - "Community 23"
-Cohesion: 0.08
-Nodes (24): Chunk A: 数据结构, Chunk B: 项目分析器, Chunk C: Bridge 集成 + 增量, Chunk D: UI, Chunk E: 验收, Phase 3.2: 跨文件分析 实现计划, Task A1: 创建 GDSCrossFileEdge, Task A2: 创建 GDScriptProjectResult (+16 more)
+Cohesion: 0.07
+Nodes (29): 1. resolver 缺 `obj.signal.connect(cb)` 分支（验收修复）, 2. parser extends/class_name 顺序（验收修复）, 3. Project tab 边方向, 4. 增量实现简化, Chunk A: 数据结构, Chunk B: 项目分析器, Chunk C: Bridge 集成 + 增量, Chunk D: UI (+21 more)
+
+### Community 24 - "Community 24"
+Cohesion: 0.10
+Nodes (20): Chunk A: 度数数据, Chunk B: 图节点 + 主屏容器, Chunk C: 三个图视图 builder, Chunk D: 主屏集成, Chunk E: 验收, Phase 3.3: 图可视化 实现计划, Task A1: AnalysisResult 加 degree 字段, Task A2: resolver 累加度数 (+12 more)
+
+### Community 25 - "Community 25"
+Cohesion: 0.17
+Nodes (11): ADR-0001: 暂缓 C# 重写，先 Profile 再决定, C# 重写预期收益, 关键前提（冷水）, 决策, 参考, 当前优先级, 背景, 触发条件（何时重新评估） (+3 more)
 
 ## Knowledge Gaps
-- **276 isolated node(s):** `项目概述`, `仓库`, `项目结构`, `架构：三阶段管道`, `开发命令` (+271 more)
+- **329 isolated node(s):** `项目概述`, `仓库`, `项目结构`, `架构：三阶段管道`, `开发命令` (+324 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **3 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -138,13 +148,13 @@ Nodes (24): Chunk A: 数据结构, Chunk B: 项目分析器, Chunk C: Bridge 集
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `Phase 2: GDScript 符号解析器 设计规范` connect `Community 3` to `Community 16`?**
-  _High betweenness centrality (0.022) - this node is a cross-community bridge._
+  _High betweenness centrality (0.016) - this node is a cross-community bridge._
 - **Why does `四、解析策略` connect `Community 16` to `Community 3`?**
-  _High betweenness centrality (0.013) - this node is a cross-community bridge._
-- **Why does `GDScript 解析器 Godot 4.7 重写规范` connect `Community 12` to `Community 18`, `Community 21`?**
-  _High betweenness centrality (0.011) - this node is a cross-community bridge._
+  _High betweenness centrality (0.009) - this node is a cross-community bridge._
+- **Why does `GDScript 解析器 Godot 4.7 重写规范` connect `Community 12` to `Community 21`?**
+  _High betweenness centrality (0.008) - this node is a cross-community bridge._
 - **What connects `项目概述`, `仓库`, `项目结构` to the rest of the system?**
-  _276 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _329 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.10526315789473684 - nodes in this community are weakly interconnected._
 - **Should `Community 3` be split into smaller, more focused modules?**
