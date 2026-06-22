@@ -772,22 +772,52 @@ git commit -m "test: Phase 3.2 regression + UI acceptance pass"
 
 ## 完成检查清单
 
-- [ ] `gds_cross_file_edge.gd` — 跨文件边数据类
-- [ ] `gds_project_result.gd` — 项目级结果 + 查询 API + reverse_index
-- [ ] `gds_analysis_result.gd` — 加 type_table 字段
-- [ ] `gds_symbol_resolver.gd` — 填充 type_table
-- [ ] `gds_project_analyzer.gd` — 扫描 + 批量分析 + 类注册表 + 跨文件解析
-- [ ] Bridge — 项目分析入口（deferred）+ 增量 refresh
-- [ ] `gds_project_panel.gd` — Project tab
-- [ ] MainPanel — 第 5 tab
-- [ ] Bootstrap — 启动首次项目扫描 + 保存增量触发
-- [ ] Phase 1/2/3v1 回归全通过
-- [ ] Phase 3.2 测试 4/4
-- [ ] Project tab 手动验收
+- [x] `gds_cross_file_edge.gd` — 跨文件边数据类
+- [x] `gds_project_result.gd` — 项目级结果 + 查询 API + reverse_index
+- [x] `gds_analysis_result.gd` — 加 type_table 字段
+- [x] `gds_symbol_resolver.gd` — 填充 type_table
+- [x] `gds_project_analyzer.gd` — 扫描 + 批量分析 + 类注册表 + 跨文件解析
+- [x] Bridge — 项目分析入口（deferred）+ 增量 refresh
+- [x] `gds_project_panel.gd` — Project tab（双向边：→ references / ← referenced by）
+- [x] MainPanel — 第 5 tab
+- [x] Bootstrap — 启动首次项目扫描 + 保存增量触发
+- [x] Phase 1/2/3v1 回归全通过
+- [x] Phase 3.2 测试 4/4
+- [x] Project tab 手动验收
+
+---
+
+## 与实际实现的差异
+
+### 1. resolver 缺 `obj.signal.connect(cb)` 分支（验收修复）
+
+| 项目 | 计划 | 实际 |
+|------|------|------|
+| 信号 connect 形式 | 假设 `obj.connect("sig", cb)` / `signal.connect(cb)` 已覆盖 | demo 用 `player.health_changed.connect(cb)`（base 是 AttributeNode），原 connect 路由无此分支 → 加分支修复（`4cddd74`） |
+
+### 2. parser extends/class_name 顺序（验收修复）
+
+| 项目 | 计划 | 实际 |
+|------|------|------|
+| 头部声明顺序 | 隐含 extends-first | player.gd 是 class_name-first（合法）→ 解析失败 → 改顺序无关循环（`99c658b`） |
+
+### 3. Project tab 边方向
+
+| 项目 | 计划 | 实际 |
+|------|------|------|
+| 跨文件边显示 | "文件列表 + 引用数 + 跨文件边" | 初版只显出向；补双向（→ references 出向蓝 / ← referenced by 入向绿，`a5d23b5`）——目标文件不再空白 |
+
+### 4. 增量实现简化
+
+| 项目 | 计划 | 实际 |
+|------|------|------|
+| 增量 cross_edges | "精细反向边局部更新" | 简化为全量重算 cross_edges + reverse_index（YAGNI，文件数不大时够用） |
 
 ## 已知限制（Phase 3.3）
 
 - 动态类型 `var x = func()` 返回值不解析（无类型推断）
 - 跨文件边用 EXTERNAL edge 的 target_object 查 type_table，未标注类型的对象跳过
+- `obj.signal.emit()`（base AttributeNode）跨文件 emit 未加分支（对称补全留 3.3）
 - 增量 cross_edges 全量重算（未做精细反向边局部更新，YAGNI）
-- 首次大项目扫描可能慢（deferred 分批未实现，按需 Phase 3.3）
+- 首次大项目扫描 deferred 但单次跑完（无分批进度，100+ 文件可能感知卡顿）
+- 单文件 < 50ms 性能基准未测

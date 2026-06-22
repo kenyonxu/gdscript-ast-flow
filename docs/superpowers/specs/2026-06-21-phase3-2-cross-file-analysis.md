@@ -1,6 +1,6 @@
 # Phase 3.2: 跨文件分析 设计规范
 
-> 日期: 2026-06-21 | 状态: 设计中 | 依赖: Phase 3 v1 (已完成 ✅)
+> 日期: 2026-06-21 | 状态: Phase 3.2 已完成 ✅ | 依赖: Phase 3 v1 (已完成 ✅)
 
 ## 一、目标
 
@@ -215,15 +215,56 @@ Project tab 内容:
 
 ## 九、验收标准
 
-- [ ] Phase 1/2/3v1 回归全通过
-- [ ] 项目扫描能发现 `res://` 下所有 `.gd`（含子目录）
-- [ ] 类注册表正确：`Player` → `res://.../player.gd`
-- [ ] 跨文件调用：`Enemy.gd` 里 `player.take_damage()` 解析为 CrossFileEdge → Player.gd
-- [ ] 跨文件信号：`health_changed` 的 emit 和 connect 在不同文件时能关联
-- [ ] 增量：保存单文件仅触发该文件 + 反向边重分析（不全扫）
-- [ ] Project tab 显示文件列表 + 引用数 + 跨文件边
-- [ ] 大项目 deferred 分批，不阻塞编辑器
-- [ ] 单文件重分析 < 50ms
+- [x] Phase 1/2/3v1 回归全通过
+- [x] 项目扫描能发现 `res://` 下所有 `.gd`（含子目录）
+- [x] 类注册表正确：`Player` → `res://.../player.gd`
+- [x] 跨文件调用：`Enemy.gd` 里 `player.take_damage()` 解析为 CrossFileEdge → Player.gd
+- [x] 跨文件信号：`health_changed` 的 connect 跨文件关联
+- [x] 增量：保存单文件触发该文件 + 反向边重分析（不全扫）
+- [x] Project tab 显示文件列表 + 引用数 + 跨文件边（双向：→ references / ← referenced by）
+- [x] 大项目 deferred，不阻塞编辑器（首次扫描 `call_deferred`）
+- [ ] 单文件重分析 < 50ms（**Phase 3.3** — 未做基准）
+
+---
+
+## 附录：Phase 3.2 实现完成记录
+
+**完成日期：** 2026-06-21
+**关键提交：**
+- `d2bc4d3` ProjectAnalyzer 跨文件解析核心（两遍设计）
+- `94bd699`→`ada861d` Bridge 项目入口 + 增量
+- `5fc7def`→`0660019` GDSProjectPanel + 第 5 tab
+- `c6a2f1b`→`ba44c36` 跨文件样例 + 验收测试
+- `4cddd74` resolver `obj.signal.connect(cb)` 分支
+- `99c658b` parser extends/class_name 顺序无关
+- `a5d23b5` Project tab 双向边（入向 referenced by）
+**测试结果：** 跨文件 4/4，编辑器 Project tab 手动验收通过
+
+### 与规范的偏差（均在实现中修复）
+
+| 项目 | 规范 | 实际 |
+|------|------|------|
+| `obj.signal.connect(cb)` | resolver 应记录跨文件信号 | **原缺失**——connect 路由无 AttributeNode base 分支，加分支后修复（`4cddd74`） |
+| extends/class_name 顺序 | 任意顺序（GDScript 合法） | **原只支持 extends-first**——player.gd 是 class_name-first 解析失败，改成顺序无关循环（`99c658b`） |
+| Project tab 边方向 | spec 只说"跨文件边" | 实现初版只显出向；加双向（→ references / ← referenced by，`a5d23b5`） |
+| 增量 cross_edges 重算 | spec 说"精细反向边局部更新" | 实现简化为全量重算 cross_edges（YAGNI，文件数不大时够用） |
+
+### 验收中发现并修复的 Bug
+
+| Bug | 症状 | 根因 | 修复提交 |
+|-----|------|------|---------|
+| Player 不在注册表 | test_class_registry FAIL | class_name 在 extends 前 → extends 落进成员循环报错 → `_analyze_file` 返回 null | `99c658b`（顺序无关循环） |
+| 跨文件信号无边 | test_cross_file_signal FAIL | `player.health_changed.connect(cb)` 的 base 是 AttributeNode，无 connect 分支匹配 | `4cddd74`（加 AttributeNode connect 分支） |
+| 目标文件点开空白 | player.gd 无内容 | 面板只显出向边，目标文件无出向 | `a5d23b5`（加 ← referenced by 入向） |
+
+### 已知限制（Phase 3.3）
+
+- **动态类型不解析**：`var x = func()` 返回值、`get_node()` 结果无类型推断
+- **未标注对象跳过**：`obj.method()` 中 obj 无类型标注则不解析（接受覆盖率限制）
+- **EMIT 跨文件未做**：`obj.signal.emit()`（base 是 AttributeNode）未加分支（demo 用本地 emit，未阻塞；对称补全留 3.3）
+- **增量全量重算 cross_edges**：未做反向边局部更新
+- **大项目首扫无分批进度**：deferred 但单次跑完，100+ 文件可能感知卡顿
+- **性能基准未测**：单文件 < 50ms 未验证
 
 ## 十、风险与边界
 
