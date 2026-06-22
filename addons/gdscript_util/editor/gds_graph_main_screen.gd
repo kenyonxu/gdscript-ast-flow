@@ -90,9 +90,10 @@ func _refresh_legend() -> void:
 	if _scope == 1:
 		# 项目级
 		if _graph_kind == 1:
-			# 项目信号图：emit/connect 边
+			# 项目信号图：emit/connect/both 边
 			_add_legend_chip(_legend, "■ emit", Color.RED)
 			_add_legend_chip(_legend, "■ connect", Color.DODGER_BLUE)
+			_add_legend_chip(_legend, "■ emit+connect", Color.MEDIUM_PURPLE)
 		else:
 			# 项目调用图：文件耦合（枢纽=高耦合文件）
 			_add_legend_chip(_legend, "▲ 高耦合文件", Color.ORANGE_RED)
