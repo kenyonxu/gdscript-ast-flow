@@ -14,6 +14,7 @@ var _call_view: GDSCallGraphView = null
 var _signal_view: GDSSignalGraphView = null
 var _project_view: GDSProjectGraphView = null
 var _min_degree: int = 0
+var _legend: HBoxContainer = null
 
 func setup(p_bridge: GDSAnalysisBridge) -> void:
 	_bridge = p_bridge
@@ -63,13 +64,9 @@ func _build_ui() -> void:
 	thresh_box.value = 0
 	thresh_box.value_changed.connect(func(v): _min_degree = v; _rebuild())
 	toolbar.add_child(thresh_box)
-	# 图例
-	var legend = HBoxContainer.new()
-	_add_legend_chip(legend, "■ emit", Color.RED)
-	_add_legend_chip(legend, "■ connect", Color.DODGER_BLUE)
-	_add_legend_chip(legend, "★ 入口", Color.LIME_GREEN)
-	_add_legend_chip(legend, "▲ 枢纽", Color.ORANGE_RED)
-	add_child(legend)
+	# 图例（按当前视图动态填充，见 _refresh_legend）
+	_legend = HBoxContainer.new()
+	add_child(_legend)
 	# GraphEdit
 	_graph_edit = GraphEdit.new()
 	_graph_edit.size_flags_horizontal = SIZE_EXPAND_FILL
@@ -82,8 +79,34 @@ func _add_legend_chip(p_parent: Control, p_text: String, p_color: Color) -> void
 	var chip = Label.new()
 	chip.text = p_text
 	chip.add_theme_color_override("font_color", p_color)
-	chip.add_theme_font_size_override("font_size", 11)
+	chip.add_theme_font_size_override("font_size", 14)
 	p_parent.add_child(chip)
+
+# 图例按当前 Scope × Kind 刷新——只显示该视图真实用到的颜色，避免误导
+func _refresh_legend() -> void:
+	for c in _legend.get_children():
+		c.queue_free()
+	if _scope == 1:
+		# 项目级
+		if _graph_kind == 1:
+			# 项目信号图：emit/connect 边
+			_add_legend_chip(_legend, "■ emit", Color.RED)
+			_add_legend_chip(_legend, "■ connect", Color.DODGER_BLUE)
+		else:
+			# 项目调用图：文件耦合（枢纽=高耦合文件）
+			_add_legend_chip(_legend, "▲ 高耦合文件", Color.ORANGE_RED)
+	else:
+		# 单文件
+		if _graph_kind == 1:
+			# 信号图：emit/connect 边 + 节点标记
+			_add_legend_chip(_legend, "■ emit", Color.RED)
+			_add_legend_chip(_legend, "■ connect", Color.DODGER_BLUE)
+			_add_legend_chip(_legend, "★ 入口", Color.LIME_GREEN)
+			_add_legend_chip(_legend, "▲ 枢纽", Color.ORANGE_RED)
+		else:
+			# 调用图：仅节点标记（边未按 call_type 着色）
+			_add_legend_chip(_legend, "★ 入口函数", Color.LIME_GREEN)
+			_add_legend_chip(_legend, "▲ 枢纽(度≥5)", Color.ORANGE_RED)
 
 func _on_data_changed(_arg = null) -> void:
 	_rebuild()
@@ -94,6 +117,8 @@ func _rebuild() -> void:
 		if c is GraphNode:
 			c.queue_free()
 	_graph_edit.clear_connections()
+	# 图例按当前视图刷新（只显当前视图真实用到的颜色）
+	_refresh_legend()
 	# 按 Scope × Kind 分发
 	if _scope == 1:
 		# 项目级（调用图语义=文件耦合；信号图=跨文件信号）
