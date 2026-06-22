@@ -30,10 +30,11 @@ func configure(p_kind: String, p_name: String, p_subtitle: String, p_degree: int
 	var label = RichTextLabel.new()
 	label.bbcode_enabled = true
 	label.fit_content = true
+	label.autowrap_mode = TextServer.AUTOWRAP_OFF  # 不换行，否则 fit_content 撑高节点
 	label.text = p_subtitle
 	label.add_theme_font_size_override("normal_font_size", 11)
 	label.size_flags_horizontal = SIZE_EXPAND_FILL
-	label.size_flags_vertical = SIZE_FILL  # 不 EXPAND，否则 RichTextLabel 在 GraphNode 里竖直撑满把节点拉长
+	label.size_flags_vertical = SIZE_FILL
 	add_child(label)
 	# tooltip — 完整信息
 	tooltip_text = "%s\n%s\n%s\n%s" % [p_name, p_signature, p_location, p_subtitle]
@@ -50,4 +51,4 @@ func configure(p_kind: String, p_name: String, p_subtitle: String, p_degree: int
 	var out_color := Color.DODGER_BLUE
 	set_slot(0, true, in_type, in_color, true, out_type, out_color)
 	# 默认尺寸
-	custom_minimum_size = Vector2(140, 0)
+	custom_minimum_size = Vector2(220, 0)
