@@ -1,8 +1,10 @@
 # addons/gdscript_util/editor/graphs/../gds_graph_main_screen.gd
 # 主屏 tab — Scope(单文件/项目) × Graph(调用/信号) 切换，重建 GraphEdit
+# 必须 extends Container（VBoxContainer）——plain Control 不把尺寸传给子节点，
+# GraphEdit 会塌缩为 0 高度导致节点不可见（同 Phase 3 底部面板布局教训）
 
 class_name GDSGraphMainScreen
-extends Control
+extends VBoxContainer
 
 var _bridge: GDSAnalysisBridge = null
 var _graph_edit: GraphEdit = null
