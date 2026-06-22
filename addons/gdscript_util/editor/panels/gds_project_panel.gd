@@ -47,12 +47,30 @@ func _refresh(p_result: GDScriptProjectResult) -> void:
 		_add_cross_edges(item, path, p_result)
 
 func _add_cross_edges(p_parent: TreeItem, p_path: String, p_result: GDScriptProjectResult) -> void:
+	# 出向: 本文件引用了谁（→ 蓝色）
+	var has_out := false
 	for edge in p_result.cross_edges:
 		if edge.source_file == p_path:
-			var child = _tree.create_item(p_parent)
-			var arrow = "→"
-			child.set_text(0, "  %s %s.%s (%s)" % [arrow, edge.target_class, edge.target_symbol, edge.target_file.get_file()])
-			child.set_custom_color(0, Color.DODGER_BLUE)
+			if not has_out:
+				var ohdr = _tree.create_item(p_parent)
+				ohdr.set_text(0, "  → references")
+				ohdr.set_custom_color(0, Color.DIM_GRAY)
+				has_out = true
+			var ochild = _tree.create_item(p_parent)
+			ochild.set_text(0, "    → %s.%s (%s)" % [edge.target_class, edge.target_symbol, edge.target_file.get_file()])
+			ochild.set_custom_color(0, Color.DODGER_BLUE)
+	# 入向: 谁引用了本文件（← 绿色）— reverse_index 的直观呈现
+	var has_in := false
+	for edge in p_result.cross_edges:
+		if edge.target_file == p_path:
+			if not has_in:
+				var ihdr = _tree.create_item(p_parent)
+				ihdr.set_text(0, "  ← referenced by")
+				ihdr.set_custom_color(0, Color.DIM_GRAY)
+				has_in = true
+			var ichild = _tree.create_item(p_parent)
+			ichild.set_text(0, "    ← %s (%s.%s)" % [edge.source_file.get_file(), edge.target_class, edge.target_symbol])
+			ichild.set_custom_color(0, Color.SEA_GREEN)
 
 func _on_rebuild() -> void:
 	_rebuild_btn.disabled = true
