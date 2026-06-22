@@ -45,7 +45,7 @@ const NAMES := {
 	"print": true, "print_rich": true, "printerr": true, "printraw": true,
 	"push_error": true, "push_warning": true,
 	# 数学
-	"abs": true, "absf": true, "absf": true, "absi": true,
+	"abs": true, "absf": true, "absi": true,
 	"acos": true, "asin": true, "atan": true, "atan2": true,
 	"ceil": true, "ceilf": true, "ceili": true,
 	"clamp": true, "clampf": true, "clampi": true,
@@ -59,7 +59,7 @@ const NAMES := {
 	"pow": true, "round": true, "roundf": true, "roundi": true,
 	"sign": true, "signf": true, "signi": true,
 	"snapped": true, "snappedf": true, "snappedi": true,
-	"sqrt": true, "stepify": true,
+	"sqrt": true,
 	"wrap": true, "wrapf": true, "wrapi": true,
 	# 集合/转换
 	"range": true, "len": true, "str": true,
@@ -101,16 +101,29 @@ var filter_builtin_calls := true
 
 - [ ] **Step 2: 修改 _resolve_call 模式 1b**
 
-将当前模式 1b（`sym == null` 记 EXTERNAL 边）改为三步判断：
+将当前模式 1b（`sym == null or sym.kind == FUNCTION` 记边）拆成三步：
 
+**当前代码**（Phase 2 forward-ref 修后）：
 ```gdscript
-		# 模式 1b: 隐式 self（如 print/range/未声明函数调用）
-		if sym == null:
-			if filter_builtin_calls and GDSBuiltinFunctions.is_builtin(callee_name):
-				pass  # 内置函数 → 不记边、不计度数
-			else:
-				# 未声明的用户函数（前向引用等）— 记 EXTERNAL 边
-				_add_call_edge(func_name, callee_name, node.callee_line(), GDScriptCallEdge.CallType.EXTERNAL, "")
+		# 1b: 隐式 self 调用 foo()
+		var sym = p_scope.resolve(callee.name)
+		if sym == null or sym.kind == GDScriptSymbol.Kind.FUNCTION:
+			_add_call_edge(p_current_function, callee.name, callee.line, GDScriptCallEdge.CallType.SELF, "", p_node.arguments)
+```
+
+**改为**：
+```gdscript
+		# 1b: 隐式 self 调用 foo()
+		var sym = p_scope.resolve(callee.name)
+		if sym != null and sym.kind == GDScriptSymbol.Kind.FUNCTION:
+			# 已声明的用户函数 → 记边（不变）
+			_add_call_edge(p_current_function, callee.name, callee.line, GDScriptCallEdge.CallType.SELF, "", p_node.arguments)
+		elif sym == null:
+			# 未解析 — 可能是内置函数或前向引用
+			if not (filter_builtin_calls and GDSBuiltinFunctions.is_builtin(callee.name)):
+				# 非内置 → 前向引用，记边
+				_add_call_edge(p_current_function, callee.name, callee.line, GDScriptCallEdge.CallType.SELF, "", p_node.arguments)
+			# 内置 → 不记边、不计度数
 ```
 
 - [ ] **Step 3: 确保已声明函数分支不受影响**
@@ -128,7 +141,7 @@ git commit -m "feat: resolver — filter builtin function calls (print/range/…
 
 ### Task C0-3: 验收测试
 
-**Files:** Modify: `addons/gdscript_util/tests/test_symbol_resolver.gd`
+**Files:** Modify: `tests/test_symbol_resolver.gd`
 
 - [ ] **Step 1: 追加 test_11_builtin_filter**
 
@@ -139,7 +152,7 @@ func test_11_builtin_filter():
 	print("Test 11: builtin function filter...")
 	var resolver = GDScriptSymbolResolver.new()
 
-	# 1. 默认 ON: print/range 不记边
+	# 1. filter ON: print/range 不记边
 	resolver.filter_builtin_calls = true
 	var tok = GDScriptTokenizer.new()
 	var ast = GDScriptParser.new().parse(tok.tokenize("func _a():\n\tprint(\"x\")\n\trange(5)\n"))
@@ -156,14 +169,13 @@ func test_11_builtin_filter():
 	assert(full2.call_graph.edges.size() >= 1, "forward ref helper() should produce an edge")
 	assert(full2.call_in_degree.get("helper", 0) >= 1, "helper in-degree should be >=1")
 
-	# 3. 已声明函数调用（sym != null）——记边、无 callee 噪声
-	resolver.filter_builtin_calls = true
+	# 3. filter OFF: print 记边（回归验证）
+	resolver.filter_builtin_calls = false
 	var tok3 = GDScriptTokenizer.new()
-	var ast3 = GDScriptParser.new().parse(tok3.tokenize("func _c():\n\tprint(\"x\")\n\nfunc helper():\n\tpass\n"))
+	var ast3 = GDScriptParser.new().parse(tok3.tokenize("func _c():\n\tprint(\"x\")\n"))
 	var full3 = resolver.resolve(ast3, "")
-	assert(full3.get_callers_of("helper").is_empty(), "helper should have no callers")
-	assert(full3.call_in_degree.get("print", 0) >= 1, "with filter OFF, print should be recorded")
-	assert_eq(1, full.get_callers_of("print").size(), "with filter off, print should be recorded")
+	assert(full3.call_graph.edges.size() >= 1, "with filter OFF, print should produce an edge")
+	assert(full3.call_in_degree.get("print", 0) >= 1, "print in-degree should be >=1 with filter OFF")
 	print("  PASS")
 ```
 

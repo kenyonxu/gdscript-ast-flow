@@ -4,7 +4,7 @@
 
 **Goal:** 让未标注类型的变量（`var x := Player.new()` / `var p = get_player()` / `var c = preload("res://a.gd")`）也能被推导出类型，填入 `type_table`，使 Phase 3.2 跨文件解析能解析更多 `obj.method()` 调用。
 
-**Architecture:** 新增 `GDS_TypeInferrer`（三模式：`.new()`/返回类型/preload）。resolver 加返回类型表两遍扫描：第一遍预建 `{func_name: return_type_string}`，第二遍在变量解析时先取显式标注（已有），为空且开推断时调 `GDS_TypeInferrer.infer`。开关默认 true，可设为 false 归回原行为。
+**Architecture:** 新增 `GDSTypeInferrer`（三模式：`.new()`/返回类型/preload）。resolver 加返回类型表两遍扫描：第一遍预建 `{func_name: return_type_string}`，第二遍在变量解析时先取显式标注（已有），为空且开推断时调 `GDSTypeInferrer.infer`。开关默认 true，可设为 false 归回原行为。
 
 **Tech Stack:** Godot 4.7, GDScript
 
@@ -26,7 +26,7 @@ addons/gdscript_util/
 
 ## Chunk C0: 核心实现
 
-### Task C0-1: 创建 GDS_TypeInferrer — L1 推断器
+### Task C0-1: 创建 GDSTypeInferrer — L1 推断器
 
 **Files:** Create: `addons/gdscript_util/gds_type_inferrer.gd`
 
@@ -36,7 +36,7 @@ addons/gdscript_util/
 # addons/gdscript_util/gds_type_inferrer.gd
 # L1 类型推断器 — 三模式：T.new() / 函数返回类型 / preload
 
-class_name GDS_TypeInferrer
+class_name GDSTypeInferrer
 extends RefCounted
 
 # p_expr: 变量 initializer 表达式 AST（CallNode / PreloadNode / null）
@@ -70,7 +70,7 @@ static func infer(p_expr, p_return_table: Dictionary) -> String:
 
 ```bash
 git add addons/gdscript_util/gds_type_inferrer.gd
-git commit -m "feat: GDS_TypeInferrer — L1 type inference (.new/return-type/preload)"
+git commit -m "feat: GDSTypeInferrer — L1 type inference (.new/return-type/preload)"
 ```
 
 ---
@@ -90,7 +90,7 @@ var _return_type_table: Dictionary = {}
 
 - [ ] **Step 2: 第一遍 — 预建返回类型表**
 
-在 `resolve(ast, file_path)` 方法中，`_resolve_class_members` 之前追加：
+在 `resolve(ast, file_path)` 方法中，`_resolve_class` 之前追加：
 
 ```gdscript
 	if enable_type_inference:
@@ -113,7 +113,7 @@ func _build_return_type_table(p_ast) -> void:
 	# Phase 3.2: 记录变量声明类型到 type_table（供跨文件解析）
 	var vtype = _type_to_string(p_node.datatype)  # 显式标注
 	if vtype == "" and enable_type_inference and p_node.initializer != null:
-		vtype = GDS_TypeInferrer.infer(p_node.initializer, _return_type_table)
+		vtype = GDSTypeInferrer.infer(p_node.initializer, _return_type_table)
 	if vtype != "":
 		result.type_table[p_node.name] = vtype
 ```
@@ -129,7 +129,7 @@ git commit -m "feat: resolver — two-pass L1 inference for unannotated variable
 
 ### Task C0-3: 验收测试
 
-**Files:** Modify: `addons/gdscript_util/tests/test_symbol_resolver.gd`
+**Files:** Modify: `tests/test_symbol_resolver.gd`
 
 - [ ] **Step 1: 追加推断测试用例**
 
@@ -171,7 +171,7 @@ func test_14_type_infer_preload():
 - [ ] **Step 2: 提交**
 
 ```bash
-git add addons/gdscript_util/tests/test_symbol_resolver.gd
+git add tests/test_symbol_resolver.gd
 git commit -m "test: L1 type inference — new/return/preload + explicit-wins + switch off"
 ```
 
@@ -205,7 +205,7 @@ git commit -m "test: type inference acceptance pass"
 
 ## 完成检查清单
 
-- [ ] GDS_TypeInferrer — `infer()` 三模式
+- [ ] GDSTypeInferrer — `infer()` 三模式
 - [ ] resolver — `_return_type_table` + `enable_type_inference` 开关
 - [ ] resolver — `_build_return_type_table()` 第一遍预建
 - [ ] resolver — `_resolve_variable` 显式标注优先 + 推断回退
