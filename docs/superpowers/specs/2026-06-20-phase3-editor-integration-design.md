@@ -1,6 +1,6 @@
 # Phase 3: 编辑器集成 + 完整语法 设计规范
 
-> 日期: 2026-06-20 | 状态: 设计中 | 依赖: Phase 1 (已完成 ✅) + Phase 2 (已完成 ✅)
+> 日期: 2026-06-20 | 状态: Phase 3 v1 已完成 ✅ | 依赖: Phase 1 (已完成 ✅) + Phase 2 (已完成 ✅)
 
 ## 一、目标
 
@@ -411,11 +411,57 @@ func parse(p_tokens: Array) -> ClassNode:
 
 ## 十二、验收标准
 
-- [ ] 10/10 Phase 1 测试仍通过
-- [ ] 10/10 Phase 2 测试仍通过
-- [ ] 5 个编辑器面板可正常打开/关闭
-- [ ] Bridge 信号联动：点击调用图项 → 其他面板联动过滤
-- [ ] 新语法解析测试：namespace/trait/f-string/guard/inline-setter 各 1 个用例
-- [ ] 1000 行文件解析 < 50ms
-- [ ] 错误恢复：包含语法错误的文件仍可部分分析
-- [ ] 缓存命中：未修改文件不重新分析
+- [x] 10/10 Phase 1 测试仍通过
+- [x] 10/10 Phase 2 测试仍通过
+- [x] 编辑器面板可正常打开/关闭（4 tab 整合为单底部面板，非 5 独立面板）
+- [x] Bridge 信号联动：点击调用图项 → 其他面板联动过滤
+- [x] 新语法解析测试：namespace/trait/f-string/guard/inline-setter（5/5 通过）
+- [ ] 1000 行文件解析 < 50ms（**Phase 3.2** — 未做基准）
+- [x] 错误恢复：包含语法错误的文件仍可部分分析（suite/inner_class 循环恢复）
+- [x] 缓存命中：未修改文件不重新分析（时间戳缓存）
+
+---
+
+## 附录：Phase 3 v1 实现完成记录
+
+**完成日期：** 2026-06-21
+**关键提交：**
+- `95f1e6f` docs: Phase 3 plan · `6a59fb4` docs: spec
+- `9f5e66e`→`6fff1d4` Bridge / Bootstrap / 4 子面板
+- `34dc94c`→`cb5c9cc` tokenizer + AST + parser（namespace/trait/f-string/guard/setter）
+- `97803b2` Phase 3 语法测试 5/5
+- `646364a` 编辑器保存死锁修复
+- `e7a92ab` extends 前导换行修复
+- `94789d5` 底部面板填满布局修复
+**测试结果：** Phase 3 语法 5/5，编辑器面板手动验收通过
+
+### 与规范的偏差（均在实现中修复）
+
+| 项目 | 规范 | 实际 |
+|------|------|------|
+| 面板布局 | 3 底部 tab + 右侧 Dock 摘要 + Toolbar | **单底部面板 4 子 tab**（Summary 整合进来，去掉右侧 Dock——太侵入检查器） |
+| 摘要面板位置 | 右侧 Dock | 底部面板第 1 子 tab |
+| f-string AST | FormattedStringNode 解析 `{expr}` | **LiteralNode 暂存 segments**（Phase 3.2 升级） |
+| 可视化方式 | spec 4.5 采纳 limboai Tree 模式 | 同规范（Tree + metadata + 多选 + 右键 + 搜索高亮） |
+| Custom-draw 热路径 | Phase 3.2 延后 | 同规范（v1 用颜色编码） |
+
+### 验收中发现并修复的 Bug（关键）
+
+| Bug | 症状 | 根因 | 修复提交 |
+|-----|------|------|---------|
+| 编辑器保存锁死 | Ctrl+S 卡死 | `_parse_suite` 循环 `_parse_statement` 返回 null 不推进 → 无限自旋；且 `resource_saved` 双重连接 + 同步阻塞主线程 | `646364a`（suite/inner_class 循环恢复 + 移除双重连接 + deferred 分析） |
+| extends 误判 | 真实文件报"extends 只能在文件顶部" | `parse()` 没跳过注释头产生的 leading NEWLINE | `e7a92ab` |
+| 底部面板内容塌缩 | tab 可见区域利用度极低 | `_content_stack` 是 Control（不传尺寸给子节点），size_flags 只在 Container 内生效 | `94789d5`（Control→VBoxContainer） |
+| guard 字段冲突 | GuardedMatchBranchNode 编译失败 | 重复声明 MatchBranchNode 已有的 guard | `2321128` |
+| f-string 转义 | `\x00` invalid escape | Phase 3 重引入 Phase 1 已修的 bug | `2321128` |
+| Bridge 依赖 | GDScriptUtil 未声明 | plugin.gd 无 class_name，Bridge 改直接跑 pipeline | `2321128` |
+| 右侧 Dock 无标题/空白 | 摘要面板像未配置容器 | `add_control_to_dock` 用 .name 作标题未设；RichTextLabel 空时塌缩 | `9bc92f7`（后被整合进底部 tab） |
+
+### 已知限制（Phase 3.2 处理）
+
+- **f-string**：`{expr}` 未解析为表达式节点，仅存文本
+- **热路径可视化**：调用频率/连接强度需 custom-draw（依赖 resolver 统计次数，当前无）
+- **主屏图可视化**：GraphEdit/_draw 调用关系图未做
+- **跨文件分析**：仅单文件，无项目级调用图
+- **内置函数**：`print`/`range` 等仍记为调用边（前向引用修复的副作用）
+- **1000 行性能基准**：未测量

@@ -1161,19 +1161,63 @@ git commit -m "test: Phase 3 syntax — f-string, match guard, namespace"
 
 ## 完成检查清单
 
-- [ ] `editor/gds_analysis_bridge.gd` — 信号中继桥
-- [ ] `editor/gds_editor_bootstrap.gd` — 模块化启动
-- [ ] `editor/widgets/gds_tree_search.gd` — 搜索高亮工具（参考 limboai）
-- [ ] `editor/panels/gds_analysis_main_panel.gd` — TabBar 主面板
-- [ ] `editor/panels/gds_call_graph_panel.gd` — 调用图子面板（metadata + 多选 + 右键菜单）
-- [ ] `editor/panels/gds_signal_flow_panel.gd` — 信号流子面板（metadata）
-- [ ] `editor/panels/gds_def_use_panel.gd` — 变量读写子面板（metadata）
-- [ ] `editor/panels/gds_analysis_summary.gd` — Dock 摘要面板
-- [ ] `plugin.gd` + `plugin.cfg` — Bootstrap 集成 + v3.0.0
-- [ ] Tokenizer — namespace/trait/implements/f-string
-- [ ] AST — NamespaceNode/TraitNode/GuardedMatchBranchNode/SetterGetterNode
-- [ ] Parser — namespace/trait/match-guard/inline-setter + 错误恢复
-- [ ] 时间戳缓存 — 未修改文件跳过分析
-- [ ] Phase 1 回归 10/10
-- [ ] Phase 2 回归 10/10
-- [ ] Phase 3 语法测试 3/3
+- [x] `editor/gds_analysis_bridge.gd` — 信号中继桥
+- [x] `editor/gds_editor_bootstrap.gd` — 模块化启动（+ deferred 分析 + 去抖 + 重入保护）
+- [x] `editor/widgets/gds_tree_search.gd` — 搜索高亮工具（参考 limboai）
+- [x] `editor/panels/gds_analysis_main_panel.gd` — TabBar 主面板（4 子 tab，VBoxContainer 填满）
+- [x] `editor/panels/gds_call_graph_panel.gd` — 调用图子面板（metadata + 多选 + 右键菜单）
+- [x] `editor/panels/gds_signal_flow_panel.gd` — 信号流子面板（metadata）
+- [x] `editor/panels/gds_def_use_panel.gd` — 变量读写子面板（metadata）
+- [x] `editor/panels/gds_analysis_summary.gd` — 摘要面板（**整合为底部第 1 tab，非右侧 Dock**）
+- [x] `plugin.gd` + `plugin.cfg` — Bootstrap 集成 + v3.0.0（移除 Phase 2 双重 resource_saved）
+- [x] Tokenizer — namespace/trait/implements/f-string
+- [x] AST — NamespaceNode/TraitNode/GuardedMatchBranchNode/SetterGetterNode
+- [x] Parser — namespace/trait/match-guard/inline-setter + 错误恢复
+- [x] 时间戳缓存 — 未修改文件跳过分析
+- [x] Phase 1 回归 10/10
+- [x] Phase 2 回归 10/10
+- [x] Phase 3 语法测试 5/5
+
+---
+
+## 与实际实现的差异
+
+### 1. 面板架构（规范为 3 底部 tab + 右侧 Dock）
+
+| 项目 | 计划 | 实际 |
+|------|------|------|
+| 摘要面板位置 | 右侧 Dock（检查器旁） | **底部面板第 1 子 tab**——右侧 Dock 太侵入检查器，用户反馈后整合 |
+| 底部 tab 数 | 3（Call Graph / Signal Flow / Def-Use） | 4（+Summary） |
+| 右侧 Dock | 有 | **移除** |
+
+### 2. Bridge 实现
+
+| 项目 | 计划 | 实际 |
+|------|------|------|
+| 分析触发 | 调用 `GDScriptUtil.analyze_script()` | **直接跑 pipeline**（plugin.gd 无 class_name，GDScriptUtil 解析失败） |
+| 保存响应 | 同步 | **deferred + 去抖 + 重入保护**（同步会阻塞编辑器） |
+
+### 3. 验收中修复的关键 Bug
+
+| Bug | 根因 | 修复 |
+|-----|------|------|
+| 编辑器保存锁死 | `_parse_suite`/`_parse_inner_class` 循环 null 不推进 → 无限自旋；`resource_saved` 双重连接；同步阻塞主线程 | 循环加恢复推进；移除 plugin.gd 双重连接；deferred 分析（`646364a`） |
+| extends 误判 | `parse()` 未跳过注释头产生的 leading NEWLINE | parse() 开头 + extends 前各补 `_skip_newlines()`（`e7a92ab`） |
+| 面板内容塌缩 | `_content_stack` 是 Control，size_flags 只在 Container 生效 | Control→VBoxContainer + 子面板 EXPAND_FILL（`94789d5`） |
+| guard 字段冲突 | GuardedMatchBranchNode 重复声明父类 guard | 去除重复字段（`2321128`） |
+| f-string `\x00` | Phase 3 重引入 Phase 1 bug | `\x00`→`""`（`2321128`） |
+
+### 4. f-string 简化
+
+| 项目 | 计划 | 实际 |
+|------|------|------|
+| f-string AST | FormattedStringNode 解析 `{expr}` 为表达式 | **LiteralNode 暂存 segments 文本**（Phase 3.2 升级） |
+
+### 5. 文件结构差异
+
+| 计划 | 实际 |
+|------|------|
+| `gds_graph_canvas.gd`（custom draw） | 未创建（Phase 3.2） |
+| `gds_find_references_dialog.gd` / `gds_export_report_dialog.gd` | 未创建（YAGNI，Phase 3.2 按需） |
+| — | `samples/analysis_demo.gd`（验收样例，新增） |
+| — | `tests/test_phase3_syntax.gd` + `.tscn`（5 用例） |
