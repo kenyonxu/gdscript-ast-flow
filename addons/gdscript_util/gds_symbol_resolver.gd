@@ -203,6 +203,11 @@ func _add_call_edge(p_caller: String, p_callee: String, p_line: int, p_call_type
 	edge.target_object = p_target
 	edge.arguments = p_arguments
 	result.call_graph.add_edge(edge)
+	# Phase 3.3: 累加度数（caller 出度 +1, callee 入度 +1）
+	if p_caller != "" and p_caller != "<class>":
+		result.call_out_degree[p_caller] = result.call_out_degree.get(p_caller, 0) + 1
+	if p_callee != "":
+		result.call_in_degree[p_callee] = result.call_in_degree.get(p_callee, 0) + 1
 
 
 # 创建 Site 对象
