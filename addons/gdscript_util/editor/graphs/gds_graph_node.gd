@@ -11,7 +11,16 @@ const ENTRY_METHODS := preload("res://addons/gdscript_util/editor/gds_entry_meth
 # p_kind: "function" / "signal" / "file"
 # p_hub_threshold: 枢纽高亮阈值（函数默认 5，文件默认 1——文件耦合度数值本身小）
 func configure(p_kind: String, p_name: String, p_subtitle: String, p_degree: int, p_signature: String = "", p_location: String = "", p_hub_threshold: int = 5) -> void:
-	title = p_name
+	var display_name = p_name
+	# 入口函数标记: 前缀 ▶ + 绿色 title（前缀保证即使主题色不生效也能识别）
+	if p_kind == "function" and ENTRY_METHODS.is_entry(p_name):
+		display_name = "▶ " + p_name
+		add_theme_color_override("title_color", Color.LIME_GREEN)
+	elif p_kind == "function" and p_degree >= p_hub_threshold:
+		# 枢纽高亮: 前缀 ● + 橙红 title
+		display_name = "● " + p_name
+		add_theme_color_override("title_color", Color.ORANGE_RED)
+	title = display_name
 	# 签名副文本
 	if p_signature != "":
 		var sig_label = Label.new()
@@ -37,13 +46,7 @@ func configure(p_kind: String, p_name: String, p_subtitle: String, p_degree: int
 	label.size_flags_vertical = SIZE_FILL
 	add_child(label)
 	# tooltip — 完整信息
-	tooltip_text = "%s\n%s\n%s\n%s" % [p_name, p_signature, p_location, p_subtitle]
-	# 入口函数标记（绿色 title）
-	if p_kind == "function" and ENTRY_METHODS.is_entry(p_name):
-		add_theme_color_override("title_color", Color.LIME_GREEN)
-	elif p_degree >= p_hub_threshold:
-		# 枢纽高亮
-		add_theme_color_override("title_color", Color.ORANGE_RED)
+	tooltip_text = "%s\n%s\n%s\n%s" % [display_name, p_signature, p_location, p_subtitle]
 	# slot: 左 enable（入边），右 enable（出边）；type 用于着色分组
 	var in_type := 0
 	var out_type := 1
