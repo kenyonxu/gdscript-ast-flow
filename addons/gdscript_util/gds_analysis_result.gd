@@ -19,6 +19,7 @@ var symbol_table: GDScriptSymbolTable = null
 var call_graph: GDScriptCallGraph = null
 var signal_graph: GDScriptSignalGraph = null
 var def_use_chain: GDScriptDefUseChain = null
+var type_table: Dictionary = {}  # String(var/param name) → String(类型名) — 供跨文件解析用
 
 # 错误/告警
 var errors: Array = []
