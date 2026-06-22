@@ -140,13 +140,38 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-06-21-phase3-3-graph-visualization.md": {
-    "mtime": 1782123335.2237458,
-    "ast_hash": "377079dd9f981c786429805e49073ee5",
+    "mtime": 1782129664.7042727,
+    "ast_hash": "05f1e1edde87d72fd92e830064b03bc9",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md": {
-    "mtime": 1782108324.1401756,
-    "ast_hash": "ed76efb6e9d754b078e2da0d0b74223a",
+    "mtime": 1782129664.705234,
+    "ast_hash": "6a1f86d171b2738fb1d1844647a57e87",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md": {
+    "mtime": 1782129664.7047338,
+    "ast_hash": "eff7e7cfaf3482ca4fadaf447cb775f4",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-06-22-builtin-function-filter.md": {
+    "mtime": 1782129664.7052433,
+    "ast_hash": "4483fd24e67b3a1bfca7be3e52edd9be",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md": {
+    "mtime": 1782129664.7058165,
+    "ast_hash": "a440425db3117258cee7c67bc803cf47",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-06-22-large-graph-virtualization.md": {
+    "mtime": 1782129664.7061572,
+    "ast_hash": "8170b09c388e50431022b5a5f45b8cd6",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-06-22-type-inference.md": {
+    "mtime": 1782129664.7062433,
+    "ast_hash": "43377eae7ff1ebf9f1fb4862475e6e22",
     "semantic_hash": ""
   }
 }

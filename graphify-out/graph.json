@@ -1884,14 +1884,224 @@
       "norm_label": "\u5b8c\u6210\u68c0\u67e5\u6e05\u5355"
     },
     {
+      "label": "\u4e0e\u5b9e\u9645\u5b9e\u73b0\u7684\u5dee\u5f02",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-21-phase3-3-graph-visualization.md",
+      "source_location": "L622",
+      "_origin": "ast",
+      "id": "plans_2026_06_21_phase3_3_graph_visualization_\u4e0e\u5b9e\u9645\u5b9e\u73b0\u7684\u5dee\u5f02",
+      "community": 24,
+      "norm_label": "\u4e0e\u5b9e\u9645\u5b9e\u73b0\u7684\u5dee\u5f02"
+    },
+    {
+      "label": "1. \u4e3b\u5c4f\u5bb9\u5668\u57fa\u7c7b + \u94fa\u6ee1\uff08\u9a8c\u6536\u4fee\u590d\uff09",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-21-phase3-3-graph-visualization.md",
+      "source_location": "L624",
+      "_origin": "ast",
+      "id": "plans_2026_06_21_phase3_3_graph_visualization_1_\u4e3b\u5c4f\u5bb9\u5668\u57fa\u7c7b_\u94fa\u6ee1_\u9a8c\u6536\u4fee\u590d",
+      "community": 24,
+      "norm_label": "1. \u4e3b\u5c4f\u5bb9\u5668\u57fa\u7c7b + \u94fa\u6ee1(\u9a8c\u6536\u4fee\u590d)"
+    },
+    {
+      "label": "2. Project view \u6309 kind \u5206\u652f\uff08\u9a8c\u6536\u4fee\u590d\uff09",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-21-phase3-3-graph-visualization.md",
+      "source_location": "L631",
+      "_origin": "ast",
+      "id": "plans_2026_06_21_phase3_3_graph_visualization_2_project_view_\u6309_kind_\u5206\u652f_\u9a8c\u6536\u4fee\u590d",
+      "community": 24,
+      "norm_label": "2. project view \u6309 kind \u5206\u652f(\u9a8c\u6536\u4fee\u590d)"
+    },
+    {
+      "label": "3. \u70b9\u8282\u70b9\u8df3\u8f6c\u63a8\u8fdf",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-21-phase3-3-graph-visualization.md",
+      "source_location": "L637",
+      "_origin": "ast",
+      "id": "plans_2026_06_21_phase3_3_graph_visualization_3_\u70b9\u8282\u70b9\u8df3\u8f6c\u63a8\u8fdf",
+      "community": 24,
+      "norm_label": "3. \u70b9\u8282\u70b9\u8df3\u8f6c\u63a8\u8fdf"
+    },
+    {
       "label": "\u5df2\u77e5\u9650\u5236\uff08Phase 3.4\uff09",
       "file_type": "document",
       "source_file": "docs/superpowers/plans/2026-06-21-phase3-3-graph-visualization.md",
-      "source_location": "L620",
+      "source_location": "L643",
       "_origin": "ast",
       "id": "plans_2026_06_21_phase3_3_graph_visualization_\u5df2\u77e5\u9650\u5236_phase_3_4",
       "community": 24,
       "norm_label": "\u5df2\u77e5\u9650\u5236(phase 3.4)"
+    },
+    {
+      "label": "2026-06-22-graph-usability-enhancement.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "plans_2026_06_22_graph_usability_enhancement",
+      "community": 26,
+      "norm_label": "2026-06-22-graph-usability-enhancement.md"
+    },
+    {
+      "label": "\u56fe\u53ef\u7528\u6027\u5f3a\u5316 \u5b9e\u73b0\u8ba1\u5212",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "plans_2026_06_22_graph_usability_enhancement_\u56fe\u53ef\u7528\u6027\u5f3a\u5316_\u5b9e\u73b0\u8ba1\u5212",
+      "community": 26,
+      "norm_label": "\u56fe\u53ef\u7528\u6027\u5f3a\u5316 \u5b9e\u73b0\u8ba1\u5212"
+    },
+    {
+      "label": "\u6587\u4ef6\u7ed3\u6784",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L15",
+      "_origin": "ast",
+      "id": "plans_2026_06_22_graph_usability_enhancement_\u6587\u4ef6\u7ed3\u6784",
+      "community": 26,
+      "norm_label": "\u6587\u4ef6\u7ed3\u6784"
+    },
+    {
+      "label": "Chunk P0: \u9ad8\u4ef7\u503c\u4f4e\u6210\u672c",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L30",
+      "_origin": "ast",
+      "id": "plans_2026_06_22_graph_usability_enhancement_chunk_p0_\u9ad8\u4ef7\u503c\u4f4e\u6210\u672c",
+      "community": 26,
+      "norm_label": "chunk p0: \u9ad8\u4ef7\u503c\u4f4e\u6210\u672c"
+    },
+    {
+      "label": "Task P0-1: GDSGraphNode \u6269\u5c55 \u2014 \u7b7e\u540d/\u4f4d\u7f6e/tooltip/\u5165\u53e3\u6807\u8bb0",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L32",
+      "_origin": "ast",
+      "id": "plans_2026_06_22_graph_usability_enhancement_task_p0_1_gdsgraphnode_\u6269\u5c55_\u7b7e\u540d_\u4f4d\u7f6e_tooltip_\u5165\u53e3\u6807\u8bb0",
+      "community": 26,
+      "norm_label": "task p0-1: gdsgraphnode \u6269\u5c55 \u2014 \u7b7e\u540d/\u4f4d\u7f6e/tooltip/\u5165\u53e3\u6807\u8bb0"
+    },
+    {
+      "label": "Task P0-2: \u521b\u5efa GDS_EntryMethods \u2014 \u5f15\u64ce\u5165\u53e3\u96c6\u5408",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L89",
+      "_origin": "ast",
+      "id": "plans_2026_06_22_graph_usability_enhancement_task_p0_2_\u521b\u5efa_gds_entrymethods_\u5f15\u64ce\u5165\u53e3\u96c6\u5408",
+      "community": 26,
+      "norm_label": "task p0-2: \u521b\u5efa gds_entrymethods \u2014 \u5f15\u64ce\u5165\u53e3\u96c6\u5408"
+    },
+    {
+      "label": "Task P0-3: \u8c03\u7528\u56fe\u89c6\u56fe \u2014 \u7b7e\u540d/\u4f4d\u7f6e/\u7740\u8272",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L150",
+      "_origin": "ast",
+      "id": "plans_2026_06_22_graph_usability_enhancement_task_p0_3_\u8c03\u7528\u56fe\u89c6\u56fe_\u7b7e\u540d_\u4f4d\u7f6e_\u7740\u8272",
+      "community": 26,
+      "norm_label": "task p0-3: \u8c03\u7528\u56fe\u89c6\u56fe \u2014 \u7b7e\u540d/\u4f4d\u7f6e/\u7740\u8272"
+    },
+    {
+      "label": "Task P0-4: \u4fe1\u53f7\u56fe\u89c6\u56fe \u2014 emit/connect \u53cc slot \u5206\u8272\u5206\u5411",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L227",
+      "_origin": "ast",
+      "id": "plans_2026_06_22_graph_usability_enhancement_task_p0_4_\u4fe1\u53f7\u56fe\u89c6\u56fe_emit_connect_\u53cc_slot_\u5206\u8272\u5206\u5411",
+      "community": 26,
+      "norm_label": "task p0-4: \u4fe1\u53f7\u56fe\u89c6\u56fe \u2014 emit/connect \u53cc slot \u5206\u8272\u5206\u5411"
+    },
+    {
+      "label": "Task P0-5: \u9879\u76ee\u56fe\u89c6\u56fe \u2014 \u7b7e\u540d/\u4f4d\u7f6e",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L301",
+      "_origin": "ast",
+      "id": "plans_2026_06_22_graph_usability_enhancement_task_p0_5_\u9879\u76ee\u56fe\u89c6\u56fe_\u7b7e\u540d_\u4f4d\u7f6e",
+      "community": 26,
+      "norm_label": "task p0-5: \u9879\u76ee\u56fe\u89c6\u56fe \u2014 \u7b7e\u540d/\u4f4d\u7f6e"
+    },
+    {
+      "label": "Chunk P1: \u4e2d\u4ef7\u503c",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L329",
+      "_origin": "ast",
+      "id": "plans_2026_06_22_graph_usability_enhancement_chunk_p1_\u4e2d\u4ef7\u503c",
+      "community": 26,
+      "norm_label": "chunk p1: \u4e2d\u4ef7\u503c"
+    },
+    {
+      "label": "Task P1-1: \u4e3b\u5c4f toolbar \u52a0 legend\uff08\u56fe\u4f8b\uff09",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L331",
+      "_origin": "ast",
+      "id": "plans_2026_06_22_graph_usability_enhancement_task_p1_1_\u4e3b\u5c4f_toolbar_\u52a0_legend_\u56fe\u4f8b",
+      "community": 26,
+      "norm_label": "task p1-1: \u4e3b\u5c4f toolbar \u52a0 legend(\u56fe\u4f8b)"
+    },
+    {
+      "label": "Task P1-2: \u4f4e\u5ea6\u6570\u7b5b\u9009",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L365",
+      "_origin": "ast",
+      "id": "plans_2026_06_22_graph_usability_enhancement_task_p1_2_\u4f4e\u5ea6\u6570\u7b5b\u9009",
+      "community": 26,
+      "norm_label": "task p1-2: \u4f4e\u5ea6\u6570\u7b5b\u9009"
+    },
+    {
+      "label": "Task P1-3: \u70b9\u8282\u70b9\u8df3\u8f6c + \u5173\u8054\u8fb9\u9ad8\u4eae",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L400",
+      "_origin": "ast",
+      "id": "plans_2026_06_22_graph_usability_enhancement_task_p1_3_\u70b9\u8282\u70b9\u8df3\u8f6c_\u5173\u8054\u8fb9\u9ad8\u4eae",
+      "community": 26,
+      "norm_label": "task p1-3: \u70b9\u8282\u70b9\u8df3\u8f6c + \u5173\u8054\u8fb9\u9ad8\u4eae"
+    },
+    {
+      "label": "Chunk \u9a8c\u6536",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L448",
+      "_origin": "ast",
+      "id": "plans_2026_06_22_graph_usability_enhancement_chunk_\u9a8c\u6536",
+      "community": 26,
+      "norm_label": "chunk \u9a8c\u6536"
+    },
+    {
+      "label": "Task V-1: \u9a8c\u6536",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L450",
+      "_origin": "ast",
+      "id": "plans_2026_06_22_graph_usability_enhancement_task_v_1_\u9a8c\u6536",
+      "community": 26,
+      "norm_label": "task v-1: \u9a8c\u6536"
+    },
+    {
+      "label": "\u5b8c\u6210\u68c0\u67e5\u6e05\u5355",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L471",
+      "_origin": "ast",
+      "id": "plans_2026_06_22_graph_usability_enhancement_\u5b8c\u6210\u68c0\u67e5\u6e05\u5355",
+      "community": 26,
+      "norm_label": "\u5b8c\u6210\u68c0\u67e5\u6e05\u5355"
+    },
+    {
+      "label": "\u5df2\u77e5\u9650\u5236",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L485",
+      "_origin": "ast",
+      "id": "plans_2026_06_22_graph_usability_enhancement_\u5df2\u77e5\u9650\u5236",
+      "community": 26,
+      "norm_label": "\u5df2\u77e5\u9650\u5236"
     },
     {
       "label": "2026-06-20-godot47-gdscript-parser-design.md",
@@ -4114,10 +4324,60 @@
       "norm_label": "\u5341\u4e8c\u3001\u9a8c\u6536\u6807\u51c6"
     },
     {
+      "label": "\u9644\u5f55\uff1aPhase 3.3 \u5b9e\u73b0\u5b8c\u6210\u8bb0\u5f55",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
+      "source_location": "L227",
+      "_origin": "ast",
+      "id": "specs_2026_06_21_phase3_3_graph_visualization_\u9644\u5f55_phase_3_3_\u5b9e\u73b0\u5b8c\u6210\u8bb0\u5f55",
+      "community": 18,
+      "norm_label": "\u9644\u5f55:phase 3.3 \u5b9e\u73b0\u5b8c\u6210\u8bb0\u5f55"
+    },
+    {
+      "label": "\u4e0e\u89c4\u8303\u7684\u504f\u5dee\uff08\u5747\u5728\u5b9e\u73b0\u4e2d\u4fee\u590d\uff09",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
+      "source_location": "L240",
+      "_origin": "ast",
+      "id": "specs_2026_06_21_phase3_3_graph_visualization_\u4e0e\u89c4\u8303\u7684\u504f\u5dee_\u5747\u5728\u5b9e\u73b0\u4e2d\u4fee\u590d",
+      "community": 18,
+      "norm_label": "\u4e0e\u89c4\u8303\u7684\u504f\u5dee(\u5747\u5728\u5b9e\u73b0\u4e2d\u4fee\u590d)"
+    },
+    {
+      "label": "\u9a8c\u6536\u4e2d\u53d1\u73b0\u5e76\u4fee\u590d\u7684 Bug",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
+      "source_location": "L249",
+      "_origin": "ast",
+      "id": "specs_2026_06_21_phase3_3_graph_visualization_\u9a8c\u6536\u4e2d\u53d1\u73b0\u5e76\u4fee\u590d\u7684_bug",
+      "community": 18,
+      "norm_label": "\u9a8c\u6536\u4e2d\u53d1\u73b0\u5e76\u4fee\u590d\u7684 bug"
+    },
+    {
+      "label": "\u5173\u952e\u7ecf\u9a8c\uff08GDScript \u7f16\u8f91\u5668\u4e3b\u5c4f\uff09",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
+      "source_location": "L257",
+      "_origin": "ast",
+      "id": "specs_2026_06_21_phase3_3_graph_visualization_\u5173\u952e\u7ecf\u9a8c_gdscript_\u7f16\u8f91\u5668\u4e3b\u5c4f",
+      "community": 18,
+      "norm_label": "\u5173\u952e\u7ecf\u9a8c(gdscript \u7f16\u8f91\u5668\u4e3b\u5c4f)"
+    },
+    {
+      "label": "\u5df2\u77e5\u9650\u5236\uff08Phase 3.4\uff09",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
+      "source_location": "L264",
+      "_origin": "ast",
+      "id": "specs_2026_06_21_phase3_3_graph_visualization_\u5df2\u77e5\u9650\u5236_phase_3_4",
+      "community": 18,
+      "norm_label": "\u5df2\u77e5\u9650\u5236(phase 3.4)"
+    },
+    {
       "label": "\u5341\u4e09\u3001\u98ce\u9669\u4e0e\u8fb9\u754c",
       "file_type": "document",
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
-      "source_location": "L225",
+      "source_location": "L272",
       "_origin": "ast",
       "id": "specs_2026_06_21_phase3_3_graph_visualization_\u5341\u4e09_\u98ce\u9669\u4e0e\u8fb9\u754c",
       "community": 18,
@@ -4127,11 +4387,651 @@
       "label": "\u5341\u56db\u3001\u4e0e Phase 3.4 \u7684\u8fb9\u754c",
       "file_type": "document",
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
-      "source_location": "L235",
+      "source_location": "L282",
       "_origin": "ast",
       "id": "specs_2026_06_21_phase3_3_graph_visualization_\u5341\u56db_\u4e0e_phase_3_4_\u7684\u8fb9\u754c",
       "community": 18,
       "norm_label": "\u5341\u56db\u3001\u4e0e phase 3.4 \u7684\u8fb9\u754c"
+    },
+    {
+      "label": "2026-06-22-builtin-function-filter.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-builtin-function-filter.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_builtin_function_filter",
+      "community": 29,
+      "norm_label": "2026-06-22-builtin-function-filter.md"
+    },
+    {
+      "label": "\u5185\u7f6e\u51fd\u6570\u8fc7\u6ee4 \u8bbe\u8ba1\u89c4\u8303",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-builtin-function-filter.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_builtin_function_filter_\u5185\u7f6e\u51fd\u6570\u8fc7\u6ee4_\u8bbe\u8ba1\u89c4\u8303",
+      "community": 29,
+      "norm_label": "\u5185\u7f6e\u51fd\u6570\u8fc7\u6ee4 \u8bbe\u8ba1\u89c4\u8303"
+    },
+    {
+      "label": "\u4e00\u3001\u76ee\u6807",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-builtin-function-filter.md",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_builtin_function_filter_\u4e00_\u76ee\u6807",
+      "community": 29,
+      "norm_label": "\u4e00\u3001\u76ee\u6807"
+    },
+    {
+      "label": "\u4e8c\u3001\u8303\u56f4",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-builtin-function-filter.md",
+      "source_location": "L14",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_builtin_function_filter_\u4e8c_\u8303\u56f4",
+      "community": 29,
+      "norm_label": "\u4e8c\u3001\u8303\u56f4"
+    },
+    {
+      "label": "\u505a\uff1a",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-builtin-function-filter.md",
+      "source_location": "L16",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_builtin_function_filter_\u505a",
+      "community": 29,
+      "norm_label": "\u505a:"
+    },
+    {
+      "label": "\u4e0d\u505a\uff1a",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-builtin-function-filter.md",
+      "source_location": "L23",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_builtin_function_filter_\u4e0d\u505a",
+      "community": 29,
+      "norm_label": "\u4e0d\u505a:"
+    },
+    {
+      "label": "\u4e09\u3001\u6570\u636e\u6765\u6e90",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-builtin-function-filter.md",
+      "source_location": "L29",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_builtin_function_filter_\u4e09_\u6570\u636e\u6765\u6e90",
+      "community": 29,
+      "norm_label": "\u4e09\u3001\u6570\u636e\u6765\u6e90"
+    },
+    {
+      "label": "\u56db\u3001\u67b6\u6784",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-builtin-function-filter.md",
+      "source_location": "L37",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_builtin_function_filter_\u56db_\u67b6\u6784",
+      "community": 29,
+      "norm_label": "\u56db\u3001\u67b6\u6784"
+    },
+    {
+      "label": "4.1 \u5185\u7f6e\u51fd\u6570\u8868",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-builtin-function-filter.md",
+      "source_location": "L45",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_builtin_function_filter_4_1_\u5185\u7f6e\u51fd\u6570\u8868",
+      "community": 29,
+      "norm_label": "4.1 \u5185\u7f6e\u51fd\u6570\u8868"
+    },
+    {
+      "label": "4.2 resolver \u8fc7\u6ee4",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-builtin-function-filter.md",
+      "source_location": "L71",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_builtin_function_filter_4_2_resolver_\u8fc7\u6ee4",
+      "community": 29,
+      "norm_label": "4.2 resolver \u8fc7\u6ee4"
+    },
+    {
+      "label": "\u4e94\u3001\u4ea4\u4ed8\u7269",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-builtin-function-filter.md",
+      "source_location": "L89",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_builtin_function_filter_\u4e94_\u4ea4\u4ed8\u7269",
+      "community": 29,
+      "norm_label": "\u4e94\u3001\u4ea4\u4ed8\u7269"
+    },
+    {
+      "label": "\u516d\u3001\u9a8c\u6536\u6807\u51c6",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-builtin-function-filter.md",
+      "source_location": "L96",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_builtin_function_filter_\u516d_\u9a8c\u6536\u6807\u51c6",
+      "community": 29,
+      "norm_label": "\u516d\u3001\u9a8c\u6536\u6807\u51c6"
+    },
+    {
+      "label": "\u4e03\u3001\u98ce\u9669",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-builtin-function-filter.md",
+      "source_location": "L104",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_builtin_function_filter_\u4e03_\u98ce\u9669",
+      "community": 29,
+      "norm_label": "\u4e03\u3001\u98ce\u9669"
+    },
+    {
+      "label": "2026-06-22-graph-usability-enhancement.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_graph_usability_enhancement",
+      "community": 1,
+      "norm_label": "2026-06-22-graph-usability-enhancement.md"
+    },
+    {
+      "label": "\u56fe\u53ef\u7528\u6027\u5f3a\u5316 \u8bbe\u8ba1\u89c4\u8303",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_graph_usability_enhancement_\u56fe\u53ef\u7528\u6027\u5f3a\u5316_\u8bbe\u8ba1\u89c4\u8303",
+      "community": 1,
+      "norm_label": "\u56fe\u53ef\u7528\u6027\u5f3a\u5316 \u8bbe\u8ba1\u89c4\u8303"
+    },
+    {
+      "label": "\u4e00\u3001\u76ee\u6807",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_graph_usability_enhancement_\u4e00_\u76ee\u6807",
+      "community": 1,
+      "norm_label": "\u4e00\u3001\u76ee\u6807"
+    },
+    {
+      "label": "\u4e8c\u3001\u8303\u56f4",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L16",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_graph_usability_enhancement_\u4e8c_\u8303\u56f4",
+      "community": 1,
+      "norm_label": "\u4e8c\u3001\u8303\u56f4"
+    },
+    {
+      "label": "P0\uff08\u9ad8\u4ef7\u503c\u4f4e\u6210\u672c\uff0c\u4f18\u5148\uff09",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L18",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_graph_usability_enhancement_p0_\u9ad8\u4ef7\u503c\u4f4e\u6210\u672c_\u4f18\u5148",
+      "community": 1,
+      "norm_label": "p0(\u9ad8\u4ef7\u503c\u4f4e\u6210\u672c,\u4f18\u5148)"
+    },
+    {
+      "label": "P1\uff08\u4e2d\u4ef7\u503c\uff0cP0 \u4e4b\u540e\uff09",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L27",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_graph_usability_enhancement_p1_\u4e2d\u4ef7\u503c_p0_\u4e4b\u540e",
+      "community": 1,
+      "norm_label": "p1(\u4e2d\u4ef7\u503c,p0 \u4e4b\u540e)"
+    },
+    {
+      "label": "\u4e0d\u505a\uff08\u72ec\u7acb spec / Phase 3.4+\uff09",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L36",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_graph_usability_enhancement_\u4e0d\u505a_\u72ec\u7acb_spec_phase_3_4",
+      "community": 1,
+      "norm_label": "\u4e0d\u505a(\u72ec\u7acb spec / phase 3.4+)"
+    },
+    {
+      "label": "\u4e09\u3001\u73b0\u72b6\u56de\u987e\uff08Phase 3.3 \u7ed8\u5236\u5185\u5bb9\uff09",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L44",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_graph_usability_enhancement_\u4e09_\u73b0\u72b6\u56de\u987e_phase_3_3_\u7ed8\u5236\u5185\u5bb9",
+      "community": 1,
+      "norm_label": "\u4e09\u3001\u73b0\u72b6\u56de\u987e(phase 3.3 \u7ed8\u5236\u5185\u5bb9)"
+    },
+    {
+      "label": "\u56db\u3001\u6a21\u5757\u8be6\u8ff0",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L53",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_graph_usability_enhancement_\u56db_\u6a21\u5757\u8be6\u8ff0",
+      "community": 1,
+      "norm_label": "\u56db\u3001\u6a21\u5757\u8be6\u8ff0"
+    },
+    {
+      "label": "4.1 \u8fb9\u5206\u7c7b\u578b\u7740\u8272\uff08#1\uff09",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L55",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_graph_usability_enhancement_4_1_\u8fb9\u5206\u7c7b\u578b\u7740\u8272_1",
+      "community": 1,
+      "norm_label": "4.1 \u8fb9\u5206\u7c7b\u578b\u7740\u8272(#1)"
+    },
+    {
+      "label": "4.2 \u8282\u70b9\u5e26\u7b7e\u540d\uff08#2\uff09",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L66",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_graph_usability_enhancement_4_2_\u8282\u70b9\u5e26\u7b7e\u540d_2",
+      "community": 1,
+      "norm_label": "4.2 \u8282\u70b9\u5e26\u7b7e\u540d(#2)"
+    },
+    {
+      "label": "4.3 \u8282\u70b9\u5e26\u4f4d\u7f6e\uff08#3\uff09",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L83",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_graph_usability_enhancement_4_3_\u8282\u70b9\u5e26\u4f4d\u7f6e_3",
+      "community": 1,
+      "norm_label": "4.3 \u8282\u70b9\u5e26\u4f4d\u7f6e(#3)"
+    },
+    {
+      "label": "4.4 \u4fe1\u53f7\u56fe emit/connect \u5206\u5411\uff08#4\uff09",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L95",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_graph_usability_enhancement_4_4_\u4fe1\u53f7\u56fe_emit_connect_\u5206\u5411_4",
+      "community": 1,
+      "norm_label": "4.4 \u4fe1\u53f7\u56fe emit/connect \u5206\u5411(#4)"
+    },
+    {
+      "label": "4.5 \u5165\u53e3\u51fd\u6570\u6807\u8bb0\uff08#5\uff0cP1\uff09",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L102",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_graph_usability_enhancement_4_5_\u5165\u53e3\u51fd\u6570\u6807\u8bb0_5_p1",
+      "community": 1,
+      "norm_label": "4.5 \u5165\u53e3\u51fd\u6570\u6807\u8bb0(#5,p1)"
+    },
+    {
+      "label": "4.6 hover tooltip\uff08#6\uff0cP1\uff09",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L108",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_graph_usability_enhancement_4_6_hover_tooltip_6_p1",
+      "community": 1,
+      "norm_label": "4.6 hover tooltip(#6,p1)"
+    },
+    {
+      "label": "4.7 \u4f4e\u5ea6\u6570\u7b5b\u9009\uff08#7\uff0cP1\uff09",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L112",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_graph_usability_enhancement_4_7_\u4f4e\u5ea6\u6570\u7b5b\u9009_7_p1",
+      "community": 1,
+      "norm_label": "4.7 \u4f4e\u5ea6\u6570\u7b5b\u9009(#7,p1)"
+    },
+    {
+      "label": "4.8 \u70b9\u8282\u70b9\u8df3\u8f6c + \u5173\u8054\u8fb9\u9ad8\u4eae\uff08#8\uff0cP1\uff09",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L116",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_graph_usability_enhancement_4_8_\u70b9\u8282\u70b9\u8df3\u8f6c_\u5173\u8054\u8fb9\u9ad8\u4eae_8_p1",
+      "community": 1,
+      "norm_label": "4.8 \u70b9\u8282\u70b9\u8df3\u8f6c + \u5173\u8054\u8fb9\u9ad8\u4eae(#8,p1)"
+    },
+    {
+      "label": "\u4e94\u3001\u901a\u7528\u56fe\u4f8b\uff08legend\uff09",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L122",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_graph_usability_enhancement_\u4e94_\u901a\u7528\u56fe\u4f8b_legend",
+      "community": 1,
+      "norm_label": "\u4e94\u3001\u901a\u7528\u56fe\u4f8b(legend)"
+    },
+    {
+      "label": "\u516d\u3001\u4ea4\u4ed8\u7269",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L131",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_graph_usability_enhancement_\u516d_\u4ea4\u4ed8\u7269",
+      "community": 1,
+      "norm_label": "\u516d\u3001\u4ea4\u4ed8\u7269"
+    },
+    {
+      "label": "\u4e03\u3001\u9a8c\u6536\u6807\u51c6",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L142",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_graph_usability_enhancement_\u4e03_\u9a8c\u6536\u6807\u51c6",
+      "community": 1,
+      "norm_label": "\u4e03\u3001\u9a8c\u6536\u6807\u51c6"
+    },
+    {
+      "label": "\u516b\u3001\u98ce\u9669\u4e0e\u8fb9\u754c",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L155",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_graph_usability_enhancement_\u516b_\u98ce\u9669\u4e0e\u8fb9\u754c",
+      "community": 1,
+      "norm_label": "\u516b\u3001\u98ce\u9669\u4e0e\u8fb9\u754c"
+    },
+    {
+      "label": "2026-06-22-large-graph-virtualization.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-large-graph-virtualization.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_large_graph_virtualization",
+      "community": 27,
+      "norm_label": "2026-06-22-large-graph-virtualization.md"
+    },
+    {
+      "label": "\u5927\u56fe\u865a\u62df\u5316 \u8bbe\u8ba1\u89c4\u8303",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-large-graph-virtualization.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_large_graph_virtualization_\u5927\u56fe\u865a\u62df\u5316_\u8bbe\u8ba1\u89c4\u8303",
+      "community": 27,
+      "norm_label": "\u5927\u56fe\u865a\u62df\u5316 \u8bbe\u8ba1\u89c4\u8303"
+    },
+    {
+      "label": "\u4e00\u3001\u76ee\u6807",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-large-graph-virtualization.md",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_large_graph_virtualization_\u4e00_\u76ee\u6807",
+      "community": 27,
+      "norm_label": "\u4e00\u3001\u76ee\u6807"
+    },
+    {
+      "label": "\u4e8c\u3001\u8303\u56f4",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-large-graph-virtualization.md",
+      "source_location": "L16",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_large_graph_virtualization_\u4e8c_\u8303\u56f4",
+      "community": 27,
+      "norm_label": "\u4e8c\u3001\u8303\u56f4"
+    },
+    {
+      "label": "\u505a\uff1a",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-large-graph-virtualization.md",
+      "source_location": "L18",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_large_graph_virtualization_\u505a",
+      "community": 27,
+      "norm_label": "\u505a:"
+    },
+    {
+      "label": "\u4e0d\u505a\uff1a",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-large-graph-virtualization.md",
+      "source_location": "L26",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_large_graph_virtualization_\u4e0d\u505a",
+      "community": 27,
+      "norm_label": "\u4e0d\u505a:"
+    },
+    {
+      "label": "\u4e09\u3001\u67b6\u6784",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-large-graph-virtualization.md",
+      "source_location": "L32",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_large_graph_virtualization_\u4e09_\u67b6\u6784",
+      "community": 27,
+      "norm_label": "\u4e09\u3001\u67b6\u6784"
+    },
+    {
+      "label": "3.1 \u865a\u62df\u5316\u6570\u636e\u6d41",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-large-graph-virtualization.md",
+      "source_location": "L41",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_large_graph_virtualization_3_1_\u865a\u62df\u5316\u6570\u636e\u6d41",
+      "community": 27,
+      "norm_label": "3.1 \u865a\u62df\u5316\u6570\u636e\u6d41"
+    },
+    {
+      "label": "3.2 GDSVirtualGraphEdit",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-large-graph-virtualization.md",
+      "source_location": "L56",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_large_graph_virtualization_3_2_gdsvirtualgraphedit",
+      "community": 27,
+      "norm_label": "3.2 gdsvirtualgraphedit"
+    },
+    {
+      "label": "3.3 \u6eda\u52a8/\u7f29\u653e\u89e6\u53d1",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-large-graph-virtualization.md",
+      "source_location": "L104",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_large_graph_virtualization_3_3_\u6eda\u52a8_\u7f29\u653e\u89e6\u53d1",
+      "community": 27,
+      "norm_label": "3.3 \u6eda\u52a8/\u7f29\u653e\u89e6\u53d1"
+    },
+    {
+      "label": "3.4 \u7f29\u653e\u805a\u5408",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-large-graph-virtualization.md",
+      "source_location": "L108",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_large_graph_virtualization_3_4_\u7f29\u653e\u805a\u5408",
+      "community": 27,
+      "norm_label": "3.4 \u7f29\u653e\u805a\u5408"
+    },
+    {
+      "label": "\u56db\u3001\u4ea4\u4ed8\u7269",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-large-graph-virtualization.md",
+      "source_location": "L112",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_large_graph_virtualization_\u56db_\u4ea4\u4ed8\u7269",
+      "community": 27,
+      "norm_label": "\u56db\u3001\u4ea4\u4ed8\u7269"
+    },
+    {
+      "label": "\u4e94\u3001\u9a8c\u6536\u6807\u51c6",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-large-graph-virtualization.md",
+      "source_location": "L121",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_large_graph_virtualization_\u4e94_\u9a8c\u6536\u6807\u51c6",
+      "community": 27,
+      "norm_label": "\u4e94\u3001\u9a8c\u6536\u6807\u51c6"
+    },
+    {
+      "label": "\u516d\u3001\u98ce\u9669",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-large-graph-virtualization.md",
+      "source_location": "L130",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_large_graph_virtualization_\u516d_\u98ce\u9669",
+      "community": 27,
+      "norm_label": "\u516d\u3001\u98ce\u9669"
+    },
+    {
+      "label": "\u4e03\u3001\u4f18\u5148\u7ea7\u8bf4\u660e",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-large-graph-virtualization.md",
+      "source_location": "L140",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_large_graph_virtualization_\u4e03_\u4f18\u5148\u7ea7\u8bf4\u660e",
+      "community": 27,
+      "norm_label": "\u4e03\u3001\u4f18\u5148\u7ea7\u8bf4\u660e"
+    },
+    {
+      "label": "2026-06-22-type-inference.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-type-inference.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_type_inference",
+      "community": 28,
+      "norm_label": "2026-06-22-type-inference.md"
+    },
+    {
+      "label": "\u7c7b\u578b\u63a8\u65ad \u8bbe\u8ba1\u89c4\u8303",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-type-inference.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_type_inference_\u7c7b\u578b\u63a8\u65ad_\u8bbe\u8ba1\u89c4\u8303",
+      "community": 28,
+      "norm_label": "\u7c7b\u578b\u63a8\u65ad \u8bbe\u8ba1\u89c4\u8303"
+    },
+    {
+      "label": "\u4e00\u3001\u76ee\u6807",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-type-inference.md",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_type_inference_\u4e00_\u76ee\u6807",
+      "community": 28,
+      "norm_label": "\u4e00\u3001\u76ee\u6807"
+    },
+    {
+      "label": "\u4e8c\u3001\u8303\u56f4",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-type-inference.md",
+      "source_location": "L18",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_type_inference_\u4e8c_\u8303\u56f4",
+      "community": 28,
+      "norm_label": "\u4e8c\u3001\u8303\u56f4"
+    },
+    {
+      "label": "\u505a\uff08L1 \u7b80\u5355\u63a8\u65ad\uff0c\u8986\u76d6\u5e38\u89c1\u6a21\u5f0f\uff09\uff1a",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-type-inference.md",
+      "source_location": "L20",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_type_inference_\u505a_l1_\u7b80\u5355\u63a8\u65ad_\u8986\u76d6\u5e38\u89c1\u6a21\u5f0f",
+      "community": 28,
+      "norm_label": "\u505a(l1 \u7b80\u5355\u63a8\u65ad,\u8986\u76d6\u5e38\u89c1\u6a21\u5f0f):"
+    },
+    {
+      "label": "\u4e0d\u505a\uff08L2+ \u590d\u6742\uff0c\u540e\u7eed\uff09\uff1a",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-type-inference.md",
+      "source_location": "L28",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_type_inference_\u4e0d\u505a_l2_\u590d\u6742_\u540e\u7eed",
+      "community": 28,
+      "norm_label": "\u4e0d\u505a(l2+ \u590d\u6742,\u540e\u7eed):"
+    },
+    {
+      "label": "\u4e09\u3001\u4e3a\u4ec0\u4e48\u662f L1\uff08\u52a1\u5b9e\u8fb9\u754c\uff09",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-type-inference.md",
+      "source_location": "L36",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_type_inference_\u4e09_\u4e3a\u4ec0\u4e48\u662f_l1_\u52a1\u5b9e\u8fb9\u754c",
+      "community": 28,
+      "norm_label": "\u4e09\u3001\u4e3a\u4ec0\u4e48\u662f l1(\u52a1\u5b9e\u8fb9\u754c)"
+    },
+    {
+      "label": "\u56db\u3001\u67b6\u6784",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-type-inference.md",
+      "source_location": "L42",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_type_inference_\u56db_\u67b6\u6784",
+      "community": 28,
+      "norm_label": "\u56db\u3001\u67b6\u6784"
+    },
+    {
+      "label": "4.1 \u63a8\u65ad\u6d41\u7a0b",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-type-inference.md",
+      "source_location": "L51",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_type_inference_4_1_\u63a8\u65ad\u6d41\u7a0b",
+      "community": 28,
+      "norm_label": "4.1 \u63a8\u65ad\u6d41\u7a0b"
+    },
+    {
+      "label": "4.2 GDS_TypeInferrer",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-type-inference.md",
+      "source_location": "L64",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_type_inference_4_2_gds_typeinferrer",
+      "community": 28,
+      "norm_label": "4.2 gds_typeinferrer"
+    },
+    {
+      "label": "4.3 \u8fd4\u56de\u7c7b\u578b\u8868\u9884\u5efa",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-type-inference.md",
+      "source_location": "L94",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_type_inference_4_3_\u8fd4\u56de\u7c7b\u578b\u8868\u9884\u5efa",
+      "community": 28,
+      "norm_label": "4.3 \u8fd4\u56de\u7c7b\u578b\u8868\u9884\u5efa"
+    },
+    {
+      "label": "\u4e94\u3001\u4ea4\u4ed8\u7269",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-type-inference.md",
+      "source_location": "L98",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_type_inference_\u4e94_\u4ea4\u4ed8\u7269",
+      "community": 28,
+      "norm_label": "\u4e94\u3001\u4ea4\u4ed8\u7269"
+    },
+    {
+      "label": "\u516d\u3001\u9a8c\u6536\u6807\u51c6",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-type-inference.md",
+      "source_location": "L105",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_type_inference_\u516d_\u9a8c\u6536\u6807\u51c6",
+      "community": 28,
+      "norm_label": "\u516d\u3001\u9a8c\u6536\u6807\u51c6"
+    },
+    {
+      "label": "\u4e03\u3001\u98ce\u9669",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-type-inference.md",
+      "source_location": "L114",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_type_inference_\u4e03_\u98ce\u9669",
+      "community": 28,
+      "norm_label": "\u4e03\u3001\u98ce\u9669"
+    },
+    {
+      "label": "\u516b\u3001\u4e0e\u56fe\u5f3a\u5316\u7684\u5173\u7cfb",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-22-type-inference.md",
+      "source_location": "L123",
+      "_origin": "ast",
+      "id": "specs_2026_06_22_type_inference_\u516b_\u4e0e\u56fe\u5f3a\u5316\u7684\u5173\u7cfb",
+      "community": 28,
+      "norm_label": "\u516b\u3001\u4e0e\u56fe\u5f3a\u5316\u7684\u5173\u7cfb"
     },
     {
       "label": "readme.md",
@@ -4257,7 +5157,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 0,
       "norm_label": "gdscriptbytecodeparser (extends node)",
       "id": "gds_bc_parser_gd__class_GDScriptByteCodeParser"
     },
@@ -4270,7 +5170,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 0,
       "norm_label": "token (enum)",
       "id": "gds_bc_parser_gd__enum_Token"
     },
@@ -4283,7 +5183,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 0,
       "norm_label": "gdscriptbytecodeparseresult",
       "id": "gds_bc_parser_gd__class_GDScriptByteCodeParseResult"
     },
@@ -4296,7 +5196,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 0,
       "norm_label": "gdscripttoken",
       "id": "gds_bc_parser_gd__class_GDScriptToken"
     },
@@ -4309,7 +5209,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 0,
       "norm_label": "parse(code: poolbytearray)",
       "id": "gds_bc_parser_gd__func_parse"
     },
@@ -4322,7 +5222,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 0,
       "norm_label": "_parse_identifiers(stream, count)",
       "id": "gds_bc_parser_gd__func_parse_identifiers"
     },
@@ -4335,7 +5235,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 0,
       "norm_label": "_parse_constants(stream, count)",
       "id": "gds_bc_parser_gd__func_parse_constants"
     },
@@ -4348,7 +5248,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 0,
       "norm_label": "_parse_lines(stream, count)",
       "id": "gds_bc_parser_gd__func_parse_lines"
     },
@@ -4361,7 +5261,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 1,
+      "community": 0,
       "norm_label": "_parse_tokens(stream, count)",
       "id": "gds_bc_parser_gd__func_parse_tokens"
     },
@@ -4924,9 +5824,9 @@
       "source_file": "docs/superpowers/decisions/0001-defer-csharp-rewrite.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "decisions_0001_defer_csharp_rewrite",
-      "target": "decisions_0001_defer_csharp_rewrite_adr_0001_\u6682\u7f13_c_\u91cd\u5199_\u5148_profile_\u518d\u51b3\u5b9a",
-      "confidence_score": 1.0
+      "target": "decisions_0001_defer_csharp_rewrite_adr_0001_\u6682\u7f13_c_\u91cd\u5199_\u5148_profile_\u518d\u51b3\u5b9a"
     },
     {
       "relation": "contains",
@@ -4934,9 +5834,9 @@
       "source_file": "docs/superpowers/decisions/0001-defer-csharp-rewrite.md",
       "source_location": "L30",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "decisions_0001_defer_csharp_rewrite_adr_0001_\u6682\u7f13_c_\u91cd\u5199_\u5148_profile_\u518d\u51b3\u5b9a",
-      "target": "decisions_0001_defer_csharp_rewrite_\u51b3\u7b56",
-      "confidence_score": 1.0
+      "target": "decisions_0001_defer_csharp_rewrite_\u51b3\u7b56"
     },
     {
       "relation": "contains",
@@ -4944,9 +5844,9 @@
       "source_file": "docs/superpowers/decisions/0001-defer-csharp-rewrite.md",
       "source_location": "L59",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "decisions_0001_defer_csharp_rewrite_adr_0001_\u6682\u7f13_c_\u91cd\u5199_\u5148_profile_\u518d\u51b3\u5b9a",
-      "target": "decisions_0001_defer_csharp_rewrite_\u53c2\u8003",
-      "confidence_score": 1.0
+      "target": "decisions_0001_defer_csharp_rewrite_\u53c2\u8003"
     },
     {
       "relation": "contains",
@@ -4954,9 +5854,9 @@
       "source_file": "docs/superpowers/decisions/0001-defer-csharp-rewrite.md",
       "source_location": "L55",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "decisions_0001_defer_csharp_rewrite_adr_0001_\u6682\u7f13_c_\u91cd\u5199_\u5148_profile_\u518d\u51b3\u5b9a",
-      "target": "decisions_0001_defer_csharp_rewrite_\u5f53\u524d\u4f18\u5148\u7ea7",
-      "confidence_score": 1.0
+      "target": "decisions_0001_defer_csharp_rewrite_\u5f53\u524d\u4f18\u5148\u7ea7"
     },
     {
       "relation": "contains",
@@ -4964,9 +5864,9 @@
       "source_file": "docs/superpowers/decisions/0001-defer-csharp-rewrite.md",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "decisions_0001_defer_csharp_rewrite_adr_0001_\u6682\u7f13_c_\u91cd\u5199_\u5148_profile_\u518d\u51b3\u5b9a",
-      "target": "decisions_0001_defer_csharp_rewrite_\u80cc\u666f",
-      "confidence_score": 1.0
+      "target": "decisions_0001_defer_csharp_rewrite_\u80cc\u666f"
     },
     {
       "relation": "contains",
@@ -4974,9 +5874,9 @@
       "source_file": "docs/superpowers/decisions/0001-defer-csharp-rewrite.md",
       "source_location": "L37",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "decisions_0001_defer_csharp_rewrite_adr_0001_\u6682\u7f13_c_\u91cd\u5199_\u5148_profile_\u518d\u51b3\u5b9a",
-      "target": "decisions_0001_defer_csharp_rewrite_\u89e6\u53d1\u6761\u4ef6_\u4f55\u65f6\u91cd\u65b0\u8bc4\u4f30",
-      "confidence_score": 1.0
+      "target": "decisions_0001_defer_csharp_rewrite_\u89e6\u53d1\u6761\u4ef6_\u4f55\u65f6\u91cd\u65b0\u8bc4\u4f30"
     },
     {
       "relation": "contains",
@@ -4984,9 +5884,9 @@
       "source_file": "docs/superpowers/decisions/0001-defer-csharp-rewrite.md",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "decisions_0001_defer_csharp_rewrite_adr_0001_\u6682\u7f13_c_\u91cd\u5199_\u5148_profile_\u518d\u51b3\u5b9a",
-      "target": "decisions_0001_defer_csharp_rewrite_\u8bc4\u4f30",
-      "confidence_score": 1.0
+      "target": "decisions_0001_defer_csharp_rewrite_\u8bc4\u4f30"
     },
     {
       "relation": "contains",
@@ -4994,9 +5894,9 @@
       "source_file": "docs/superpowers/decisions/0001-defer-csharp-rewrite.md",
       "source_location": "L45",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "decisions_0001_defer_csharp_rewrite_adr_0001_\u6682\u7f13_c_\u91cd\u5199_\u5148_profile_\u518d\u51b3\u5b9a",
-      "target": "decisions_0001_defer_csharp_rewrite_\u8def\u5f84_\u82e5\u672a\u6765\u91cd\u5f00",
-      "confidence_score": 1.0
+      "target": "decisions_0001_defer_csharp_rewrite_\u8def\u5f84_\u82e5\u672a\u6765\u91cd\u5f00"
     },
     {
       "relation": "contains",
@@ -5004,9 +5904,9 @@
       "source_file": "docs/superpowers/decisions/0001-defer-csharp-rewrite.md",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "decisions_0001_defer_csharp_rewrite_\u8bc4\u4f30",
-      "target": "decisions_0001_defer_csharp_rewrite_c_\u91cd\u5199\u9884\u671f\u6536\u76ca",
-      "confidence_score": 1.0
+      "target": "decisions_0001_defer_csharp_rewrite_c_\u91cd\u5199\u9884\u671f\u6536\u76ca"
     },
     {
       "relation": "contains",
@@ -5014,9 +5914,9 @@
       "source_file": "docs/superpowers/decisions/0001-defer-csharp-rewrite.md",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "decisions_0001_defer_csharp_rewrite_\u8bc4\u4f30",
-      "target": "decisions_0001_defer_csharp_rewrite_\u5173\u952e\u524d\u63d0_\u51b7\u6c34",
-      "confidence_score": 1.0
+      "target": "decisions_0001_defer_csharp_rewrite_\u5173\u952e\u524d\u63d0_\u51b7\u6c34"
     },
     {
       "relation": "contains",
@@ -5024,9 +5924,9 @@
       "source_file": "docs/superpowers/decisions/0001-defer-csharp-rewrite.md",
       "source_location": "L24",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "decisions_0001_defer_csharp_rewrite_\u8bc4\u4f30",
-      "target": "decisions_0001_defer_csharp_rewrite_\u91cd\u5199\u7684\u771f\u5b9e\u4ee3\u4ef7",
-      "confidence_score": 1.0
+      "target": "decisions_0001_defer_csharp_rewrite_\u91cd\u5199\u7684\u771f\u5b9e\u4ee3\u4ef7"
     },
     {
       "relation": "contains",
@@ -6234,9 +7134,9 @@
       "source_file": "docs/superpowers/plans/2026-06-21-phase3-2-cross-file-analysis.md",
       "source_location": "L790",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_06_21_phase3_2_cross_file_analysis_phase_3_2_\u8de8\u6587\u4ef6\u5206\u6790_\u5b9e\u73b0\u8ba1\u5212",
-      "target": "plans_2026_06_21_phase3_2_cross_file_analysis_\u4e0e\u5b9e\u9645\u5b9e\u73b0\u7684\u5dee\u5f02",
-      "confidence_score": 1.0
+      "target": "plans_2026_06_21_phase3_2_cross_file_analysis_\u4e0e\u5b9e\u9645\u5b9e\u73b0\u7684\u5dee\u5f02"
     },
     {
       "relation": "contains",
@@ -6424,9 +7324,9 @@
       "source_file": "docs/superpowers/plans/2026-06-21-phase3-2-cross-file-analysis.md",
       "source_location": "L792",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_06_21_phase3_2_cross_file_analysis_\u4e0e\u5b9e\u9645\u5b9e\u73b0\u7684\u5dee\u5f02",
-      "target": "plans_2026_06_21_phase3_2_cross_file_analysis_1_resolver_\u7f3a_obj_signal_connect_cb_\u5206\u652f_\u9a8c\u6536\u4fee\u590d",
-      "confidence_score": 1.0
+      "target": "plans_2026_06_21_phase3_2_cross_file_analysis_1_resolver_\u7f3a_obj_signal_connect_cb_\u5206\u652f_\u9a8c\u6536\u4fee\u590d"
     },
     {
       "relation": "contains",
@@ -6434,9 +7334,9 @@
       "source_file": "docs/superpowers/plans/2026-06-21-phase3-2-cross-file-analysis.md",
       "source_location": "L798",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_06_21_phase3_2_cross_file_analysis_\u4e0e\u5b9e\u9645\u5b9e\u73b0\u7684\u5dee\u5f02",
-      "target": "plans_2026_06_21_phase3_2_cross_file_analysis_2_parser_extends_class_name_\u987a\u5e8f_\u9a8c\u6536\u4fee\u590d",
-      "confidence_score": 1.0
+      "target": "plans_2026_06_21_phase3_2_cross_file_analysis_2_parser_extends_class_name_\u987a\u5e8f_\u9a8c\u6536\u4fee\u590d"
     },
     {
       "relation": "contains",
@@ -6444,9 +7344,9 @@
       "source_file": "docs/superpowers/plans/2026-06-21-phase3-2-cross-file-analysis.md",
       "source_location": "L804",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_06_21_phase3_2_cross_file_analysis_\u4e0e\u5b9e\u9645\u5b9e\u73b0\u7684\u5dee\u5f02",
-      "target": "plans_2026_06_21_phase3_2_cross_file_analysis_3_project_tab_\u8fb9\u65b9\u5411",
-      "confidence_score": 1.0
+      "target": "plans_2026_06_21_phase3_2_cross_file_analysis_3_project_tab_\u8fb9\u65b9\u5411"
     },
     {
       "relation": "contains",
@@ -6454,9 +7354,9 @@
       "source_file": "docs/superpowers/plans/2026-06-21-phase3-2-cross-file-analysis.md",
       "source_location": "L810",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_06_21_phase3_2_cross_file_analysis_\u4e0e\u5b9e\u9645\u5b9e\u73b0\u7684\u5dee\u5f02",
-      "target": "plans_2026_06_21_phase3_2_cross_file_analysis_4_\u589e\u91cf\u5b9e\u73b0\u7b80\u5316",
-      "confidence_score": 1.0
+      "target": "plans_2026_06_21_phase3_2_cross_file_analysis_4_\u589e\u91cf\u5b9e\u73b0\u7b80\u5316"
     },
     {
       "relation": "contains",
@@ -6464,9 +7364,9 @@
       "source_file": "docs/superpowers/plans/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_06_21_phase3_3_graph_visualization",
-      "target": "plans_2026_06_21_phase3_3_graph_visualization_phase_3_3_\u56fe\u53ef\u89c6\u5316_\u5b9e\u73b0\u8ba1\u5212",
-      "confidence_score": 1.0
+      "target": "plans_2026_06_21_phase3_3_graph_visualization_phase_3_3_\u56fe\u53ef\u89c6\u5316_\u5b9e\u73b0\u8ba1\u5212"
     },
     {
       "relation": "contains",
@@ -6474,9 +7374,9 @@
       "source_file": "docs/superpowers/plans/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L37",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_06_21_phase3_3_graph_visualization_phase_3_3_\u56fe\u53ef\u89c6\u5316_\u5b9e\u73b0\u8ba1\u5212",
-      "target": "plans_2026_06_21_phase3_3_graph_visualization_chunk_a_\u5ea6\u6570\u6570\u636e",
-      "confidence_score": 1.0
+      "target": "plans_2026_06_21_phase3_3_graph_visualization_chunk_a_\u5ea6\u6570\u6570\u636e"
     },
     {
       "relation": "contains",
@@ -6484,9 +7384,9 @@
       "source_file": "docs/superpowers/plans/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L94",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_06_21_phase3_3_graph_visualization_phase_3_3_\u56fe\u53ef\u89c6\u5316_\u5b9e\u73b0\u8ba1\u5212",
-      "target": "plans_2026_06_21_phase3_3_graph_visualization_chunk_b_\u56fe\u8282\u70b9_\u4e3b\u5c4f\u5bb9\u5668",
-      "confidence_score": 1.0
+      "target": "plans_2026_06_21_phase3_3_graph_visualization_chunk_b_\u56fe\u8282\u70b9_\u4e3b\u5c4f\u5bb9\u5668"
     },
     {
       "relation": "contains",
@@ -6494,9 +7394,9 @@
       "source_file": "docs/superpowers/plans/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L235",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_06_21_phase3_3_graph_visualization_phase_3_3_\u56fe\u53ef\u89c6\u5316_\u5b9e\u73b0\u8ba1\u5212",
-      "target": "plans_2026_06_21_phase3_3_graph_visualization_chunk_c_\u4e09\u4e2a\u56fe\u89c6\u56fe_builder",
-      "confidence_score": 1.0
+      "target": "plans_2026_06_21_phase3_3_graph_visualization_chunk_c_\u4e09\u4e2a\u56fe\u89c6\u56fe_builder"
     },
     {
       "relation": "contains",
@@ -6504,9 +7404,9 @@
       "source_file": "docs/superpowers/plans/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L423",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_06_21_phase3_3_graph_visualization_phase_3_3_\u56fe\u53ef\u89c6\u5316_\u5b9e\u73b0\u8ba1\u5212",
-      "target": "plans_2026_06_21_phase3_3_graph_visualization_chunk_d_\u4e3b\u5c4f\u96c6\u6210",
-      "confidence_score": 1.0
+      "target": "plans_2026_06_21_phase3_3_graph_visualization_chunk_d_\u4e3b\u5c4f\u96c6\u6210"
     },
     {
       "relation": "contains",
@@ -6514,8 +7414,18 @@
       "source_file": "docs/superpowers/plans/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L499",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_06_21_phase3_3_graph_visualization_phase_3_3_\u56fe\u53ef\u89c6\u5316_\u5b9e\u73b0\u8ba1\u5212",
-      "target": "plans_2026_06_21_phase3_3_graph_visualization_chunk_e_\u9a8c\u6536",
+      "target": "plans_2026_06_21_phase3_3_graph_visualization_chunk_e_\u9a8c\u6536"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-21-phase3-3-graph-visualization.md",
+      "source_location": "L622",
+      "weight": 1.0,
+      "source": "plans_2026_06_21_phase3_3_graph_visualization_phase_3_3_\u56fe\u53ef\u89c6\u5316_\u5b9e\u73b0\u8ba1\u5212",
+      "target": "plans_2026_06_21_phase3_3_graph_visualization_\u4e0e\u5b9e\u9645\u5b9e\u73b0\u7684\u5dee\u5f02",
       "confidence_score": 1.0
     },
     {
@@ -6524,9 +7434,9 @@
       "source_file": "docs/superpowers/plans/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L605",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_06_21_phase3_3_graph_visualization_phase_3_3_\u56fe\u53ef\u89c6\u5316_\u5b9e\u73b0\u8ba1\u5212",
-      "target": "plans_2026_06_21_phase3_3_graph_visualization_\u5b8c\u6210\u68c0\u67e5\u6e05\u5355",
-      "confidence_score": 1.0
+      "target": "plans_2026_06_21_phase3_3_graph_visualization_\u5b8c\u6210\u68c0\u67e5\u6e05\u5355"
     },
     {
       "relation": "contains",
@@ -6534,9 +7444,9 @@
       "source_file": "docs/superpowers/plans/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L620",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_06_21_phase3_3_graph_visualization_phase_3_3_\u56fe\u53ef\u89c6\u5316_\u5b9e\u73b0\u8ba1\u5212",
-      "target": "plans_2026_06_21_phase3_3_graph_visualization_\u5df2\u77e5\u9650\u5236_phase_3_4",
-      "confidence_score": 1.0
+      "target": "plans_2026_06_21_phase3_3_graph_visualization_\u5df2\u77e5\u9650\u5236_phase_3_4"
     },
     {
       "relation": "contains",
@@ -6544,9 +7454,9 @@
       "source_file": "docs/superpowers/plans/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_06_21_phase3_3_graph_visualization_phase_3_3_\u56fe\u53ef\u89c6\u5316_\u5b9e\u73b0\u8ba1\u5212",
-      "target": "plans_2026_06_21_phase3_3_graph_visualization_\u6587\u4ef6\u7ed3\u6784",
-      "confidence_score": 1.0
+      "target": "plans_2026_06_21_phase3_3_graph_visualization_\u6587\u4ef6\u7ed3\u6784"
     },
     {
       "relation": "contains",
@@ -6554,9 +7464,9 @@
       "source_file": "docs/superpowers/plans/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L39",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_06_21_phase3_3_graph_visualization_chunk_a_\u5ea6\u6570\u6570\u636e",
-      "target": "plans_2026_06_21_phase3_3_graph_visualization_task_a1_analysisresult_\u52a0_degree_\u5b57\u6bb5",
-      "confidence_score": 1.0
+      "target": "plans_2026_06_21_phase3_3_graph_visualization_task_a1_analysisresult_\u52a0_degree_\u5b57\u6bb5"
     },
     {
       "relation": "contains",
@@ -6564,9 +7474,9 @@
       "source_file": "docs/superpowers/plans/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L62",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_06_21_phase3_3_graph_visualization_chunk_a_\u5ea6\u6570\u6570\u636e",
-      "target": "plans_2026_06_21_phase3_3_graph_visualization_task_a2_resolver_\u7d2f\u52a0\u5ea6\u6570",
-      "confidence_score": 1.0
+      "target": "plans_2026_06_21_phase3_3_graph_visualization_task_a2_resolver_\u7d2f\u52a0\u5ea6\u6570"
     },
     {
       "relation": "contains",
@@ -6574,9 +7484,9 @@
       "source_file": "docs/superpowers/plans/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L96",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_06_21_phase3_3_graph_visualization_chunk_b_\u56fe\u8282\u70b9_\u4e3b\u5c4f\u5bb9\u5668",
-      "target": "plans_2026_06_21_phase3_3_graph_visualization_task_b1_\u521b\u5efa_gdsgraphnode_\u901a\u7528\u56fe\u8282\u70b9",
-      "confidence_score": 1.0
+      "target": "plans_2026_06_21_phase3_3_graph_visualization_task_b1_\u521b\u5efa_gdsgraphnode_\u901a\u7528\u56fe\u8282\u70b9"
     },
     {
       "relation": "contains",
@@ -6584,9 +7494,9 @@
       "source_file": "docs/superpowers/plans/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L142",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_06_21_phase3_3_graph_visualization_chunk_b_\u56fe\u8282\u70b9_\u4e3b\u5c4f\u5bb9\u5668",
-      "target": "plans_2026_06_21_phase3_3_graph_visualization_task_b2_\u521b\u5efa_gdsgraphmainscreen_\u4e3b\u5c4f\u5bb9\u5668",
-      "confidence_score": 1.0
+      "target": "plans_2026_06_21_phase3_3_graph_visualization_task_b2_\u521b\u5efa_gdsgraphmainscreen_\u4e3b\u5c4f\u5bb9\u5668"
     },
     {
       "relation": "contains",
@@ -6594,9 +7504,9 @@
       "source_file": "docs/superpowers/plans/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L237",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_06_21_phase3_3_graph_visualization_chunk_c_\u4e09\u4e2a\u56fe\u89c6\u56fe_builder",
-      "target": "plans_2026_06_21_phase3_3_graph_visualization_task_c1_gdscallgraphview_\u8c03\u7528\u56fe",
-      "confidence_score": 1.0
+      "target": "plans_2026_06_21_phase3_3_graph_visualization_task_c1_gdscallgraphview_\u8c03\u7528\u56fe"
     },
     {
       "relation": "contains",
@@ -6604,9 +7514,9 @@
       "source_file": "docs/superpowers/plans/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L303",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_06_21_phase3_3_graph_visualization_chunk_c_\u4e09\u4e2a\u56fe\u89c6\u56fe_builder",
-      "target": "plans_2026_06_21_phase3_3_graph_visualization_task_c2_gdssignalgraphview_\u4fe1\u53f7\u6d41",
-      "confidence_score": 1.0
+      "target": "plans_2026_06_21_phase3_3_graph_visualization_task_c2_gdssignalgraphview_\u4fe1\u53f7\u6d41"
     },
     {
       "relation": "contains",
@@ -6614,9 +7524,9 @@
       "source_file": "docs/superpowers/plans/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L366",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_06_21_phase3_3_graph_visualization_chunk_c_\u4e09\u4e2a\u56fe\u89c6\u56fe_builder",
-      "target": "plans_2026_06_21_phase3_3_graph_visualization_task_c3_gdsprojectgraphview_\u9879\u76ee\u7ea7\u56fe",
-      "confidence_score": 1.0
+      "target": "plans_2026_06_21_phase3_3_graph_visualization_task_c3_gdsprojectgraphview_\u9879\u76ee\u7ea7\u56fe"
     },
     {
       "relation": "contains",
@@ -6624,9 +7534,9 @@
       "source_file": "docs/superpowers/plans/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L425",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_06_21_phase3_3_graph_visualization_chunk_d_\u4e3b\u5c4f\u96c6\u6210",
-      "target": "plans_2026_06_21_phase3_3_graph_visualization_task_d1_plugin_gd_\u52a0\u4e3b\u5c4f_overrides",
-      "confidence_score": 1.0
+      "target": "plans_2026_06_21_phase3_3_graph_visualization_task_d1_plugin_gd_\u52a0\u4e3b\u5c4f_overrides"
     },
     {
       "relation": "contains",
@@ -6634,9 +7544,9 @@
       "source_file": "docs/superpowers/plans/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L461",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_06_21_phase3_3_graph_visualization_chunk_d_\u4e3b\u5c4f\u96c6\u6210",
-      "target": "plans_2026_06_21_phase3_3_graph_visualization_task_d2_bootstrap_\u6ce8\u518c\u4e3b\u5c4f_\u8f6c\u53d1_make_visible",
-      "confidence_score": 1.0
+      "target": "plans_2026_06_21_phase3_3_graph_visualization_task_d2_bootstrap_\u6ce8\u518c\u4e3b\u5c4f_\u8f6c\u53d1_make_visible"
     },
     {
       "relation": "contains",
@@ -6644,9 +7554,9 @@
       "source_file": "docs/superpowers/plans/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L501",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_06_21_phase3_3_graph_visualization_chunk_e_\u9a8c\u6536",
-      "target": "plans_2026_06_21_phase3_3_graph_visualization_task_e1_\u56fe\u6784\u5efa\u9a8c\u6536\u6d4b\u8bd5",
-      "confidence_score": 1.0
+      "target": "plans_2026_06_21_phase3_3_graph_visualization_task_e1_\u56fe\u6784\u5efa\u9a8c\u6536\u6d4b\u8bd5"
     },
     {
       "relation": "contains",
@@ -6654,8 +7564,198 @@
       "source_file": "docs/superpowers/plans/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L584",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_2026_06_21_phase3_3_graph_visualization_chunk_e_\u9a8c\u6536",
-      "target": "plans_2026_06_21_phase3_3_graph_visualization_task_e2_\u56de\u5f52_\u4e3b\u5c4f\u624b\u52a8\u9a8c\u6536",
+      "target": "plans_2026_06_21_phase3_3_graph_visualization_task_e2_\u56de\u5f52_\u4e3b\u5c4f\u624b\u52a8\u9a8c\u6536"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-21-phase3-3-graph-visualization.md",
+      "source_location": "L624",
+      "weight": 1.0,
+      "source": "plans_2026_06_21_phase3_3_graph_visualization_\u4e0e\u5b9e\u9645\u5b9e\u73b0\u7684\u5dee\u5f02",
+      "target": "plans_2026_06_21_phase3_3_graph_visualization_1_\u4e3b\u5c4f\u5bb9\u5668\u57fa\u7c7b_\u94fa\u6ee1_\u9a8c\u6536\u4fee\u590d",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-21-phase3-3-graph-visualization.md",
+      "source_location": "L631",
+      "weight": 1.0,
+      "source": "plans_2026_06_21_phase3_3_graph_visualization_\u4e0e\u5b9e\u9645\u5b9e\u73b0\u7684\u5dee\u5f02",
+      "target": "plans_2026_06_21_phase3_3_graph_visualization_2_project_view_\u6309_kind_\u5206\u652f_\u9a8c\u6536\u4fee\u590d",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-21-phase3-3-graph-visualization.md",
+      "source_location": "L637",
+      "weight": 1.0,
+      "source": "plans_2026_06_21_phase3_3_graph_visualization_\u4e0e\u5b9e\u9645\u5b9e\u73b0\u7684\u5dee\u5f02",
+      "target": "plans_2026_06_21_phase3_3_graph_visualization_3_\u70b9\u8282\u70b9\u8df3\u8f6c\u63a8\u8fdf",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "plans_2026_06_22_graph_usability_enhancement",
+      "target": "plans_2026_06_22_graph_usability_enhancement_\u56fe\u53ef\u7528\u6027\u5f3a\u5316_\u5b9e\u73b0\u8ba1\u5212",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L30",
+      "weight": 1.0,
+      "source": "plans_2026_06_22_graph_usability_enhancement_\u56fe\u53ef\u7528\u6027\u5f3a\u5316_\u5b9e\u73b0\u8ba1\u5212",
+      "target": "plans_2026_06_22_graph_usability_enhancement_chunk_p0_\u9ad8\u4ef7\u503c\u4f4e\u6210\u672c",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L329",
+      "weight": 1.0,
+      "source": "plans_2026_06_22_graph_usability_enhancement_\u56fe\u53ef\u7528\u6027\u5f3a\u5316_\u5b9e\u73b0\u8ba1\u5212",
+      "target": "plans_2026_06_22_graph_usability_enhancement_chunk_p1_\u4e2d\u4ef7\u503c",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L448",
+      "weight": 1.0,
+      "source": "plans_2026_06_22_graph_usability_enhancement_\u56fe\u53ef\u7528\u6027\u5f3a\u5316_\u5b9e\u73b0\u8ba1\u5212",
+      "target": "plans_2026_06_22_graph_usability_enhancement_chunk_\u9a8c\u6536",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L471",
+      "weight": 1.0,
+      "source": "plans_2026_06_22_graph_usability_enhancement_\u56fe\u53ef\u7528\u6027\u5f3a\u5316_\u5b9e\u73b0\u8ba1\u5212",
+      "target": "plans_2026_06_22_graph_usability_enhancement_\u5b8c\u6210\u68c0\u67e5\u6e05\u5355",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L485",
+      "weight": 1.0,
+      "source": "plans_2026_06_22_graph_usability_enhancement_\u56fe\u53ef\u7528\u6027\u5f3a\u5316_\u5b9e\u73b0\u8ba1\u5212",
+      "target": "plans_2026_06_22_graph_usability_enhancement_\u5df2\u77e5\u9650\u5236",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "plans_2026_06_22_graph_usability_enhancement_\u56fe\u53ef\u7528\u6027\u5f3a\u5316_\u5b9e\u73b0\u8ba1\u5212",
+      "target": "plans_2026_06_22_graph_usability_enhancement_\u6587\u4ef6\u7ed3\u6784",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L32",
+      "weight": 1.0,
+      "source": "plans_2026_06_22_graph_usability_enhancement_chunk_p0_\u9ad8\u4ef7\u503c\u4f4e\u6210\u672c",
+      "target": "plans_2026_06_22_graph_usability_enhancement_task_p0_1_gdsgraphnode_\u6269\u5c55_\u7b7e\u540d_\u4f4d\u7f6e_tooltip_\u5165\u53e3\u6807\u8bb0",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L89",
+      "weight": 1.0,
+      "source": "plans_2026_06_22_graph_usability_enhancement_chunk_p0_\u9ad8\u4ef7\u503c\u4f4e\u6210\u672c",
+      "target": "plans_2026_06_22_graph_usability_enhancement_task_p0_2_\u521b\u5efa_gds_entrymethods_\u5f15\u64ce\u5165\u53e3\u96c6\u5408",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L150",
+      "weight": 1.0,
+      "source": "plans_2026_06_22_graph_usability_enhancement_chunk_p0_\u9ad8\u4ef7\u503c\u4f4e\u6210\u672c",
+      "target": "plans_2026_06_22_graph_usability_enhancement_task_p0_3_\u8c03\u7528\u56fe\u89c6\u56fe_\u7b7e\u540d_\u4f4d\u7f6e_\u7740\u8272",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L227",
+      "weight": 1.0,
+      "source": "plans_2026_06_22_graph_usability_enhancement_chunk_p0_\u9ad8\u4ef7\u503c\u4f4e\u6210\u672c",
+      "target": "plans_2026_06_22_graph_usability_enhancement_task_p0_4_\u4fe1\u53f7\u56fe\u89c6\u56fe_emit_connect_\u53cc_slot_\u5206\u8272\u5206\u5411",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L301",
+      "weight": 1.0,
+      "source": "plans_2026_06_22_graph_usability_enhancement_chunk_p0_\u9ad8\u4ef7\u503c\u4f4e\u6210\u672c",
+      "target": "plans_2026_06_22_graph_usability_enhancement_task_p0_5_\u9879\u76ee\u56fe\u89c6\u56fe_\u7b7e\u540d_\u4f4d\u7f6e",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L331",
+      "weight": 1.0,
+      "source": "plans_2026_06_22_graph_usability_enhancement_chunk_p1_\u4e2d\u4ef7\u503c",
+      "target": "plans_2026_06_22_graph_usability_enhancement_task_p1_1_\u4e3b\u5c4f_toolbar_\u52a0_legend_\u56fe\u4f8b",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L365",
+      "weight": 1.0,
+      "source": "plans_2026_06_22_graph_usability_enhancement_chunk_p1_\u4e2d\u4ef7\u503c",
+      "target": "plans_2026_06_22_graph_usability_enhancement_task_p1_2_\u4f4e\u5ea6\u6570\u7b5b\u9009",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L400",
+      "weight": 1.0,
+      "source": "plans_2026_06_22_graph_usability_enhancement_chunk_p1_\u4e2d\u4ef7\u503c",
+      "target": "plans_2026_06_22_graph_usability_enhancement_task_p1_3_\u70b9\u8282\u70b9\u8df3\u8f6c_\u5173\u8054\u8fb9\u9ad8\u4eae",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L450",
+      "weight": 1.0,
+      "source": "plans_2026_06_22_graph_usability_enhancement_chunk_\u9a8c\u6536",
+      "target": "plans_2026_06_22_graph_usability_enhancement_task_v_1_\u9a8c\u6536",
       "confidence_score": 1.0
     },
     {
@@ -8364,9 +9464,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-2-cross-file-analysis.md",
       "source_location": "L230",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_2_cross_file_analysis_phase_3_2_\u8de8\u6587\u4ef6\u5206\u6790_\u8bbe\u8ba1\u89c4\u8303",
-      "target": "specs_2026_06_21_phase3_2_cross_file_analysis_\u9644\u5f55_phase_3_2_\u5b9e\u73b0\u5b8c\u6210\u8bb0\u5f55",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_2_cross_file_analysis_\u9644\u5f55_phase_3_2_\u5b9e\u73b0\u5b8c\u6210\u8bb0\u5f55"
     },
     {
       "relation": "contains",
@@ -8504,9 +9604,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-2-cross-file-analysis.md",
       "source_location": "L243",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_2_cross_file_analysis_\u9644\u5f55_phase_3_2_\u5b9e\u73b0\u5b8c\u6210\u8bb0\u5f55",
-      "target": "specs_2026_06_21_phase3_2_cross_file_analysis_\u4e0e\u89c4\u8303\u7684\u504f\u5dee_\u5747\u5728\u5b9e\u73b0\u4e2d\u4fee\u590d",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_2_cross_file_analysis_\u4e0e\u89c4\u8303\u7684\u504f\u5dee_\u5747\u5728\u5b9e\u73b0\u4e2d\u4fee\u590d"
     },
     {
       "relation": "contains",
@@ -8514,9 +9614,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-2-cross-file-analysis.md",
       "source_location": "L260",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_2_cross_file_analysis_\u9644\u5f55_phase_3_2_\u5b9e\u73b0\u5b8c\u6210\u8bb0\u5f55",
-      "target": "specs_2026_06_21_phase3_2_cross_file_analysis_\u5df2\u77e5\u9650\u5236_phase_3_3",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_2_cross_file_analysis_\u5df2\u77e5\u9650\u5236_phase_3_3"
     },
     {
       "relation": "contains",
@@ -8524,9 +9624,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-2-cross-file-analysis.md",
       "source_location": "L252",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_2_cross_file_analysis_\u9644\u5f55_phase_3_2_\u5b9e\u73b0\u5b8c\u6210\u8bb0\u5f55",
-      "target": "specs_2026_06_21_phase3_2_cross_file_analysis_\u9a8c\u6536\u4e2d\u53d1\u73b0\u5e76\u4fee\u590d\u7684_bug",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_2_cross_file_analysis_\u9a8c\u6536\u4e2d\u53d1\u73b0\u5e76\u4fee\u590d\u7684_bug"
     },
     {
       "relation": "contains",
@@ -8534,9 +9634,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_3_graph_visualization",
-      "target": "specs_2026_06_21_phase3_3_graph_visualization_phase_3_3_\u56fe\u53ef\u89c6\u5316_\u8bbe\u8ba1\u89c4\u8303",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_phase_3_3_\u56fe\u53ef\u89c6\u5316_\u8bbe\u8ba1\u89c4\u8303"
     },
     {
       "relation": "contains",
@@ -8544,9 +9644,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_3_graph_visualization_phase_3_3_\u56fe\u53ef\u89c6\u5316_\u8bbe\u8ba1\u89c4\u8303",
-      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u4e00_\u76ee\u6807",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u4e00_\u76ee\u6807"
     },
     {
       "relation": "contains",
@@ -8554,9 +9654,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L137",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_3_graph_visualization_phase_3_3_\u56fe\u53ef\u89c6\u5316_\u8bbe\u8ba1\u89c4\u8303",
-      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u4e03_\u6a21\u5757_3_\u4fe1\u53f7\u6d41\u89c6\u56fe",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u4e03_\u6a21\u5757_3_\u4fe1\u53f7\u6d41\u89c6\u56fe"
     },
     {
       "relation": "contains",
@@ -8564,9 +9664,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L35",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_3_graph_visualization_phase_3_3_\u56fe\u53ef\u89c6\u5316_\u8bbe\u8ba1\u89c4\u8303",
-      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u4e09_\u4e3a\u4ec0\u4e48\u7528_graphedit_\u800c\u975e_tree_custom_draw",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u4e09_\u4e3a\u4ec0\u4e48\u7528_graphedit_\u800c\u975e_tree_custom_draw"
     },
     {
       "relation": "contains",
@@ -8574,9 +9674,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L166",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_3_graph_visualization_phase_3_3_\u56fe\u53ef\u89c6\u5316_\u8bbe\u8ba1\u89c4\u8303",
-      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u4e5d_\u6a21\u5757_5_\u5ea6\u6570\u7edf\u8ba1_resolver_\u589e\u5f3a",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u4e5d_\u6a21\u5757_5_\u5ea6\u6570\u7edf\u8ba1_resolver_\u589e\u5f3a"
     },
     {
       "relation": "contains",
@@ -8584,9 +9684,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_3_graph_visualization_phase_3_3_\u56fe\u53ef\u89c6\u5316_\u8bbe\u8ba1\u89c4\u8303",
-      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u4e8c_\u8303\u56f4",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u4e8c_\u8303\u56f4"
     },
     {
       "relation": "contains",
@@ -8594,9 +9694,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L78",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_3_graph_visualization_phase_3_3_\u56fe\u53ef\u89c6\u5316_\u8bbe\u8ba1\u89c4\u8303",
-      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u4e94_\u6a21\u5757_1_\u4e3b\u5c4f_tab_\u96c6\u6210",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u4e94_\u6a21\u5757_1_\u4e3b\u5c4f_tab_\u96c6\u6210"
     },
     {
       "relation": "contains",
@@ -8604,9 +9704,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L152",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_3_graph_visualization_phase_3_3_\u56fe\u53ef\u89c6\u5316_\u8bbe\u8ba1\u89c4\u8303",
-      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u516b_\u6a21\u5757_4_\u9879\u76ee\u7ea7\u56fe",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u516b_\u6a21\u5757_4_\u9879\u76ee\u7ea7\u56fe"
     },
     {
       "relation": "contains",
@@ -8614,9 +9714,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L116",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_3_graph_visualization_phase_3_3_\u56fe\u53ef\u89c6\u5316_\u8bbe\u8ba1\u89c4\u8303",
-      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u516d_\u6a21\u5757_2_\u8c03\u7528\u56fe\u89c6\u56fe",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u516d_\u6a21\u5757_2_\u8c03\u7528\u56fe\u89c6\u56fe"
     },
     {
       "relation": "contains",
@@ -8624,9 +9724,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L184",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_3_graph_visualization_phase_3_3_\u56fe\u53ef\u89c6\u5316_\u8bbe\u8ba1\u89c4\u8303",
-      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u5341_\u4ea4\u4e92",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u5341_\u4ea4\u4e92"
     },
     {
       "relation": "contains",
@@ -8634,9 +9734,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L197",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_3_graph_visualization_phase_3_3_\u56fe\u53ef\u89c6\u5316_\u8bbe\u8ba1\u89c4\u8303",
-      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u5341\u4e00_\u4ea4\u4ed8\u7269",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u5341\u4e00_\u4ea4\u4ed8\u7269"
     },
     {
       "relation": "contains",
@@ -8644,9 +9744,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L225",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_3_graph_visualization_phase_3_3_\u56fe\u53ef\u89c6\u5316_\u8bbe\u8ba1\u89c4\u8303",
-      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u5341\u4e09_\u98ce\u9669\u4e0e\u8fb9\u754c",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u5341\u4e09_\u98ce\u9669\u4e0e\u8fb9\u754c"
     },
     {
       "relation": "contains",
@@ -8654,9 +9754,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L212",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_3_graph_visualization_phase_3_3_\u56fe\u53ef\u89c6\u5316_\u8bbe\u8ba1\u89c4\u8303",
-      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u5341\u4e8c_\u9a8c\u6536\u6807\u51c6",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u5341\u4e8c_\u9a8c\u6536\u6807\u51c6"
     },
     {
       "relation": "contains",
@@ -8664,9 +9764,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L235",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_3_graph_visualization_phase_3_3_\u56fe\u53ef\u89c6\u5316_\u8bbe\u8ba1\u89c4\u8303",
-      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u5341\u56db_\u4e0e_phase_3_4_\u7684\u8fb9\u754c",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u5341\u56db_\u4e0e_phase_3_4_\u7684\u8fb9\u754c"
     },
     {
       "relation": "contains",
@@ -8674,8 +9774,18 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L45",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_3_graph_visualization_phase_3_3_\u56fe\u53ef\u89c6\u5316_\u8bbe\u8ba1\u89c4\u8303",
-      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u56db_\u67b6\u6784",
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u56db_\u67b6\u6784"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
+      "source_location": "L227",
+      "weight": 1.0,
+      "source": "specs_2026_06_21_phase3_3_graph_visualization_phase_3_3_\u56fe\u53ef\u89c6\u5316_\u8bbe\u8ba1\u89c4\u8303",
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u9644\u5f55_phase_3_3_\u5b9e\u73b0\u5b8c\u6210\u8bb0\u5f55",
       "confidence_score": 1.0
     },
     {
@@ -8684,9 +9794,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L27",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_3_graph_visualization_\u4e8c_\u8303\u56f4",
-      "target": "specs_2026_06_21_phase3_3_graph_visualization_phase_3_3_\u4e0d\u505a_phase_3_4_\u540e\u7eed",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_phase_3_3_\u4e0d\u505a_phase_3_4_\u540e\u7eed"
     },
     {
       "relation": "contains",
@@ -8694,9 +9804,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_3_graph_visualization_\u4e8c_\u8303\u56f4",
-      "target": "specs_2026_06_21_phase3_3_graph_visualization_phase_3_3_\u505a",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_phase_3_3_\u505a"
     },
     {
       "relation": "contains",
@@ -8704,9 +9814,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L64",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_3_graph_visualization_\u56db_\u67b6\u6784",
-      "target": "specs_2026_06_21_phase3_3_graph_visualization_4_1_\u6570\u636e\u6d41",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_4_1_\u6570\u636e\u6d41"
     },
     {
       "relation": "contains",
@@ -8714,9 +9824,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L80",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_3_graph_visualization_\u4e94_\u6a21\u5757_1_\u4e3b\u5c4f_tab_\u96c6\u6210",
-      "target": "specs_2026_06_21_phase3_3_graph_visualization_5_1_editorplugin_\u4e3b\u5c4f",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_5_1_editorplugin_\u4e3b\u5c4f"
     },
     {
       "relation": "contains",
@@ -8724,9 +9834,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L96",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_3_graph_visualization_\u4e94_\u6a21\u5757_1_\u4e3b\u5c4f_tab_\u96c6\u6210",
-      "target": "specs_2026_06_21_phase3_3_graph_visualization_5_2_\u4e3b\u5c4f\u5e03\u5c40",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_5_2_\u4e3b\u5c4f\u5e03\u5c40"
     },
     {
       "relation": "contains",
@@ -8734,9 +9844,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L118",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_3_graph_visualization_\u516d_\u6a21\u5757_2_\u8c03\u7528\u56fe\u89c6\u56fe",
-      "target": "specs_2026_06_21_phase3_3_graph_visualization_6_1_\u8282\u70b9",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_6_1_\u8282\u70b9"
     },
     {
       "relation": "contains",
@@ -8744,9 +9854,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L126",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_3_graph_visualization_\u516d_\u6a21\u5757_2_\u8c03\u7528\u56fe\u89c6\u56fe",
-      "target": "specs_2026_06_21_phase3_3_graph_visualization_6_2_\u8fb9",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_6_2_\u8fb9"
     },
     {
       "relation": "contains",
@@ -8754,9 +9864,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L132",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_3_graph_visualization_\u516d_\u6a21\u5757_2_\u8c03\u7528\u56fe\u89c6\u56fe",
-      "target": "specs_2026_06_21_phase3_3_graph_visualization_6_3_\u5ea6\u6570\u9a71\u52a8",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_6_3_\u5ea6\u6570\u9a71\u52a8"
     },
     {
       "relation": "contains",
@@ -8764,9 +9874,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L139",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_3_graph_visualization_\u4e03_\u6a21\u5757_3_\u4fe1\u53f7\u6d41\u89c6\u56fe",
-      "target": "specs_2026_06_21_phase3_3_graph_visualization_7_1_\u8282\u70b9",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_7_1_\u8282\u70b9"
     },
     {
       "relation": "contains",
@@ -8774,9 +9884,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L143",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_3_graph_visualization_\u4e03_\u6a21\u5757_3_\u4fe1\u53f7\u6d41\u89c6\u56fe",
-      "target": "specs_2026_06_21_phase3_3_graph_visualization_7_2_\u8fb9",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_7_2_\u8fb9"
     },
     {
       "relation": "contains",
@@ -8784,9 +9894,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L148",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_3_graph_visualization_\u4e03_\u6a21\u5757_3_\u4fe1\u53f7\u6d41\u89c6\u56fe",
-      "target": "specs_2026_06_21_phase3_3_graph_visualization_7_3_\u8de8\u6587\u4ef6",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_7_3_\u8de8\u6587\u4ef6"
     },
     {
       "relation": "contains",
@@ -8794,9 +9904,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L154",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_3_graph_visualization_\u516b_\u6a21\u5757_4_\u9879\u76ee\u7ea7\u56fe",
-      "target": "specs_2026_06_21_phase3_3_graph_visualization_8_1_\u8282\u70b9",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_8_1_\u8282\u70b9"
     },
     {
       "relation": "contains",
@@ -8804,9 +9914,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L158",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_3_graph_visualization_\u516b_\u6a21\u5757_4_\u9879\u76ee\u7ea7\u56fe",
-      "target": "specs_2026_06_21_phase3_3_graph_visualization_8_2_\u8fb9",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_8_2_\u8fb9"
     },
     {
       "relation": "contains",
@@ -8814,9 +9924,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L162",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_3_graph_visualization_\u516b_\u6a21\u5757_4_\u9879\u76ee\u7ea7\u56fe",
-      "target": "specs_2026_06_21_phase3_3_graph_visualization_8_3_\u8026\u5408\u8bc6\u522b",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_8_3_\u8026\u5408\u8bc6\u522b"
     },
     {
       "relation": "contains",
@@ -8824,9 +9934,9 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L168",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_3_graph_visualization_\u4e5d_\u6a21\u5757_5_\u5ea6\u6570\u7edf\u8ba1_resolver_\u589e\u5f3a",
-      "target": "specs_2026_06_21_phase3_3_graph_visualization_9_1_\u6570\u636e",
-      "confidence_score": 1.0
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_9_1_\u6570\u636e"
     },
     {
       "relation": "contains",
@@ -8834,8 +9944,648 @@
       "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
       "source_location": "L179",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "specs_2026_06_21_phase3_3_graph_visualization_\u4e5d_\u6a21\u5757_5_\u5ea6\u6570\u7edf\u8ba1_resolver_\u589e\u5f3a",
-      "target": "specs_2026_06_21_phase3_3_graph_visualization_9_2_\u7528\u9014",
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_9_2_\u7528\u9014"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
+      "source_location": "L240",
+      "weight": 1.0,
+      "source": "specs_2026_06_21_phase3_3_graph_visualization_\u9644\u5f55_phase_3_3_\u5b9e\u73b0\u5b8c\u6210\u8bb0\u5f55",
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u4e0e\u89c4\u8303\u7684\u504f\u5dee_\u5747\u5728\u5b9e\u73b0\u4e2d\u4fee\u590d",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
+      "source_location": "L257",
+      "weight": 1.0,
+      "source": "specs_2026_06_21_phase3_3_graph_visualization_\u9644\u5f55_phase_3_3_\u5b9e\u73b0\u5b8c\u6210\u8bb0\u5f55",
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u5173\u952e\u7ecf\u9a8c_gdscript_\u7f16\u8f91\u5668\u4e3b\u5c4f",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
+      "source_location": "L264",
+      "weight": 1.0,
+      "source": "specs_2026_06_21_phase3_3_graph_visualization_\u9644\u5f55_phase_3_3_\u5b9e\u73b0\u5b8c\u6210\u8bb0\u5f55",
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u5df2\u77e5\u9650\u5236_phase_3_4",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-21-phase3-3-graph-visualization.md",
+      "source_location": "L249",
+      "weight": 1.0,
+      "source": "specs_2026_06_21_phase3_3_graph_visualization_\u9644\u5f55_phase_3_3_\u5b9e\u73b0\u5b8c\u6210\u8bb0\u5f55",
+      "target": "specs_2026_06_21_phase3_3_graph_visualization_\u9a8c\u6536\u4e2d\u53d1\u73b0\u5e76\u4fee\u590d\u7684_bug",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-builtin-function-filter.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_builtin_function_filter",
+      "target": "specs_2026_06_22_builtin_function_filter_\u5185\u7f6e\u51fd\u6570\u8fc7\u6ee4_\u8bbe\u8ba1\u89c4\u8303",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-builtin-function-filter.md",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_builtin_function_filter_\u5185\u7f6e\u51fd\u6570\u8fc7\u6ee4_\u8bbe\u8ba1\u89c4\u8303",
+      "target": "specs_2026_06_22_builtin_function_filter_\u4e00_\u76ee\u6807",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-builtin-function-filter.md",
+      "source_location": "L104",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_builtin_function_filter_\u5185\u7f6e\u51fd\u6570\u8fc7\u6ee4_\u8bbe\u8ba1\u89c4\u8303",
+      "target": "specs_2026_06_22_builtin_function_filter_\u4e03_\u98ce\u9669",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-builtin-function-filter.md",
+      "source_location": "L29",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_builtin_function_filter_\u5185\u7f6e\u51fd\u6570\u8fc7\u6ee4_\u8bbe\u8ba1\u89c4\u8303",
+      "target": "specs_2026_06_22_builtin_function_filter_\u4e09_\u6570\u636e\u6765\u6e90",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-builtin-function-filter.md",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_builtin_function_filter_\u5185\u7f6e\u51fd\u6570\u8fc7\u6ee4_\u8bbe\u8ba1\u89c4\u8303",
+      "target": "specs_2026_06_22_builtin_function_filter_\u4e8c_\u8303\u56f4",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-builtin-function-filter.md",
+      "source_location": "L89",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_builtin_function_filter_\u5185\u7f6e\u51fd\u6570\u8fc7\u6ee4_\u8bbe\u8ba1\u89c4\u8303",
+      "target": "specs_2026_06_22_builtin_function_filter_\u4e94_\u4ea4\u4ed8\u7269",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-builtin-function-filter.md",
+      "source_location": "L96",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_builtin_function_filter_\u5185\u7f6e\u51fd\u6570\u8fc7\u6ee4_\u8bbe\u8ba1\u89c4\u8303",
+      "target": "specs_2026_06_22_builtin_function_filter_\u516d_\u9a8c\u6536\u6807\u51c6",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-builtin-function-filter.md",
+      "source_location": "L37",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_builtin_function_filter_\u5185\u7f6e\u51fd\u6570\u8fc7\u6ee4_\u8bbe\u8ba1\u89c4\u8303",
+      "target": "specs_2026_06_22_builtin_function_filter_\u56db_\u67b6\u6784",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-builtin-function-filter.md",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_builtin_function_filter_\u4e8c_\u8303\u56f4",
+      "target": "specs_2026_06_22_builtin_function_filter_\u4e0d\u505a",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-builtin-function-filter.md",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_builtin_function_filter_\u4e8c_\u8303\u56f4",
+      "target": "specs_2026_06_22_builtin_function_filter_\u505a",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-builtin-function-filter.md",
+      "source_location": "L45",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_builtin_function_filter_\u56db_\u67b6\u6784",
+      "target": "specs_2026_06_22_builtin_function_filter_4_1_\u5185\u7f6e\u51fd\u6570\u8868",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-builtin-function-filter.md",
+      "source_location": "L71",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_builtin_function_filter_\u56db_\u67b6\u6784",
+      "target": "specs_2026_06_22_builtin_function_filter_4_2_resolver_\u8fc7\u6ee4",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_graph_usability_enhancement",
+      "target": "specs_2026_06_22_graph_usability_enhancement_\u56fe\u53ef\u7528\u6027\u5f3a\u5316_\u8bbe\u8ba1\u89c4\u8303",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_graph_usability_enhancement_\u56fe\u53ef\u7528\u6027\u5f3a\u5316_\u8bbe\u8ba1\u89c4\u8303",
+      "target": "specs_2026_06_22_graph_usability_enhancement_\u4e00_\u76ee\u6807",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L142",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_graph_usability_enhancement_\u56fe\u53ef\u7528\u6027\u5f3a\u5316_\u8bbe\u8ba1\u89c4\u8303",
+      "target": "specs_2026_06_22_graph_usability_enhancement_\u4e03_\u9a8c\u6536\u6807\u51c6",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L44",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_graph_usability_enhancement_\u56fe\u53ef\u7528\u6027\u5f3a\u5316_\u8bbe\u8ba1\u89c4\u8303",
+      "target": "specs_2026_06_22_graph_usability_enhancement_\u4e09_\u73b0\u72b6\u56de\u987e_phase_3_3_\u7ed8\u5236\u5185\u5bb9",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_graph_usability_enhancement_\u56fe\u53ef\u7528\u6027\u5f3a\u5316_\u8bbe\u8ba1\u89c4\u8303",
+      "target": "specs_2026_06_22_graph_usability_enhancement_\u4e8c_\u8303\u56f4",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L122",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_graph_usability_enhancement_\u56fe\u53ef\u7528\u6027\u5f3a\u5316_\u8bbe\u8ba1\u89c4\u8303",
+      "target": "specs_2026_06_22_graph_usability_enhancement_\u4e94_\u901a\u7528\u56fe\u4f8b_legend",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L155",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_graph_usability_enhancement_\u56fe\u53ef\u7528\u6027\u5f3a\u5316_\u8bbe\u8ba1\u89c4\u8303",
+      "target": "specs_2026_06_22_graph_usability_enhancement_\u516b_\u98ce\u9669\u4e0e\u8fb9\u754c",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L131",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_graph_usability_enhancement_\u56fe\u53ef\u7528\u6027\u5f3a\u5316_\u8bbe\u8ba1\u89c4\u8303",
+      "target": "specs_2026_06_22_graph_usability_enhancement_\u516d_\u4ea4\u4ed8\u7269",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L53",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_graph_usability_enhancement_\u56fe\u53ef\u7528\u6027\u5f3a\u5316_\u8bbe\u8ba1\u89c4\u8303",
+      "target": "specs_2026_06_22_graph_usability_enhancement_\u56db_\u6a21\u5757\u8be6\u8ff0",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_graph_usability_enhancement_\u4e8c_\u8303\u56f4",
+      "target": "specs_2026_06_22_graph_usability_enhancement_p0_\u9ad8\u4ef7\u503c\u4f4e\u6210\u672c_\u4f18\u5148",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L27",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_graph_usability_enhancement_\u4e8c_\u8303\u56f4",
+      "target": "specs_2026_06_22_graph_usability_enhancement_p1_\u4e2d\u4ef7\u503c_p0_\u4e4b\u540e",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L36",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_graph_usability_enhancement_\u4e8c_\u8303\u56f4",
+      "target": "specs_2026_06_22_graph_usability_enhancement_\u4e0d\u505a_\u72ec\u7acb_spec_phase_3_4",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L55",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_graph_usability_enhancement_\u56db_\u6a21\u5757\u8be6\u8ff0",
+      "target": "specs_2026_06_22_graph_usability_enhancement_4_1_\u8fb9\u5206\u7c7b\u578b\u7740\u8272_1",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L66",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_graph_usability_enhancement_\u56db_\u6a21\u5757\u8be6\u8ff0",
+      "target": "specs_2026_06_22_graph_usability_enhancement_4_2_\u8282\u70b9\u5e26\u7b7e\u540d_2",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L83",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_graph_usability_enhancement_\u56db_\u6a21\u5757\u8be6\u8ff0",
+      "target": "specs_2026_06_22_graph_usability_enhancement_4_3_\u8282\u70b9\u5e26\u4f4d\u7f6e_3",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L95",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_graph_usability_enhancement_\u56db_\u6a21\u5757\u8be6\u8ff0",
+      "target": "specs_2026_06_22_graph_usability_enhancement_4_4_\u4fe1\u53f7\u56fe_emit_connect_\u5206\u5411_4",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L102",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_graph_usability_enhancement_\u56db_\u6a21\u5757\u8be6\u8ff0",
+      "target": "specs_2026_06_22_graph_usability_enhancement_4_5_\u5165\u53e3\u51fd\u6570\u6807\u8bb0_5_p1",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L108",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_graph_usability_enhancement_\u56db_\u6a21\u5757\u8be6\u8ff0",
+      "target": "specs_2026_06_22_graph_usability_enhancement_4_6_hover_tooltip_6_p1",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L112",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_graph_usability_enhancement_\u56db_\u6a21\u5757\u8be6\u8ff0",
+      "target": "specs_2026_06_22_graph_usability_enhancement_4_7_\u4f4e\u5ea6\u6570\u7b5b\u9009_7_p1",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-graph-usability-enhancement.md",
+      "source_location": "L116",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_graph_usability_enhancement_\u56db_\u6a21\u5757\u8be6\u8ff0",
+      "target": "specs_2026_06_22_graph_usability_enhancement_4_8_\u70b9\u8282\u70b9\u8df3\u8f6c_\u5173\u8054\u8fb9\u9ad8\u4eae_8_p1",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-large-graph-virtualization.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_large_graph_virtualization",
+      "target": "specs_2026_06_22_large_graph_virtualization_\u5927\u56fe\u865a\u62df\u5316_\u8bbe\u8ba1\u89c4\u8303",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-large-graph-virtualization.md",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_large_graph_virtualization_\u5927\u56fe\u865a\u62df\u5316_\u8bbe\u8ba1\u89c4\u8303",
+      "target": "specs_2026_06_22_large_graph_virtualization_\u4e00_\u76ee\u6807",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-large-graph-virtualization.md",
+      "source_location": "L140",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_large_graph_virtualization_\u5927\u56fe\u865a\u62df\u5316_\u8bbe\u8ba1\u89c4\u8303",
+      "target": "specs_2026_06_22_large_graph_virtualization_\u4e03_\u4f18\u5148\u7ea7\u8bf4\u660e",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-large-graph-virtualization.md",
+      "source_location": "L32",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_large_graph_virtualization_\u5927\u56fe\u865a\u62df\u5316_\u8bbe\u8ba1\u89c4\u8303",
+      "target": "specs_2026_06_22_large_graph_virtualization_\u4e09_\u67b6\u6784",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-large-graph-virtualization.md",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_large_graph_virtualization_\u5927\u56fe\u865a\u62df\u5316_\u8bbe\u8ba1\u89c4\u8303",
+      "target": "specs_2026_06_22_large_graph_virtualization_\u4e8c_\u8303\u56f4",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-large-graph-virtualization.md",
+      "source_location": "L121",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_large_graph_virtualization_\u5927\u56fe\u865a\u62df\u5316_\u8bbe\u8ba1\u89c4\u8303",
+      "target": "specs_2026_06_22_large_graph_virtualization_\u4e94_\u9a8c\u6536\u6807\u51c6",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-large-graph-virtualization.md",
+      "source_location": "L130",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_large_graph_virtualization_\u5927\u56fe\u865a\u62df\u5316_\u8bbe\u8ba1\u89c4\u8303",
+      "target": "specs_2026_06_22_large_graph_virtualization_\u516d_\u98ce\u9669",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-large-graph-virtualization.md",
+      "source_location": "L112",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_large_graph_virtualization_\u5927\u56fe\u865a\u62df\u5316_\u8bbe\u8ba1\u89c4\u8303",
+      "target": "specs_2026_06_22_large_graph_virtualization_\u56db_\u4ea4\u4ed8\u7269",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-large-graph-virtualization.md",
+      "source_location": "L26",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_large_graph_virtualization_\u4e8c_\u8303\u56f4",
+      "target": "specs_2026_06_22_large_graph_virtualization_\u4e0d\u505a",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-large-graph-virtualization.md",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_large_graph_virtualization_\u4e8c_\u8303\u56f4",
+      "target": "specs_2026_06_22_large_graph_virtualization_\u505a",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-large-graph-virtualization.md",
+      "source_location": "L41",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_large_graph_virtualization_\u4e09_\u67b6\u6784",
+      "target": "specs_2026_06_22_large_graph_virtualization_3_1_\u865a\u62df\u5316\u6570\u636e\u6d41",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-large-graph-virtualization.md",
+      "source_location": "L56",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_large_graph_virtualization_\u4e09_\u67b6\u6784",
+      "target": "specs_2026_06_22_large_graph_virtualization_3_2_gdsvirtualgraphedit",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-large-graph-virtualization.md",
+      "source_location": "L104",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_large_graph_virtualization_\u4e09_\u67b6\u6784",
+      "target": "specs_2026_06_22_large_graph_virtualization_3_3_\u6eda\u52a8_\u7f29\u653e\u89e6\u53d1",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-large-graph-virtualization.md",
+      "source_location": "L108",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_large_graph_virtualization_\u4e09_\u67b6\u6784",
+      "target": "specs_2026_06_22_large_graph_virtualization_3_4_\u7f29\u653e\u805a\u5408",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-type-inference.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_type_inference",
+      "target": "specs_2026_06_22_type_inference_\u7c7b\u578b\u63a8\u65ad_\u8bbe\u8ba1\u89c4\u8303",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-type-inference.md",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_type_inference_\u7c7b\u578b\u63a8\u65ad_\u8bbe\u8ba1\u89c4\u8303",
+      "target": "specs_2026_06_22_type_inference_\u4e00_\u76ee\u6807",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-type-inference.md",
+      "source_location": "L114",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_type_inference_\u7c7b\u578b\u63a8\u65ad_\u8bbe\u8ba1\u89c4\u8303",
+      "target": "specs_2026_06_22_type_inference_\u4e03_\u98ce\u9669",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-type-inference.md",
+      "source_location": "L36",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_type_inference_\u7c7b\u578b\u63a8\u65ad_\u8bbe\u8ba1\u89c4\u8303",
+      "target": "specs_2026_06_22_type_inference_\u4e09_\u4e3a\u4ec0\u4e48\u662f_l1_\u52a1\u5b9e\u8fb9\u754c",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-type-inference.md",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_type_inference_\u7c7b\u578b\u63a8\u65ad_\u8bbe\u8ba1\u89c4\u8303",
+      "target": "specs_2026_06_22_type_inference_\u4e8c_\u8303\u56f4",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-type-inference.md",
+      "source_location": "L98",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_type_inference_\u7c7b\u578b\u63a8\u65ad_\u8bbe\u8ba1\u89c4\u8303",
+      "target": "specs_2026_06_22_type_inference_\u4e94_\u4ea4\u4ed8\u7269",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-type-inference.md",
+      "source_location": "L123",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_type_inference_\u7c7b\u578b\u63a8\u65ad_\u8bbe\u8ba1\u89c4\u8303",
+      "target": "specs_2026_06_22_type_inference_\u516b_\u4e0e\u56fe\u5f3a\u5316\u7684\u5173\u7cfb",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-type-inference.md",
+      "source_location": "L105",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_type_inference_\u7c7b\u578b\u63a8\u65ad_\u8bbe\u8ba1\u89c4\u8303",
+      "target": "specs_2026_06_22_type_inference_\u516d_\u9a8c\u6536\u6807\u51c6",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-type-inference.md",
+      "source_location": "L42",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_type_inference_\u7c7b\u578b\u63a8\u65ad_\u8bbe\u8ba1\u89c4\u8303",
+      "target": "specs_2026_06_22_type_inference_\u56db_\u67b6\u6784",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-type-inference.md",
+      "source_location": "L28",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_type_inference_\u4e8c_\u8303\u56f4",
+      "target": "specs_2026_06_22_type_inference_\u4e0d\u505a_l2_\u590d\u6742_\u540e\u7eed",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-type-inference.md",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_type_inference_\u4e8c_\u8303\u56f4",
+      "target": "specs_2026_06_22_type_inference_\u505a_l1_\u7b80\u5355\u63a8\u65ad_\u8986\u76d6\u5e38\u89c1\u6a21\u5f0f",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-type-inference.md",
+      "source_location": "L51",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_type_inference_\u56db_\u67b6\u6784",
+      "target": "specs_2026_06_22_type_inference_4_1_\u63a8\u65ad\u6d41\u7a0b",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-type-inference.md",
+      "source_location": "L64",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_type_inference_\u56db_\u67b6\u6784",
+      "target": "specs_2026_06_22_type_inference_4_2_gds_typeinferrer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-22-type-inference.md",
+      "source_location": "L94",
+      "weight": 1.0,
+      "source": "specs_2026_06_22_type_inference_\u56db_\u67b6\u6784",
+      "target": "specs_2026_06_22_type_inference_4_3_\u8fd4\u56de\u7c7b\u578b\u8868\u9884\u5efa",
       "confidence_score": 1.0
     },
     {
@@ -9470,5 +11220,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "3a4117f76e06a80dfa5088d4927abb9b386b05d5"
+  "built_at_commit": "9ce05d269f50331374633fb067c003b7699f84d1"
 }
