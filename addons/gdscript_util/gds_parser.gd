@@ -112,16 +112,23 @@ func parse(p_tokens: Array) -> GDScriptToken.ClassNode:
 
     var root = GDScriptToken.ClassNode.new()
 
+    # 跳过文件开头的空行/注释残留的 NEWLINE（真实文件常有注释头或开头空行）
+    # 否则下面的 extends/class_name 检测会因首个 token 是 NEWLINE 而被跳过，
+    # 进而 extends 被误判为"出现在类体中"
+    _skip_newlines()
+
     # 解析文件级注解 — 仅 @tool 和 @icon 是文件级的
     # 成员注解 (@export, @onready...) 在 _parse_class_member 中处理
     while _peek() and _peek().type == GDScriptToken.Type.ANNOTATION:
         var ann_name = _peek().literal
         if ann_name in ["tool", "icon"]:
             root.annotations.append(_parse_annotation())
+            _skip_newlines()  # 注解后可能跟空行
         else:
             break  # 成员注解留给 _parse_class_member
 
     # 解析 extends (文件级, 在 class body 之前)
+    _skip_newlines()
     if _peek() and _peek().type == GDScriptToken.Type.EXTENDS:
         _advance()
         var id_t = _expect(GDScriptToken.Type.IDENTIFIER, "extends 后需要类名")
