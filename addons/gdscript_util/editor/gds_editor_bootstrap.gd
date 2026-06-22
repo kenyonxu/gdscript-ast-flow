@@ -22,6 +22,9 @@ func setup(p_plugin: EditorPlugin) -> void:
 
 	_plugin.resource_saved.connect(_on_resource_saved)
 
+	# Phase 3.2: 首次启动 deferred 全量项目分析
+	call_deferred("_initial_project_scan")
+
 func teardown() -> void:
 	if _plugin.resource_saved.is_connected(_on_resource_saved):
 		_plugin.resource_saved.disconnect(_on_resource_saved)
@@ -45,7 +48,12 @@ func _run_queued_analysis() -> void:
 	var path = _analysis_queued
 	_analysis_queued = ""
 	_bridge.run_analysis(path)
+	# Phase 3.2 增量: 若已有项目结果，重分析该文件 + 重解析跨文件边
+	_bridge.refresh_file_in_project(path)
 	_is_analyzing = false
 	# 若期间又有新保存请求，继续处理
 	if _analysis_queued != "":
 		call_deferred("_run_queued_analysis")
+
+func _initial_project_scan() -> void:
+	_bridge.run_project_analysis("res://")
