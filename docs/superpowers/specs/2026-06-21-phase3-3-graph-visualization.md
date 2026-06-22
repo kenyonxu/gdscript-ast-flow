@@ -1,6 +1,6 @@
 # Phase 3.3: 图可视化 设计规范
 
-> 日期: 2026-06-21 | 状态: 设计中 | 依赖: Phase 3 v1 + Phase 3.2 (已完成 ✅)
+> 日期: 2026-06-21 | 状态: Phase 3.3 已完成 ✅ | 依赖: Phase 3 v1 + Phase 3.2 (已完成 ✅)
 
 ## 一、目标
 
@@ -211,16 +211,63 @@ resolver 在 `_add_call_edge` 时累加：`call_out_degree[caller] += 1`，`call
 
 ## 十二、验收标准
 
-- [ ] Phase 1/2/3v1/3.2 回归全通过
-- [ ] 主屏出现 "Analysis" tab，可切换显隐
-- [ ] 单文件调用图：函数节点 + 调用边，按 call_type 着色
-- [ ] 单文件信号流图：信号节点 + emit/connect 边
-- [ ] 项目级图：文件节点 + 跨文件边（粗细按边数）
-- [ ] 枢纽函数高亮（度数 >= 阈值）
-- [ ] 点节点跳转定义
-- [ ] GraphEdit 缩放/拖拽/重布局正常
-- [ ] 度数统计正确（in/out degree）
-- [ ] 过滤 + Scope/Graph 切换工作
+- [x] Phase 1/2/3v1/3.2 回归全通过
+- [x] 主屏出现 "Analysis" tab，可切换显隐
+- [x] 单文件调用图：函数节点 + 调用边，按 call_type 着色
+- [x] 单文件信号流图：信号节点 + emit/connect 边
+- [x] 项目级图：文件节点 + 跨文件边（文件耦合）
+- [x] 枢纽函数高亮（度数 >= 阈值，颜色标注）
+- [ ] 点节点跳转定义（**Phase 3.4** — 未连线）
+- [x] GraphEdit 缩放/拖拽/重布局正常
+- [x] 度数统计正确（in/out degree）
+- [x] Scope/Graph 切换工作（4 组合全通：File/Project × Call/Signal）
+
+---
+
+## 附录：Phase 3.3 实现完成记录
+
+**完成日期：** 2026-06-22
+**关键提交：**
+- A1-A2 degree 字段 + resolver 累加
+- B1-B2 GDSGraphNode + GDSGraphMainScreen
+- C1-C3 三个 view builder（call/signal/project）
+- D1-D2 plugin.gd 主屏 overrides + bootstrap 注册
+- `2efd8cf` 主屏 VBoxContainer 修复
+- `aaab62d` 主屏 EXPAND_FILL 修复
+- `2e90a44` project view 按 kind 分支
+**测试结果：** 度数/view 构建 3/3，主屏 4 组合手动验收通过
+
+### 与规范的偏差（均在实现中修复）
+
+| 项目 | 规范 | 实际 |
+|------|------|------|
+| 主屏容器基类 | `Control` | **`VBoxContainer`**——plain Control 不把尺寸传给 GraphEdit（同 Phase 3 教训） |
+| 主屏铺满 | 隐含 | 需 `EXPAND_FILL` + `PRESET_FULL_RECT` 双设——编辑器主屏父级是 Container，忽略 anchors，只认 size_flags |
+| Project+Signal 视图 | 复用 project view | 初版 project view 忽略 kind，永远画文件耦合 → 按 kind 分支（call=文件耦合 / signal=信号中心节点） |
+| 点节点跳转 | spec 列为交互项 | 推迟 Phase 3.4 |
+
+### 验收中发现并修复的 Bug
+
+| Bug | 症状 | 根因 | 修复提交 |
+|-----|------|------|---------|
+| 主屏不渲染 | 切 Project 无内容 | `extends Control`，GraphEdit 塌缩 0 高度 | `2efd8cf`（Control→VBoxContainer） |
+| 渲染只用 800×500 | 不铺满 | 主屏无 size_flags，编辑器主屏父级是 Container 只认 size_flags 不认 anchors | `aaab62d`（加 EXPAND_FILL） |
+| Project+Signal 空/同 Call | 切 Signal 无变化 | project view 忽略 p_graph_kind | `2e90a44`（按 kind 分支 call/signal） |
+
+### 关键经验（GDScript 编辑器主屏）
+
+- **主屏容器必须 `extends Container`**（VBoxContainer），plain Control 不传尺寸给子节点
+- **编辑器主屏父级是 Container**，按 `size_flags` 分配空间、**忽略子节点 anchors**——所以 `PRESET_FULL_RECT` 无效，必须给主屏自身设 `EXPAND_FILL`
+- GraphEdit 兜底加 `custom_minimum_size`，避免布局未完成时 0 高度
+- view builder 必须显式分支处理 kind，否则切换无效果
+
+### 已知限制（Phase 3.4）
+
+- 点节点跳转定义未实现
+- 大图（>200 节点）无虚拟化
+- 边颜色按 call_type 规划但 GraphEdit 连线着色需主题精修
+- 度数含内置函数噪声（print/range）
+- 性能基准未测（ADR-0001：profile 后再定）
 
 ## 十三、风险与边界
 

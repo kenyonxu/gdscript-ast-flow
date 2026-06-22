@@ -604,18 +604,41 @@ git commit -m "test: Phase 3.3 regression + main-screen graph acceptance pass"
 
 ## 完成检查清单
 
-- [ ] `gds_analysis_result.gd` — call_in_degree / call_out_degree 字段
-- [ ] `gds_symbol_resolver.gd` — `_add_call_edge` 累加度数
-- [ ] `editor/graphs/gds_graph_node.gd` — 通用 GraphNode + 度数高亮
-- [ ] `editor/gds_graph_main_screen.gd` — 主屏容器 + Scope/Graph 切换
-- [ ] `editor/graphs/gds_call_graph_view.gd` — 调用图 builder
-- [ ] `editor/graphs/gds_signal_graph_view.gd` — 信号流 builder
-- [ ] `editor/graphs/gds_project_graph_view.gd` — 项目级 builder
-- [ ] `plugin.gd` — `_has_main_screen`/`_make_visible`/`_get_plugin_name`
-- [ ] `gds_editor_bootstrap.gd` — 注册主屏 + 转发
-- [ ] Phase 1/2/3v1/3.2 回归全通过
-- [ ] Phase 3.3 测试 3/3
-- [ ] 主屏 Analysis tab 手动验收
+- [x] `gds_analysis_result.gd` — call_in_degree / call_out_degree 字段
+- [x] `gds_symbol_resolver.gd` — `_add_call_edge` 累加度数
+- [x] `editor/graphs/gds_graph_node.gd` — 通用 GraphNode + 度数高亮
+- [x] `editor/gds_graph_main_screen.gd` — 主屏容器 + Scope/Graph 切换（VBoxContainer + EXPAND_FILL）
+- [x] `editor/graphs/gds_call_graph_view.gd` — 调用图 builder
+- [x] `editor/graphs/gds_signal_graph_view.gd` — 信号流 builder
+- [x] `editor/graphs/gds_project_graph_view.gd` — 项目级 builder（按 kind 分支 call/signal）
+- [x] `plugin.gd` — `_has_main_screen`/`_make_visible`/`_get_plugin_name`
+- [x] `gds_editor_bootstrap.gd` — 注册主屏 + 转发
+- [x] Phase 1/2/3v1/3.2 回归全通过
+- [x] Phase 3.3 测试 3/3
+- [x] 主屏 Analysis tab 手动验收（4 组合：File/Project × Call/Signal 全通）
+
+---
+
+## 与实际实现的差异
+
+### 1. 主屏容器基类 + 铺满（验收修复）
+
+| 项目 | 计划 | 实际 |
+|------|------|------|
+| 基类 | `extends Control` | **`extends VBoxContainer`**——Control 不传尺寸给 GraphEdit |
+| 铺满 | 隐含 | 需 `EXPAND_FILL`（编辑器主屏父级是 Container，忽略 anchors 只认 size_flags）+ `PRESET_FULL_RECT` 双设 + GraphEdit `custom_minimum_size` 兜底 |
+
+### 2. Project view 按 kind 分支（验收修复）
+
+| 项目 | 计划 | 实际 |
+|------|------|------|
+| Project view | 单一文件耦合视图 | 初版忽略 `p_graph_kind` → 按 kind 分支：Call=文件耦合 / Signal=信号中心节点 |
+
+### 3. 点节点跳转推迟
+
+| 项目 | 计划 | 实际 |
+|------|------|------|
+| 点节点跳转定义 | 交互项 | 推迟 Phase 3.4（未连线） |
 
 ## 已知限制（Phase 3.4）
 
