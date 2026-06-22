@@ -9,9 +9,8 @@ extends GraphNode
 const ENTRY_METHODS := preload("res://addons/gdscript_util/editor/gds_entry_methods.gd")
 
 # p_kind: "function" / "signal" / "file"
-# p_signature: 函数 "(params) -> ret" 或信号 "(params)" 或文件摘要
-# p_location: "@file:line" 或文件路径
-func configure(p_kind: String, p_name: String, p_subtitle: String, p_degree: int, p_signature: String = "", p_location: String = "") -> void:
+# p_hub_threshold: 枢纽高亮阈值（函数默认 5，文件默认 1——文件耦合度数值本身小）
+func configure(p_kind: String, p_name: String, p_subtitle: String, p_degree: int, p_signature: String = "", p_location: String = "", p_hub_threshold: int = 5) -> void:
 	title = p_name
 	# 签名副文本
 	if p_signature != "":
@@ -37,7 +36,7 @@ func configure(p_kind: String, p_name: String, p_subtitle: String, p_degree: int
 	# 入口函数标记（绿色 title）
 	if p_kind == "function" and ENTRY_METHODS.is_entry(p_name):
 		add_theme_color_override("title_color", Color.LIME_GREEN)
-	elif p_degree >= 5:
+	elif p_degree >= p_hub_threshold:
 		# 枢纽高亮
 		add_theme_color_override("title_color", Color.ORANGE_RED)
 	# slot: 左 enable（入边），右 enable（出边）；type 用于着色分组

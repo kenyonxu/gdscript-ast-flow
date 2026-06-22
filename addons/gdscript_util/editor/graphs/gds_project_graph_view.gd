@@ -35,7 +35,7 @@ func _build_call_view(p_graph: GraphEdit, p_project: GDScriptProjectResult, p_mi
 		var funcs_n = file_result.get_all_functions().size()
 		var sigs_n = file_result.get_all_signals().size()
 		var node = GDSGraphNode.new()
-		node.configure("file", short, "refs:%d | %d fn, %d sig" % [refs, funcs_n, sigs_n], refs, "", path)
+		node.configure("file", short, "refs:%d | %d fn, %d sig" % [refs, funcs_n, sigs_n], refs, "", path, 1)
 		node.name = "file_" + path.get_file().get_basename()
 		node.position_offset = Vector2(col * 200, row * 120)
 		node.set_meta("jump", {"file": path, "line": 0})
