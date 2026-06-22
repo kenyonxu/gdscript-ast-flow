@@ -12,6 +12,7 @@ var _summary_panel: GDSAnalysisSummary = null
 var _call_graph_panel: GDSCallGraphPanel = null
 var _signal_flow_panel: GDSSignalFlowPanel = null
 var _def_use_panel: GDSDefUsePanel = null
+var _project_panel: GDSProjectPanel = null
 
 func setup(p_bridge: GDSAnalysisBridge) -> void:
 	_bridge = p_bridge
@@ -26,6 +27,7 @@ func _build_ui() -> void:
 	_tab_bar.add_tab("Call Graph")    # tab 1
 	_tab_bar.add_tab("Signal Flow")   # tab 2
 	_tab_bar.add_tab("Def-Use")       # tab 3
+	_tab_bar.add_tab("Project")      # tab 4
 	_tab_bar.tab_changed.connect(_on_tab_changed)
 	add_child(_tab_bar)
 
@@ -61,6 +63,12 @@ func _build_ui() -> void:
 	_def_use_panel.visible = false
 	_content_stack.add_child(_def_use_panel)
 
+	_project_panel = GDSProjectPanel.new()
+	_project_panel.setup(_bridge)
+	_make_fill(_project_panel)
+	_project_panel.visible = false
+	_content_stack.add_child(_project_panel)
+
 
 # 让子面板填满父容器（水平+垂直都 EXPAND_FILL）
 func _make_fill(p_control: Control) -> void:
@@ -72,3 +80,4 @@ func _on_tab_changed(p_tab: int) -> void:
 	_call_graph_panel.visible = (p_tab == 1)
 	_signal_flow_panel.visible = (p_tab == 2)
 	_def_use_panel.visible = (p_tab == 3)
+	_project_panel.visible = (p_tab == 4)
