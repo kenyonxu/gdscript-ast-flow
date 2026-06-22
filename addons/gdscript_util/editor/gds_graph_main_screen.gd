@@ -25,8 +25,12 @@ func setup(p_bridge: GDSAnalysisBridge) -> void:
 	_rebuild()
 
 func _build_ui() -> void:
-	# 主屏铺满编辑器主屏区域（否则 GraphEdit 永远 0x0）
+	# 主屏铺满编辑器主屏区域：
+	# - PRESET_FULL_RECT (anchors) — 父级是 Control 时生效
+	# - size_flags EXPAND_FILL — 父级是 Container 时生效（编辑器主屏实际是 Container）
 	set_anchors_and_offsets_preset(PRESET_FULL_RECT)
+	size_flags_horizontal = SIZE_EXPAND_FILL
+	size_flags_vertical = SIZE_EXPAND_FILL
 	# 顶部 toolbar
 	var toolbar = HBoxContainer.new()
 	toolbar.size_flags_horizontal = SIZE_EXPAND_FILL
