@@ -52,12 +52,26 @@ func _build_ui() -> void:
 	relayout.text = "Re-layout"
 	relayout.pressed.connect(_on_relayout)
 	toolbar.add_child(relayout)
+	# 图例
+	var legend = HBoxContainer.new()
+	_add_legend_chip(legend, "■ emit", Color.RED)
+	_add_legend_chip(legend, "■ connect", Color.DODGER_BLUE)
+	_add_legend_chip(legend, "★ 入口", Color.LIME_GREEN)
+	_add_legend_chip(legend, "▲ 枢纽", Color.ORANGE_RED)
+	add_child(legend)
 	# GraphEdit
 	_graph_edit = GraphEdit.new()
 	_graph_edit.size_flags_horizontal = SIZE_EXPAND_FILL
 	_graph_edit.size_flags_vertical = SIZE_EXPAND_FILL
 	_graph_edit.custom_minimum_size = Vector2(800, 500)  # 兜底：父容器未布局时也可见
 	add_child(_graph_edit)
+
+func _add_legend_chip(p_parent: Control, p_text: String, p_color: Color) -> void:
+	var chip = Label.new()
+	chip.text = p_text
+	chip.add_theme_color_override("font_color", p_color)
+	chip.add_theme_font_size_override("font_size", 11)
+	p_parent.add_child(chip)
 
 func _on_data_changed(_arg = null) -> void:
 	_rebuild()
