@@ -53,10 +53,21 @@ func _build_call_view(p_graph: GraphEdit, p_project: GDScriptProjectResult, p_mi
 			p_graph.connect_node(from_node.name, 0, to_node.name, 0)
 
 
-# Signal 视图: 信号中心节点 + 跨文件 emit/connect 边
+# Signal 视图: 信号中心节点 + 跨文件 emit/connect 边（emit 红 / connect 蓝）
 func _build_signal_view(p_graph: GraphEdit, p_project: GDScriptProjectResult, p_min_degree: int = 0) -> void:
 	var sig_nodes: Dictionary = {}   # signal name -> node
 	var file_nodes: Dictionary = {}  # source file -> node
+	# 预扫: 每个源文件的边种类（emit / connect / both），决定其出 slot 色
+	var file_kinds: Dictionary = {}  # file → {emit: bool, connect: bool}
+	for edge in p_project.cross_edges:
+		if edge.kind not in [GDSCrossFileEdge.Kind.SIGNAL_EMIT, GDSCrossFileEdge.Kind.SIGNAL_CONNECT]:
+			continue
+		if not file_kinds.has(edge.source_file):
+			file_kinds[edge.source_file] = {"emit": false, "connect": false}
+		if edge.kind == GDSCrossFileEdge.Kind.SIGNAL_EMIT:
+			file_kinds[edge.source_file].emit = true
+		else:
+			file_kinds[edge.source_file].connect = true
 	var row := 0
 	for edge in p_project.cross_edges:
 		if edge.kind not in [GDSCrossFileEdge.Kind.SIGNAL_EMIT, GDSCrossFileEdge.Kind.SIGNAL_CONNECT]:
@@ -71,13 +82,21 @@ func _build_signal_view(p_graph: GraphEdit, p_project: GDScriptProjectResult, p_
 			p_graph.add_child(snode)
 			sig_nodes[edge.target_symbol] = snode
 			row += 1
-		# 源文件节点（左侧）
+		# 源文件节点（左侧）— 按 emit/connect 着色出 slot（连线色 = from-slot 色）
 		if not file_nodes.has(edge.source_file):
 			var fnode = GDSGraphNode.new()
 			fnode.configure("file", edge.source_file.get_file(), "", 0, "", edge.source_file)
 			fnode.name = "src_" + edge.source_file.get_file().get_basename()
 			fnode.position_offset = Vector2(150, row * 110)
 			fnode.set_meta("jump", {"file": edge.source_file, "line": 0})
+			# 出 slot 颜色: 仅 emit→红, 仅 connect→蓝, 两者→紫
+			var kinds = file_kinds[edge.source_file]
+			var out_col = Color.DODGER_BLUE
+			if kinds.emit and kinds.connect:
+				out_col = Color.MEDIUM_PURPLE
+			elif kinds.emit:
+				out_col = Color.RED
+			fnode.set_slot(0, true, 0, Color.DODGER_BLUE, true, 1, out_col)
 			p_graph.add_child(fnode)
 			file_nodes[edge.source_file] = fnode
 		# 边: 文件 → 信号
