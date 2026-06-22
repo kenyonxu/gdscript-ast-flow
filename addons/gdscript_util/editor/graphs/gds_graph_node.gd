@@ -8,18 +8,25 @@ extends GraphNode
 
 const ENTRY_METHODS := preload("res://addons/gdscript_util/editor/gds_entry_methods.gd")
 
+var _pending_title_color: Color = Color.TRANSPARENT  # _ready 时应用（add_child 前 override 不生效）
+
+func _ready() -> void:
+	# 入树后再应用 title 颜色（configure 在 add_child 前调用，override 可能丢失）
+	if _pending_title_color != Color.TRANSPARENT:
+		add_theme_color_override("title_color", _pending_title_color)
+
 # p_kind: "function" / "signal" / "file"
 # p_hub_threshold: 枢纽高亮阈值（函数默认 5，文件默认 1——文件耦合度数值本身小）
 func configure(p_kind: String, p_name: String, p_subtitle: String, p_degree: int, p_signature: String = "", p_location: String = "", p_hub_threshold: int = 5) -> void:
 	var display_name = p_name
-	# 入口函数标记: 前缀 ▶ + 绿色 title（前缀保证即使主题色不生效也能识别）
+	# 入口函数标记: 前缀 ▶ + 绿色 title（_ready 时应用 override）
 	if p_kind == "function" and ENTRY_METHODS.is_entry(p_name):
 		display_name = "▶ " + p_name
-		add_theme_color_override("title_color", Color.LIME_GREEN)
+		_pending_title_color = Color.LIME_GREEN
 	elif p_kind == "function" and p_degree >= p_hub_threshold:
 		# 枢纽高亮: 前缀 ● + 橙红 title
 		display_name = "● " + p_name
-		add_theme_color_override("title_color", Color.ORANGE_RED)
+		_pending_title_color = Color.ORANGE_RED
 	title = display_name
 	# 签名副文本
 	if p_signature != "":

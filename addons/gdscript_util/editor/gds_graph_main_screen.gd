@@ -103,12 +103,12 @@ func _refresh_legend() -> void:
 			# 信号图：emit/connect 边 + 节点标记
 			_add_legend_chip(_legend, "■ emit", Color.RED)
 			_add_legend_chip(_legend, "■ connect", Color.DODGER_BLUE)
-			_add_legend_chip(_legend, "★ 入口", Color.LIME_GREEN)
-			_add_legend_chip(_legend, "▲ 枢纽", Color.ORANGE_RED)
+			_add_legend_chip(_legend, "▶ 入口", Color.LIME_GREEN)
+			_add_legend_chip(_legend, "● 枢纽", Color.ORANGE_RED)
 		else:
 			# 调用图：仅节点标记（边未按 call_type 着色）
-			_add_legend_chip(_legend, "★ 入口函数", Color.LIME_GREEN)
-			_add_legend_chip(_legend, "▲ 枢纽(度≥5)", Color.ORANGE_RED)
+			_add_legend_chip(_legend, "▶ 入口函数", Color.LIME_GREEN)
+			_add_legend_chip(_legend, "● 枢纽(度≥5)", Color.ORANGE_RED)
 
 func _on_data_changed(_arg = null) -> void:
 	_rebuild()
