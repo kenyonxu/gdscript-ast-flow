@@ -161,3 +161,17 @@ func _clear_highlight() -> void:
 
 func _on_relayout() -> void:
 	_graph_edit.arrange_nodes()  # Godot 4 GraphEdit 内置自动布局
+	call_deferred("_center_view")  # 等 arrange 完成后居中
+
+# 计算所有节点质心，scroll 到视口居中
+func _center_view() -> void:
+	var count := 0
+	var sum := Vector2.ZERO
+	for c in _graph_edit.get_children():
+		if c is GraphNode:
+			sum += c.position_offset + c.size / 2.0
+			count += 1
+	if count > 0:
+		var center = sum / float(count)
+		var vp = _graph_edit.get_viewport_rect().size / _graph_edit.get_zoom()
+		_graph_edit.set_scroll_offset(center - vp / 2.0)
