@@ -256,6 +256,10 @@ func _resolve_function(p_node, p_parent_scope: GDScriptSymbolTable):
 	for param in p_node.params:
 		if param is GDScriptToken.ParameterNode:
 			func_scope.define(param.name, GDScriptSymbol.Kind.PARAMETER, param, _type_to_string(param.datatype))
+			# Phase 3.2: 参数声明类型
+			var ptype = _type_to_string(param.datatype)
+			if ptype != "":
+				result.type_table[param.name] = ptype
 			# 记录参数 def site
 			_record_def_use(param.name, param, p_node.name, GDScriptDefUseSite.AccessType.DEFINE)
 
@@ -272,6 +276,11 @@ func _resolve_variable(p_node, p_scope: GDScriptSymbolTable, p_current_function:
 	# define 到当前作用域
 	var sym = p_scope.define(p_node.name, kind, p_node, _type_to_string(p_node.datatype))
 	sym.is_exported = p_node.is_export
+
+	# Phase 3.2: 记录变量声明类型到 type_table（供跨文件解析）
+	var vtype = _type_to_string(p_node.datatype)
+	if vtype != "":
+		result.type_table[p_node.name] = vtype
 
 	# 记录 def site
 	_record_def_use(p_node.name, p_node, p_current_function, GDScriptDefUseSite.AccessType.DEFINE)
