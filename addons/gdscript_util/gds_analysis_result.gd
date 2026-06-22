@@ -20,6 +20,9 @@ var call_graph: GDScriptCallGraph = null
 var signal_graph: GDScriptSignalGraph = null
 var def_use_chain: GDScriptDefUseChain = null
 var type_table: Dictionary = {}  # String(var/param name) → String(类型名) — 供跨文件解析用
+# Phase 3.3: 调用度数（驱动图节点大小/枢纽高亮）
+var call_in_degree: Dictionary = {}   # String(func) → int（被调次数）
+var call_out_degree: Dictionary = {}  # String(func) → int（调用次数）
 
 # 错误/告警
 var errors: Array = []
