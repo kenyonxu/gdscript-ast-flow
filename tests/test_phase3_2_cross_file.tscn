@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://test_phase3_2_cross_file_scene"]
+
+[ext_resource type="Script" path="res://tests/test_phase3_2_cross_file.gd" id="1_script"]
+
+[node name="TestRunner" type="Node"]
+script = ExtResource("1_script")
