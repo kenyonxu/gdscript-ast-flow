@@ -11,6 +11,8 @@ var _main_panel: GDSAnalysisMainPanel = null
 var _analysis_queued: String = ""  # 待分析路径（非空表示有待执行）
 var _is_analyzing: bool = false    # 重入保护
 var _graph_main_screen: GDSGraphMainScreen = null  # Phase 3.3: 主屏 tab
+var _focus_timer: Timer = null              # 轮询当前脚本焦点
+var _last_script_path: String = ""          # 上次分析的脚本路径（用于检测切换）
 
 func setup(p_plugin: EditorPlugin) -> void:
 	_plugin = p_plugin
@@ -32,9 +34,20 @@ func setup(p_plugin: EditorPlugin) -> void:
 	EditorInterface.get_editor_main_screen().add_child(_graph_main_screen)
 	_graph_main_screen.visible = false  # 默认隐藏，切到 Analysis tab 才显示
 
+	# 焦点跟随: 500ms 轮询当前脚本，切换时自动分析（双击打开/切 Tab 即触发，无需 save）
+	_focus_timer = Timer.new()
+	_focus_timer.wait_time = 0.5
+	_focus_timer.autostart = true
+	_focus_timer.timeout.connect(_on_focus_tick)
+	_plugin.add_child(_focus_timer)
+
 func teardown() -> void:
 	if _plugin.resource_saved.is_connected(_on_resource_saved):
 		_plugin.resource_saved.disconnect(_on_resource_saved)
+
+	if _focus_timer and is_instance_valid(_focus_timer):
+		_focus_timer.stop()
+		_focus_timer.queue_free()
 
 	if _main_panel and is_instance_valid(_main_panel):
 		_plugin.remove_control_from_bottom_panel(_main_panel)
@@ -73,3 +86,17 @@ func set_main_screen_visible(p_visible: bool) -> void:
 
 func _initial_project_scan() -> void:
 	_bridge.run_project_analysis("res://")
+
+# 焦点跟随: 检测当前脚本编辑器焦点是否变化，变了就触发分析
+func _on_focus_tick() -> void:
+	var se = _plugin.get_editor_interface().get_script_editor()
+	if se == null:
+		return
+	var current = se.get_current_script()
+	if current == null:
+		return
+	var path: String = current.resource_path
+	if path != _last_script_path and path.ends_with(".gd"):
+		_last_script_path = path
+		# 直接分析（bridge 内部有 timestamp 缓存，未修改的会秒回）
+		_bridge.run_analysis(path)
