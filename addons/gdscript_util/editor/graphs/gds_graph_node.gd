@@ -33,6 +33,7 @@ func configure(p_kind: String, p_name: String, p_subtitle: String, p_degree: int
 	label.text = p_subtitle
 	label.add_theme_font_size_override("normal_font_size", 11)
 	label.size_flags_horizontal = SIZE_EXPAND_FILL
+	label.size_flags_vertical = SIZE_FILL  # 不 EXPAND，否则 RichTextLabel 在 GraphNode 里竖直撑满把节点拉长
 	add_child(label)
 	# tooltip — 完整信息
 	tooltip_text = "%s\n%s\n%s\n%s" % [p_name, p_signature, p_location, p_subtitle]
