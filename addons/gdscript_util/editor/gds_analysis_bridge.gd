@@ -10,6 +10,10 @@ signal analysis_started(file_path: String)
 signal analysis_completed(result: GDScriptAnalysisResult)
 signal analysis_failed(file_path: String, error: String)
 
+# Phase 3.2: 项目分析生命周期
+signal project_analysis_started()
+signal project_analysis_completed(result: GDScriptProjectResult)
+
 # 面板间联动 — 用户在某面板选中一项，其他面板联动过滤
 signal function_selected(func_name: String)
 signal signal_selected(signal_name: String)
@@ -18,6 +22,10 @@ signal variable_selected(var_name: String)
 var _current_result: GDScriptAnalysisResult = null
 var _cache: Dictionary = {}  # String(path) → GDScriptAnalysisResult
 var _timestamps: Dictionary = {}  # String(path) → int(mtime)
+
+# Phase 3.2: 项目分析
+var _project_result: GDScriptProjectResult = null
+var _project_analyzer: GDScriptProjectAnalyzer = null
 
 
 func run_analysis(p_file_path: String) -> void:
@@ -88,3 +96,43 @@ func should_reanalyze(p_path: String) -> bool:
 		return false
 	_timestamps[p_path] = mtime
 	return true
+
+
+# ---- Phase 3.2: 项目分析 ----
+
+# 全量项目分析（deferred，不阻塞）
+func run_project_analysis(p_root: String = "res://") -> void:
+	project_analysis_started.emit()
+	# deferred 跑重活
+	call_deferred("_do_project_analysis", p_root)
+
+func _do_project_analysis(p_root: String) -> void:
+	if _project_analyzer == null:
+		_project_analyzer = GDScriptProjectAnalyzer.new()
+	_project_result = _project_analyzer.analyze_full(p_root)
+	project_analysis_completed.emit(_project_result)
+
+func get_project_result() -> GDScriptProjectResult:
+	return _project_result
+
+# 增量: 重分析单文件 + 重建注册表 + 重解析跨文件边
+func refresh_file_in_project(p_path: String) -> void:
+	if _project_result == null or _project_analyzer == null:
+		return  # 项目尚未全量分析过，跳过增量
+	var new_result = _project_analyzer._analyze_file(p_path)
+	if new_result == null:
+		return
+	# 检查 class_name 是否变化
+	var old_cn = ""
+	if _project_result.files.has(p_path):
+		old_cn = _project_result.files[p_path].classname_id
+	_project_result.files[p_path] = new_result
+	if new_result.classname_id != old_cn:
+		# class_name 变了 → 重建注册表
+		_project_result.class_registry.clear()
+		_project_analyzer._build_class_registry(_project_result)
+	# 重解析跨文件边（简化: 全量重算 cross_edges，反向索引随之更新）
+	_project_result.cross_edges.clear()
+	_project_result.reverse_index.clear()
+	_project_analyzer.resolve_cross_file(_project_result)
+	project_analysis_completed.emit(_project_result)
