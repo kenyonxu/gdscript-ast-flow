@@ -138,6 +138,21 @@ func _call_type_to_string(p_type: int) -> String:
 		_: return "[?]"
 
 
+# Phase 3.3: 主屏 tab
+func _has_main_screen() -> bool:
+	return true
+
+func _get_plugin_name() -> String:
+	return "Analysis"
+
+func _make_visible(p_visible: bool) -> void:
+	if _phase3_bootstrap:
+		_phase3_bootstrap.set_main_screen_visible(p_visible)
+
+func _get_plugin_icon() -> Texture2D:
+	return null  # 用默认图标
+
+
 # Phase 3: Bridge 使用的静态分析函数
 static func analyze_script(p_path: String) -> GDScriptAnalysisResult:
 	var script = load(p_path) as GDScript
