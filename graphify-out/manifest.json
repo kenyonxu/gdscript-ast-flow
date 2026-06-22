@@ -95,8 +95,8 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-06-20-phase3-editor-integration.md": {
-    "mtime": 1782042103.3444126,
-    "ast_hash": "a1f7927e7106e43c979a24d51e43c33a",
+    "mtime": 1782103947.7804365,
+    "ast_hash": "f1345f15e1c299b05fbb05f79bfcc54f",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-06-20-godot47-gdscript-parser-design.md": {
@@ -115,13 +115,23 @@
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-06-20-phase3-editor-integration-design.md": {
-    "mtime": 1782042103.3450437,
-    "ast_hash": "77a0d7f6ba7174f84ffac30e712aef69",
+    "mtime": 1782103947.7805538,
+    "ast_hash": "adf6eb86563ba53012109adb2dce0887",
     "semantic_hash": ""
   },
   "icon.svg": {
     "mtime": 1781954695.276422,
     "ast_hash": "a16f2eed1b4496c4abf03d329708ba09",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-06-21-phase3-2-cross-file-analysis.md": {
+    "mtime": 1782103842.2713497,
+    "ast_hash": "7eb4cc6b9390e0a93b9b756258f1d91a",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-06-21-phase3-2-cross-file-analysis.md": {
+    "mtime": 1782103842.2693498,
+    "ast_hash": "d28b74fecb06fe611d78d17cae03adde",
     "semantic_hash": ""
   }
 }
