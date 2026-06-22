@@ -25,6 +25,8 @@ func setup(p_bridge: GDSAnalysisBridge) -> void:
 	_rebuild()
 
 func _build_ui() -> void:
+	# 主屏铺满编辑器主屏区域（否则 GraphEdit 永远 0x0）
+	set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 	# 顶部 toolbar
 	var toolbar = HBoxContainer.new()
 	toolbar.size_flags_horizontal = SIZE_EXPAND_FILL
@@ -50,6 +52,7 @@ func _build_ui() -> void:
 	_graph_edit = GraphEdit.new()
 	_graph_edit.size_flags_horizontal = SIZE_EXPAND_FILL
 	_graph_edit.size_flags_vertical = SIZE_EXPAND_FILL
+	_graph_edit.custom_minimum_size = Vector2(800, 500)  # 兜底：父容器未布局时也可见
 	add_child(_graph_edit)
 
 func _on_data_changed(_arg = null) -> void:
