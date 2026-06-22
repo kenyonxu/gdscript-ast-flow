@@ -49,3 +49,24 @@ func _analyze_file(p_path: String) -> GDScriptAnalysisResult:
 		return null
 	var resolver = GDScriptSymbolResolver.new()
 	return resolver.resolve(ast, p_path)
+
+
+# 全量分析: 扫描 + 单文件管道，返回 GDScriptProjectResult（无跨文件边，待 B3）
+func analyze_all(p_root: String) -> GDScriptProjectResult:
+	var result = GDScriptProjectResult.new()
+	result.root_path = p_root
+	var paths = scan_project(p_root)
+	for path in paths:
+		var file_result = _analyze_file(path)
+		if file_result != null:
+			result.files[path] = file_result
+	_build_class_registry(result)
+	return result
+
+
+# 从各文件的 classname_id 建 {class_name: file_path}
+func _build_class_registry(p_result: GDScriptProjectResult) -> void:
+	for path in p_result.files:
+		var file_result = p_result.files[path]
+		if file_result.classname_id != "":
+			p_result.class_registry[file_result.classname_id] = path
