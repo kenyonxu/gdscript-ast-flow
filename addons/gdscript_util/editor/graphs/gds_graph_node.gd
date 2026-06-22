@@ -26,10 +26,13 @@ func configure(p_kind: String, p_name: String, p_subtitle: String, p_degree: int
 		loc_label.add_theme_font_size_override("font_size", 10)
 		loc_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 		add_child(loc_label)
-	# 度数副文本
-	var label = Label.new()
+	# 度数副文本 — 用 RichTextLabel 支持 BBcode 多色（文件节点 ref/func/signal 分别着色）
+	var label = RichTextLabel.new()
+	label.bbcode_enabled = true
+	label.fit_content = true
 	label.text = p_subtitle
-	label.add_theme_font_size_override("font_size", 11)
+	label.add_theme_font_size_override("normal_font_size", 11)
+	label.size_flags_horizontal = SIZE_EXPAND_FILL
 	add_child(label)
 	# tooltip — 完整信息
 	tooltip_text = "%s\n%s\n%s\n%s" % [p_name, p_signature, p_location, p_subtitle]
