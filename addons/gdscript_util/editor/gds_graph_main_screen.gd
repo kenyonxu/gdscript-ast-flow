@@ -161,7 +161,9 @@ func _clear_highlight() -> void:
 
 func _on_relayout() -> void:
 	_graph_edit.arrange_nodes()  # Godot 4 GraphEdit 内置自动布局
-	call_deferred("_center_view")  # 等 arrange 完成后居中
+	# arrange_nodes 可能下一帧才更新 position_offset，用短延迟等它完成
+	var t = get_tree().create_timer(0.1)
+	t.timeout.connect(_center_view)
 
 # 计算所有节点质心，scroll 到视口居中
 func _center_view() -> void:
@@ -172,6 +174,9 @@ func _center_view() -> void:
 			sum += c.position_offset + c.size / 2.0
 			count += 1
 	if count > 0:
-		var center = sum / float(count)
-		var vp = _graph_edit.get_viewport_rect().size / _graph_edit.get_zoom()
-		_graph_edit.set_scroll_offset(center - vp / 2.0)
+		# scroll_offset 是屏幕像素空间；position_offset 是图空间
+		# 公式: scroll = center_graph * zoom - viewport / 2
+		var center_graph = sum / float(count)
+		var screen_center = center_graph * _graph_edit.get_zoom()
+		var vp = _graph_edit.get_viewport_rect().size
+		_graph_edit.set_scroll_offset(screen_center - vp / 2.0)
