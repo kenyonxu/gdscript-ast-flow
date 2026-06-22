@@ -1,3 +1,8 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
+
+# 参考项目（limboai 行为树插件 + demo），仅本地观摩，不入库
+/addons/limboai/
+/demo/
+
