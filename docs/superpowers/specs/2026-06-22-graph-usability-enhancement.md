@@ -1,6 +1,6 @@
 # 图可用性强化 设计规范
 
-> 日期: 2026-06-22 | 状态: 设计中 | 依赖: Phase 3.3 图可视化 (已完成 ✅)
+> 日期: 2026-06-22 | 状态: 已完成 ✅ | 依赖: Phase 3.3 图可视化 (已完成 ✅)
 
 ## 一、目标
 
@@ -145,18 +145,45 @@ in:1 out:2
 - [ ] 调用图节点 title 色反映调用角色 + 图例说明
 - [ ] 函数节点显示签名（参数+返回类型）
 - [ ] 信号节点显示参数列表
-- [ ] 节点显示 `@文件:行号`
-- [ ] 入口函数（_ready 等）特殊标记
-- [ ] hover tooltip 显示完整信息
-- [ ] 阈值筛选：调高阈值，低度数节点隐藏
-- [ ] 点节点跳转到定义行
-- [ ] 图例常驻显示颜色含义
+- [x] 节点显示 `@文件:行号`
+- [x] 入口函数（_ready 等）特殊标记
+- [x] hover tooltip 显示完整信息
+- [x] 阈值筛选：调高阈值，低度数节点隐藏
+- [x] 点节点跳转到定义行
+- [x] 图例常驻显示颜色含义（按视图动态刷新）
 
-## 八、风险与边界
+---
 
-| 风险 | 缓解 |
-|------|------|
-| 调用图 per-edge 着色受限（GraphEdit 连线色=slot 色） | 接受节点级着色 + 图例；精确 per-edge 留自定义子类（不做） |
-| 签名太长撑爆节点 | 副文本超长截断 + tooltip 全文 |
-| 筛选后孤立节点残留 | 筛选时同步移除连到隐藏节点的边 |
-| 关联边高亮近似（无单边 API） | 用节点 modulate 淡化近似，文档说明 |
+## 附录：实现完成记录
+
+**完成日期：** 2026-06-22
+**测试结果：** 全部手动验收通过
+
+### 与规范的偏差（均在实现中修复）
+
+| 项目 | 规范 | 实际 |
+|------|------|------|
+| 边着色机制 | 信号图双 slot + 调用图节点级 | 同规范；项目信号图加 emit(红)/connect(蓝)/both(紫) 分色 |
+| 入口标记 | 特殊色 title | **▶ 前缀** + 绿色（title_color override 不存在，改设内部 Label font_color） |
+| 文件副文本 | 无 | **彩色 BBcode**（ref 绿/functions 蓝/signals 红，RichTextLabel） |
+| 图例 | 常驻 4 色 | **按视图动态刷新**（每个 Scope×Kind 只显真实颜色） |
+| Tab 激活 | 无 | 自动 `arrange_nodes`（deferred） |
+| 焦点跟随 | 无（仅 save 触发） | **500ms Timer** 轮询当前脚本，双击/切 Tab 自动分析 |
+
+### 验收中发现并修复的 Bug
+
+| Bug | 根因 | 修复 |
+|-----|------|------|
+| 节点 `fn` 越界 | GDScript 块作用域（var fn 在 if 块内） | 改直接索引 `func_nodes[name]` |
+| RichTextLabel 撑高节点 | `fit_content` + autowrap 默认 → 文字换行撑高 | `autowrap_mode = OFF` + 节点加宽 220px |
+| title 绿色不生效 | Godot 源码确认：GraphNode title 是内部 Label（`graph_node.cpp:1358`），不是 GraphNode theme color | `get_titlebar_hbox()->child(0)->font_color` |
+| 节点虚化不恢复 | `node_deselected` 信号未连 + 切选时旧节点残留 | 连信号 + `_ready` 恢复全部再虚化 |
+| 项目信号图全蓝 | project view 忽略 p_graph_kind | 按 kind 分支 call/signal |
+| 跨文件 emit 无数据 | resolver 缺 `obj.signal.emit()`（base AttributeNode）分支 | 加对称分支 + analyzer EMIT 解析 |
+
+### 关键经验（GraphEdit/GraphNode）
+
+- **GraphNode title 是内部 Label**（theme type `GraphNodeTitleLabel`），不是 GraphNode 的 theme color 属性 → `get_titlebar_hbox()->child(0)` 设 `font_color`
+- **GraphEdit 连线色 = from-node out-slot 色**，per-edge 着色只能通过 slot 实现
+- **RichTextLabel `fit_content` 需关 autowrap**，否则窄宽度换行撑高
+- **`add_theme_color_override` 在 add_child 前调用可能丢失** → `_ready()` 里应用更可靠

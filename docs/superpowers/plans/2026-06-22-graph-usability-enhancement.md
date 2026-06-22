@@ -471,19 +471,35 @@ git commit -m "test: graph usability enhancement acceptance pass"
 ## 完成检查清单
 
 P0:
-- [ ] GDSGraphNode — configure 扩签名/位置/tooltip/入口标记
-- [ ] GDS_EntryMethods — 入口方法集合
-- [ ] 调用图 — 签名 + 位置
-- [ ] 信号图 — emit/connect 双 slot 分色
-- [ ] 项目图 — 文件规模摘要
+- [x] GDSGraphNode — configure 扩签名/位置/tooltip/入口标记（▶/● 前缀 + RichTextLabel 副文本）
+- [x] GDS_EntryMethods — 入口方法集合
+- [x] 调用图 — 签名 + 位置 + 度数
+- [x] 信号图 — emit/connect 双 slot 分色（红/蓝/紫）
+- [x] 项目图 — 文件规模摘要（彩色 ref/func/signal）
 
 P1:
-- [ ] 主屏 — legend 图例
-- [ ] 主屏 — min-degree 筛选
-- [ ] 主屏 — 点节点跳转 + 关联淡化
+- [x] 主屏 — legend 图例（按视图动态刷新）
+- [x] 主屏 — min-degree 筛选
+- [x] 主屏 — 点节点跳转 + 关联淡化（node_deselected 恢复）
+
+验收中额外完成：
+- [x] 焦点跟随 Timer（500ms 轮询，双击/切 Tab 自动分析）
+- [x] Tab 激活自动 arrange_nodes
+- [x] 跨文件 emit 支持（resolver + analyzer）
 
 ## 已知限制
 
 - 调用图 per-edge 着色受 GraphEdit 限制（连线色=from-port 色），用节点级 + 图例近似
 - 关联边高亮用 modulate 淡化近似（无单边 API）
 - 签名超长截断未做（先靠 tooltip）
+- 函数枢纽阈值 5（小文件不会触发，正确行为）
+
+## 验收中发现并修复的关键 Bug
+
+| Bug | 根因 | 修复 |
+|-----|------|------|
+| `fn` 越界 | GDScript 块作用域（var 在 if 块内，块外引用） | 直接索引 `func_nodes[name]` |
+| RichTextLabel 撑高 | `fit_content` + 默认 autowrap → 换行 | `AUTOWRAP_OFF` + 节点加宽 220px |
+| title 绿色不生效 | GraphNode title 是内部 Label，非 GraphNode theme color | `get_titlebar_hbox()->child(0)->font_color` |
+| 虚化不恢复 | `node_deselected` 未连 + 切选残留 | 连信号 + 恢复全部再虚化 |
+| 项目信号图全蓝 | project view 忽略 kind | 按 kind 分支 call/signal |
