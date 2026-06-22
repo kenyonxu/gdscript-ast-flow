@@ -70,3 +70,68 @@ func _build_class_registry(p_result: GDScriptProjectResult) -> void:
 		var file_result = p_result.files[path]
 		if file_result.classname_id != "":
 			p_result.class_registry[file_result.classname_id] = path
+
+
+# 第二遍: 用 type_table + class_registry 解析跨文件调用/信号
+func resolve_cross_file(p_result: GDScriptProjectResult) -> void:
+	for path in p_result.files:
+		var file_result = p_result.files[path]
+		_resolve_file_cross_edges(path, file_result, p_result)
+
+
+func _resolve_file_cross_edges(p_path: String, p_file: GDScriptAnalysisResult, p_project: GDScriptProjectResult) -> void:
+	if p_file.call_graph == null:
+		return
+	for edge in p_file.call_graph.edges:
+		# EXTERNAL 调用: obj.method() — 尝试解析 obj 的类型
+		if edge.call_type == GDScriptCallEdge.CallType.EXTERNAL and edge.target_object != "":
+			var obj_type = p_file.type_table.get(edge.target_object, "")
+			if obj_type != "":
+				_try_resolve_cross_call(p_path, edge, obj_type, edge.callee, GDSCrossFileEdge.Kind.CALL, p_project)
+		# CONNECT / SIGNAL_CONNECT: obj.connect("sig", cb) — 跨文件信号连接
+		if edge.call_type in [GDScriptCallEdge.CallType.CONNECT, GDScriptCallEdge.CallType.SIGNAL_CONNECT] \
+				and edge.target_object != "":
+			var obj_type = p_file.type_table.get(edge.target_object, "")
+			if obj_type != "":
+				_try_resolve_cross_call(p_path, edge, obj_type, edge.callee, GDSCrossFileEdge.Kind.SIGNAL_CONNECT, p_project)
+
+
+func _try_resolve_cross_call(p_source_file: String, p_edge, p_obj_type: String, p_symbol: String, p_kind: int, p_project: GDScriptProjectResult) -> void:
+	# obj 类型是否是用户类？
+	var target_file = p_project.class_registry.get(p_obj_type, "")
+	if target_file == "":
+		return  # 内置类（Node/Object 等）— 跳过
+	# 目标文件是否定义了这个方法/信号？
+	var target_result = p_project.files.get(target_file, null)
+	if target_result == null:
+		return
+	if not _file_defines_symbol(target_result, p_symbol):
+		return
+	# 产出跨文件边
+	var xedge = GDSCrossFileEdge.new()
+	xedge.kind = p_kind
+	xedge.source_file = p_source_file
+	xedge.source_symbol = p_edge.caller
+	xedge.target_file = target_file
+	xedge.target_class = p_obj_type
+	xedge.target_symbol = p_symbol
+	xedge.line = p_edge.site_line
+	p_project.add_edge(xedge)
+
+
+# 检查某文件的 symbol_table 是否定义了该方法/信号
+func _file_defines_symbol(p_result: GDScriptAnalysisResult, p_name: String) -> bool:
+	if p_result.symbol_table == null:
+		return false
+	for sym_name in p_result.symbol_table.symbols:
+		var sym = p_result.symbol_table.symbols[sym_name]
+		if sym.name == p_name and sym.kind in [GDScriptSymbol.Kind.FUNCTION, GDScriptSymbol.Kind.SIGNAL]:
+			return true
+	return false
+
+
+# 完整入口
+func analyze_full(p_root: String) -> GDScriptProjectResult:
+	var result = analyze_all(p_root)
+	resolve_cross_file(result)
+	return result
