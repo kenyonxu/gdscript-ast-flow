@@ -83,6 +83,8 @@ func set_main_screen_visible(p_visible: bool) -> void:
 		_graph_main_screen.visible = p_visible
 		if p_visible:
 			_graph_main_screen._rebuild()
+			# 切到 Analysis tab 时自动整理布局（deferred 等 GraphEdit 节点就绪）
+			_graph_main_screen.call_deferred("_on_relayout")
 
 func _initial_project_scan() -> void:
 	_bridge.run_project_analysis("res://")
