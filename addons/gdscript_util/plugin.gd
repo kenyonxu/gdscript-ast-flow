@@ -7,29 +7,21 @@ var _phase3_bootstrap: GDSEditorBootstrap = null
 
 func _enter_tree():
 	add_tool_menu_item("GDScript Analysis – Parse Current", _on_parse_current)
-	# Phase 2: 注册 resource_saved 信号实现自动分析
-	resource_saved.connect(_on_resource_saved)
-	# Phase 3: 编辑器面板
+	# Phase 3: 编辑器面板（含 resource_saved 自动分析，由 bootstrap 统一管理）
+	# 注意: 不再在 plugin.gd 单独连接 resource_saved，避免与 bootstrap 双重触发
 	_phase3_bootstrap = GDSEditorBootstrap.new()
 	_phase3_bootstrap.setup(self)
 	print("[GDScriptUtil v3.0] Plugin loaded — Phase 3: Editor Integration")
 
 
 func _exit_tree():
-	# Phase 3: 拆卸编辑器面板
+	# Phase 3: 拆卸编辑器面板（bootstrap 内部断开 resource_saved）
 	if _phase3_bootstrap:
 		_phase3_bootstrap.teardown()
 		_phase3_bootstrap = null
 	remove_tool_menu_item("GDScript Analysis – Parse Current")
-	resource_saved.disconnect(_on_resource_saved)
 	analysis_cache.clear()
 	print("[GDScriptUtil v3.0] Plugin unloaded")
-
-
-# Phase 2 新增: 脚本保存时自动分析
-func _on_resource_saved(p_resource: Resource):
-	if p_resource is GDScript and p_resource.resource_path.ends_with(".gd"):
-		_analyze_script(p_resource.resource_path)
 
 
 func _on_parse_current():

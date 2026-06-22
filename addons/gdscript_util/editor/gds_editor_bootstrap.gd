@@ -8,13 +8,14 @@ extends RefCounted
 var _plugin: EditorPlugin = null
 var _bridge: GDSAnalysisBridge = null
 var _main_panel: GDSAnalysisMainPanel = null
+var _analysis_queued: String = ""  # 待分析路径（非空表示有待执行）
+var _is_analyzing: bool = false    # 重入保护
 
 func setup(p_plugin: EditorPlugin) -> void:
 	_plugin = p_plugin
 	_bridge = GDSAnalysisBridge.new()
 
 	# 底部面板 — 含 4 个子 tab（Summary / Call Graph / Signal Flow / Def-Use）
-	# Summary 作为第 1 个 tab，不再用右侧 Dock（避免侵入检查器区域）
 	_main_panel = GDSAnalysisMainPanel.new()
 	_main_panel.setup(_bridge)
 	_plugin.add_control_to_bottom_panel(_main_panel, "GDScript Analysis")
@@ -31,4 +32,20 @@ func teardown() -> void:
 
 func _on_resource_saved(resource: Resource) -> void:
 	if resource is GDScript and resource.resource_path.ends_with(".gd"):
-		_bridge.run_analysis(resource.resource_path)
+		# 不在 save 回调里同步跑重活（会阻塞编辑器）—— 延迟到下一帧
+		# 连续保存只保留最后一次目标（去抖）
+		_analysis_queued = resource.resource_path
+		if not _is_analyzing:
+			call_deferred("_run_queued_analysis")
+
+func _run_queued_analysis() -> void:
+	if _analysis_queued == "":
+		return
+	_is_analyzing = true
+	var path = _analysis_queued
+	_analysis_queued = ""
+	_bridge.run_analysis(path)
+	_is_analyzing = false
+	# 若期间又有新保存请求，继续处理
+	if _analysis_queued != "":
+		call_deferred("_run_queued_analysis")

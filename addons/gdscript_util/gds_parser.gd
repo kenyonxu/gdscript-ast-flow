@@ -310,6 +310,9 @@ func _parse_inner_class() -> GDScriptToken.ClassNode:
         var m = _parse_class_member()
         if m:
             node.members.append(m)
+        else:
+            # 错误恢复: 防止 null 返回导致死循环
+            _skip_to_newline()
     _expect(GDScriptToken.Type.DEDENT)
     return node
 
@@ -590,6 +593,11 @@ func _parse_suite() -> GDScriptToken.SuiteNode:
         var stmt = _parse_statement()
         if stmt != null:
             suite.statements.append(stmt)
+        else:
+            # 错误恢复: _parse_statement 返回 null 且未消费 token 时强制推进，
+            # 否则本循环会无限自旋（编辑器保存时锁死的根因）
+            _set_error("非预期的语句令牌: %s" % _peek().get_name())
+            _advance()
         # 每个语句后跳过 NEWLINE
         _match(GDScriptToken.Type.NEWLINE)
 
