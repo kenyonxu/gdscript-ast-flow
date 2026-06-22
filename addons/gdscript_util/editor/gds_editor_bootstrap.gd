@@ -10,6 +10,7 @@ var _bridge: GDSAnalysisBridge = null
 var _main_panel: GDSAnalysisMainPanel = null
 var _analysis_queued: String = ""  # 待分析路径（非空表示有待执行）
 var _is_analyzing: bool = false    # 重入保护
+var _graph_main_screen: GDSGraphMainScreen = null  # Phase 3.3: 主屏 tab
 
 func setup(p_plugin: EditorPlugin) -> void:
 	_plugin = p_plugin
@@ -25,6 +26,12 @@ func setup(p_plugin: EditorPlugin) -> void:
 	# Phase 3.2: 首次启动 deferred 全量项目分析
 	call_deferred("_initial_project_scan")
 
+	# Phase 3.3: 注册主屏 tab
+	_graph_main_screen = GDSGraphMainScreen.new()
+	_graph_main_screen.setup(_bridge)
+	EditorInterface.get_editor_main_screen().add_child(_graph_main_screen)
+	_graph_main_screen.visible = false  # 默认隐藏，切到 Analysis tab 才显示
+
 func teardown() -> void:
 	if _plugin.resource_saved.is_connected(_on_resource_saved):
 		_plugin.resource_saved.disconnect(_on_resource_saved)
@@ -32,6 +39,9 @@ func teardown() -> void:
 	if _main_panel and is_instance_valid(_main_panel):
 		_plugin.remove_control_from_bottom_panel(_main_panel)
 		_main_panel.queue_free()
+
+	if _graph_main_screen and is_instance_valid(_graph_main_screen):
+		_graph_main_screen.queue_free()
 
 func _on_resource_saved(resource: Resource) -> void:
 	if resource is GDScript and resource.resource_path.ends_with(".gd"):
@@ -54,6 +64,12 @@ func _run_queued_analysis() -> void:
 	# 若期间又有新保存请求，继续处理
 	if _analysis_queued != "":
 		call_deferred("_run_queued_analysis")
+
+func set_main_screen_visible(p_visible: bool) -> void:
+	if _graph_main_screen and is_instance_valid(_graph_main_screen):
+		_graph_main_screen.visible = p_visible
+		if p_visible:
+			_graph_main_screen._rebuild()
 
 func _initial_project_scan() -> void:
 	_bridge.run_project_analysis("res://")
