@@ -458,9 +458,27 @@ func _resolve_attribute_call(p_call_node, p_attr, p_scope: GDScriptSymbolTable, 
 	elif method_name == "connect":
 		_resolve_object_connect(p_call_node, p_scope, p_current_function)
 
-	# 2e: signal_name.emit() → EMIT
+	# 2e: signal_name.emit() → EMIT (本地信号发射)
 	elif method_name == "emit" and base is GDScriptToken.IdentifierNode:
 		_resolve_signal_emit(p_call_node, base.name, p_current_function, "dot_emit")
+
+	# 2e2: obj.signal.emit(args) → 跨文件信号发射
+	# base 是 AttributeNode(obj, signal_name)，如 player.health_changed.emit(args)
+	elif method_name == "emit" and base is GDScriptToken.AttributeNode:
+		var emit_sig_name = base.name
+		var emit_obj_base = base.base
+		if emit_obj_base is GDScriptToken.IdentifierNode:
+			# 记录 emit_site 到信号图
+			var einfo = result.signal_graph.get_signal_flow(emit_sig_name)
+			if einfo == null:
+				einfo = GDScriptSignalInfo.new()
+				einfo.name = emit_sig_name
+				result.signal_graph.signals[emit_sig_name] = einfo
+			einfo.emit_sites.append(_make_site(p_call_node, p_current_function, p_call_node.arguments))
+			# 记录 EMIT 边: callee=信号名, target_object=对象名 (供跨文件解析)
+			_add_call_edge(p_current_function, emit_sig_name, p_attr.line, GDScriptCallEdge.CallType.EMIT, emit_obj_base.name, p_call_node.arguments)
+		else:
+			_resolve_signal_emit(p_call_node, emit_sig_name, p_current_function, "dot_emit")
 
 	# 2f: obj.method() → EXTERNAL
 	elif base is GDScriptToken.IdentifierNode:

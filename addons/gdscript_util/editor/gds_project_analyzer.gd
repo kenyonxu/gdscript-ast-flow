@@ -94,6 +94,11 @@ func _resolve_file_cross_edges(p_path: String, p_file: GDScriptAnalysisResult, p
 			var obj_type = p_file.type_table.get(edge.target_object, "")
 			if obj_type != "":
 				_try_resolve_cross_call(p_path, edge, obj_type, edge.callee, GDSCrossFileEdge.Kind.SIGNAL_CONNECT, p_project)
+		# EMIT: obj.signal.emit(args) — 跨文件信号发射（本地 emit 的 target_object 为空，自动跳过）
+		if edge.call_type == GDScriptCallEdge.CallType.EMIT and edge.target_object != "":
+			var obj_type = p_file.type_table.get(edge.target_object, "")
+			if obj_type != "":
+				_try_resolve_cross_call(p_path, edge, obj_type, edge.callee, GDSCrossFileEdge.Kind.SIGNAL_EMIT, p_project)
 
 
 func _try_resolve_cross_call(p_source_file: String, p_edge, p_obj_type: String, p_symbol: String, p_kind: int, p_project: GDScriptProjectResult) -> void:
