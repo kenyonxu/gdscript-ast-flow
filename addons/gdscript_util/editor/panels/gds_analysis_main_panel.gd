@@ -18,6 +18,8 @@ func setup(p_bridge: GDSAnalysisBridge) -> void:
 	_build_ui()
 
 func _build_ui() -> void:
+	# 底部面板默认可用高度（用户仍可拖拽调整）
+	custom_minimum_size = Vector2(0, 240)
 	# TabBar
 	_tab_bar = TabBar.new()
 	_tab_bar.add_tab("Summary")       # tab 0
@@ -27,31 +29,43 @@ func _build_ui() -> void:
 	_tab_bar.tab_changed.connect(_on_tab_changed)
 	add_child(_tab_bar)
 
-	# 内容区
-	_content_stack = Control.new()
+	# 内容区 — 必须是 Container，子面板的 size_flags 才会生效并填满底部 dock
+	# (plain Control 不会把尺寸传给子节点，导致面板缩成最小尺寸)
+	_content_stack = VBoxContainer.new()
 	_content_stack.size_flags_horizontal = SIZE_EXPAND_FILL
 	_content_stack.size_flags_vertical = SIZE_EXPAND_FILL
 	add_child(_content_stack)
 
 	# 4 个子面板（初始只显示第一个 Summary）
+	# 每个 panel 都设 EXPAND_FILL，VBoxContainer 中可见的那个会占满剩余空间
 	_summary_panel = GDSAnalysisSummary.new()
 	_summary_panel.setup(_bridge)
+	_make_fill(_summary_panel)
 	_content_stack.add_child(_summary_panel)
 
 	_call_graph_panel = GDSCallGraphPanel.new()
 	_call_graph_panel.setup(_bridge)
+	_make_fill(_call_graph_panel)
 	_call_graph_panel.visible = false
 	_content_stack.add_child(_call_graph_panel)
 
 	_signal_flow_panel = GDSSignalFlowPanel.new()
 	_signal_flow_panel.setup(_bridge)
+	_make_fill(_signal_flow_panel)
 	_signal_flow_panel.visible = false
 	_content_stack.add_child(_signal_flow_panel)
 
 	_def_use_panel = GDSDefUsePanel.new()
 	_def_use_panel.setup(_bridge)
+	_make_fill(_def_use_panel)
 	_def_use_panel.visible = false
 	_content_stack.add_child(_def_use_panel)
+
+
+# 让子面板填满父容器（水平+垂直都 EXPAND_FILL）
+func _make_fill(p_control: Control) -> void:
+	p_control.size_flags_horizontal = SIZE_EXPAND_FILL
+	p_control.size_flags_vertical = SIZE_EXPAND_FILL
 
 func _on_tab_changed(p_tab: int) -> void:
 	_summary_panel.visible = (p_tab == 0)
