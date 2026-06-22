@@ -46,7 +46,7 @@ func build(p_graph: GraphEdit, p_result: GDScriptAnalysisResult, p_min_degree: i
 		node.configure("function", name, "in:%d out:%d" % [p_result.call_in_degree.get(name, 0), p_result.call_out_degree.get(name, 0)], deg, sig, loc)
 		node.name = "fn_" + name
 		node.position_offset = Vector2(col * 180, row * 90)
-		node.set_meta("jump", {"file": p_result.file_path, "line": fn.line if func_nodes.has(name) else 0})
+		node.set_meta("jump", {"file": p_result.file_path, "line": func_nodes[name].line if func_nodes.has(name) else 0})
 		p_graph.add_child(node)
 		nodes[name] = node
 		col += 1
