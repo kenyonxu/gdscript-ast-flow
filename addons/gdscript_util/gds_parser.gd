@@ -127,22 +127,26 @@ func parse(p_tokens: Array) -> GDScriptToken.ClassNode:
         else:
             break  # 成员注解留给 _parse_class_member
 
-    # 解析 extends (文件级, 在 class body 之前)
+    # 解析 extends / class_name (文件级, 任意顺序)
+    # GDScript 允许 class_name 在 extends 之前或之后，用循环兼容两种写法
     _skip_newlines()
-    if _peek() and _peek().type == GDScriptToken.Type.EXTENDS:
-        _advance()
-        var id_t = _expect(GDScriptToken.Type.IDENTIFIER, "extends 后需要类名")
-        if id_t:
-            root.extends_id = id_t.literal
-        _match(GDScriptToken.Type.NEWLINE)  # extends 后的换行
-
-    # 解析 class_name (文件级, 可能在 extends 之后)
-    _skip_newlines()  # 跳过 extends 和 class_name 之间的空行
-    if _peek() and _peek().type == GDScriptToken.Type.CLASS_NAME:
-        _advance()
-        var id_t = _expect(GDScriptToken.Type.IDENTIFIER, "class_name 后需要类名")
-        if id_t:
-            root.classname_id = id_t.literal
+    var _header_done := false
+    while not _header_done:
+        if _peek() and _peek().type == GDScriptToken.Type.EXTENDS:
+            _advance()
+            var id_t = _expect(GDScriptToken.Type.IDENTIFIER, "extends 后需要类名")
+            if id_t:
+                root.extends_id = id_t.literal
+            _match(GDScriptToken.Type.NEWLINE)
+            _skip_newlines()
+        elif _peek() and _peek().type == GDScriptToken.Type.CLASS_NAME:
+            _advance()
+            var id_t = _expect(GDScriptToken.Type.IDENTIFIER, "class_name 后需要类名")
+            if id_t:
+                root.classname_id = id_t.literal
+            _skip_newlines()
+        else:
+            _header_done = true
     _skip_newlines()
 
     # 解析类体成员
