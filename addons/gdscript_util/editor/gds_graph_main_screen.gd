@@ -73,6 +73,7 @@ func _build_ui() -> void:
 	_graph_edit.size_flags_vertical = SIZE_EXPAND_FILL
 	_graph_edit.custom_minimum_size = Vector2(800, 500)  # 兜底：父容器未布局时也可见
 	_graph_edit.node_selected.connect(_on_node_selected)
+	_graph_edit.node_deselected.connect(_on_node_deselected)
 	add_child(_graph_edit)
 
 func _add_legend_chip(p_parent: Control, p_text: String, p_color: Color) -> void:
@@ -142,12 +143,20 @@ func _on_node_selected(p_node: Node) -> void:
 	# 关联高亮：淡化非关联节点
 	_highlight_related(p_node)
 
+func _on_node_deselected(_p_node: Node) -> void:
+	# 取消选择 → 全部恢复全透明
+	_clear_highlight()
+
 func _highlight_related(p_selected: GraphNode) -> void:
-	# 简化：选中节点 + 与它同名前缀相关的保持正常，其余淡化
+	# 先全部恢复，再淡化非选中（这样切换选择时上一个节点能恢复）
 	for c in _graph_edit.get_children():
-		if c is GraphNode and c != p_selected:
-			c.modulate.a = 0.3  # 淡化
-	# 再选别的或重建时恢复（_rebuild 重建会重置 modulate）
+		if c is GraphNode:
+			c.modulate.a = 1.0 if c == p_selected else 0.3
+
+func _clear_highlight() -> void:
+	for c in _graph_edit.get_children():
+		if c is GraphNode:
+			c.modulate.a = 1.0
 
 func _on_relayout() -> void:
 	_graph_edit.arrange_nodes()  # Godot 4 GraphEdit 内置自动布局
