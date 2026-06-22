@@ -11,9 +11,14 @@ const ENTRY_METHODS := preload("res://addons/gdscript_util/editor/gds_entry_meth
 var _pending_title_color: Color = Color.TRANSPARENT  # _ready 时应用（add_child 前 override 不生效）
 
 func _ready() -> void:
-	# 入树后再应用 title 颜色（configure 在 add_child 前调用，override 可能丢失）
+	# GraphNode 的 title 是内部 Label（theme type "GraphNodeTitleLabel"），不是 GraphNode
+	# 自身的 theme color。直接改内部 Label 的 font_color 才能着色。
 	if _pending_title_color != Color.TRANSPARENT:
-		add_theme_color_override("title_color", _pending_title_color)
+		var hbox = get_titlebar_hbox()
+		if hbox and hbox.get_child_count() > 0:
+			var title_label = hbox.get_child(0) as Label
+			if title_label:
+				title_label.add_theme_color_override("font_color", _pending_title_color)
 
 # p_kind: "function" / "signal" / "file"
 # p_hub_threshold: 枢纽高亮阈值（函数默认 5，文件默认 1——文件耦合度数值本身小）
