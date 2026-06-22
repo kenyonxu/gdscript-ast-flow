@@ -13,6 +13,7 @@ var _graph_kind: int = 0  # 0=调用, 1=信号
 var _call_view: GDSCallGraphView = null
 var _signal_view: GDSSignalGraphView = null
 var _project_view: GDSProjectGraphView = null
+var _min_degree: int = 0
 
 func setup(p_bridge: GDSAnalysisBridge) -> void:
 	_bridge = p_bridge
@@ -52,6 +53,16 @@ func _build_ui() -> void:
 	relayout.text = "Re-layout"
 	relayout.pressed.connect(_on_relayout)
 	toolbar.add_child(relayout)
+	# Min-degree 筛选
+	var thresh_label = Label.new()
+	thresh_label.text = "Min degree:"
+	toolbar.add_child(thresh_label)
+	var thresh_box = SpinBox.new()
+	thresh_box.min_value = 0
+	thresh_box.max_value = 20
+	thresh_box.value = 0
+	thresh_box.value_changed.connect(func(v): _min_degree = v; _rebuild())
+	toolbar.add_child(thresh_box)
 	# 图例
 	var legend = HBoxContainer.new()
 	_add_legend_chip(legend, "■ emit", Color.RED)
@@ -85,12 +96,12 @@ func _rebuild() -> void:
 	# 按 Scope × Kind 分发
 	if _scope == 1:
 		# 项目级（调用图语义=文件耦合；信号图=跨文件信号）
-		_project_view.build(_graph_edit, _bridge.get_project_result(), _graph_kind)
+		_project_view.build(_graph_edit, _bridge.get_project_result(), _graph_kind, _min_degree)
 	else:
 		if _graph_kind == 0:
-			_call_view.build(_graph_edit, _bridge.get_current_result())
+			_call_view.build(_graph_edit, _bridge.get_current_result(), _min_degree)
 		else:
-			_signal_view.build(_graph_edit, _bridge.get_current_result())
+			_signal_view.build(_graph_edit, _bridge.get_current_result(), _min_degree)
 
 func _on_relayout() -> void:
 	_graph_edit.arrange_nodes()  # Godot 4 GraphEdit 内置自动布局
