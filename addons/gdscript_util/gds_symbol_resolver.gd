@@ -431,6 +431,24 @@ func _resolve_attribute_call(p_call_node, p_attr, p_scope: GDScriptSymbolTable, 
 	elif method_name == "connect" and base is GDScriptToken.IdentifierNode:
 		_resolve_signal_connect(p_call_node, base.name, p_scope, p_current_function)
 
+	# 2d2: obj.signal.connect(cb) -> 跨文件信号连接
+	# base 是 AttributeNode(obj, signal_name)，如 player.health_changed.connect(cb)
+	elif method_name == "connect" and base is GDScriptToken.AttributeNode:
+		var sig_name = base.name
+		var obj_base = base.base
+		if obj_base is GDScriptToken.IdentifierNode:
+			# 记录 connect_site 到信号图
+			var info = result.signal_graph.get_signal_flow(sig_name)
+			if info == null:
+				info = GDScriptSignalInfo.new()
+				info.name = sig_name
+				result.signal_graph.signals[sig_name] = info
+			info.connect_sites.append(_make_site(p_call_node, p_current_function, p_call_node.arguments))
+			# 记录 SIGNAL_CONNECT 边: callee=信号名, target_object=对象名 (供跨文件解析)
+			_add_call_edge(p_current_function, sig_name, p_attr.line, GDScriptCallEdge.CallType.SIGNAL_CONNECT, obj_base.name, p_call_node.arguments)
+		else:
+			_resolve_object_connect(p_call_node, p_scope, p_current_function)
+
 	# 2e: other connect
 	elif method_name == "connect":
 		_resolve_object_connect(p_call_node, p_scope, p_current_function)
