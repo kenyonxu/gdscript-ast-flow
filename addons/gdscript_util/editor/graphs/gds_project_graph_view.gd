@@ -5,8 +5,11 @@ class_name GDSProjectGraphView
 extends RefCounted
 
 func build(p_graph: GraphEdit, p_project: GDScriptProjectResult, p_graph_kind: int) -> void:
+	print("[D project_view] build called, project=%s" % [p_project])
 	if p_project == null:
+		print("[D project_view] project null — abort")
 		return
+	print("[D project_view] files=%d cross_edges=%d" % [p_project.files.size(), p_project.cross_edges.size()])
 	# 聚合: {(source_file, target_file) → edge_count}
 	var pair_counts: Dictionary = {}
 	for edge in p_project.cross_edges:
@@ -37,3 +40,4 @@ func build(p_graph: GraphEdit, p_project: GDScriptProjectResult, p_graph_kind: i
 		var to_node = nodes.get(dst)
 		if from_node and to_node:
 			p_graph.connect_node(from_node.name, 0, to_node.name, 0)
+	print("[D project_view] added %d nodes, graph size=%s" % [nodes.size(), p_graph.size])

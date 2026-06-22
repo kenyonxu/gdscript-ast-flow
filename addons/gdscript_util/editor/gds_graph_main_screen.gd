@@ -56,6 +56,7 @@ func _on_data_changed(_arg = null) -> void:
 	_rebuild()
 
 func _rebuild() -> void:
+	print("[D rebuild] scope=%d kind=%d visible=%s graph_edit=%s size=%s" % [_scope, _graph_kind, visible, is_instance_valid(_graph_edit), _graph_edit.size if is_instance_valid(_graph_edit) else "<null>"])
 	# 清空
 	for c in _graph_edit.get_children():
 		if c is GraphNode:
@@ -64,8 +65,10 @@ func _rebuild() -> void:
 	# 按 Scope × Kind 分发
 	if _scope == 1:
 		# 项目级（调用图语义=文件耦合；信号图=跨文件信号）
+		print("[D rebuild] project_result=%s" % [_bridge.get_project_result()])
 		_project_view.build(_graph_edit, _bridge.get_project_result(), _graph_kind)
 	else:
+		print("[D rebuild] current_result=%s" % [_bridge.get_current_result()])
 		if _graph_kind == 0:
 			_call_view.build(_graph_edit, _bridge.get_current_result())
 		else:
