@@ -19,6 +19,9 @@ func run_all_tests():
 	test_9_external_connect()
 	test_10_def_use_full_chain()
 	test_11_builtin_filter()
+	test_12_type_infer_new()
+	test_13_type_infer_return()
+	test_14_type_infer_preload()
 	print("\n=== All tests completed ===")
 
 
@@ -279,4 +282,38 @@ func test_11_builtin_filter():
 	var full3 = resolver.resolve(ast3, "")
 	assert(full3.call_graph.edges.size() >= 1, "with filter OFF, print should produce an edge")
 	assert(full3.call_in_degree.get("print", 0) >= 1, "print in-degree should be >=1 with filter OFF")
+	print("  PASS")
+
+# Test 12: 类型推断 — T.new()
+func test_12_type_infer_new():
+	print("Test 12: type inference — T.new()...")
+	var resolver = GDScriptSymbolResolver.new()
+	resolver.enable_type_inference = true
+	var tok = GDScriptTokenizer.new()
+	var ast = GDScriptParser.new().parse(tok.tokenize("func _a():\n	var x := Player.new()\n	x.take_damage(10)\n"))
+	var full = resolver.resolve(ast, "")
+	assert(full.type_table.get("x", "") == "Player", "x should be inferred as Player")
+	print("  PASS")
+
+# Test 13: 类型推断 — 函数返回类型
+func test_13_type_infer_return():
+	print("Test 13: type inference — return type...")
+	var resolver = GDScriptSymbolResolver.new()
+	resolver.enable_type_inference = true
+	var tok = GDScriptTokenizer.new()
+	var src = "func get_player() -> Player:\n	return null\n\nfunc _b():\n	var p := get_player()\n"
+	var ast = GDScriptParser.new().parse(tok.tokenize(src))
+	var full = resolver.resolve(ast, "")
+	assert(full.type_table.get("p", "") == "Player", "p should be inferred from get_player() return type")
+	print("  PASS")
+
+# Test 14: 类型推断 — preload
+func test_14_type_infer_preload():
+	print("Test 14: type inference — preload...")
+	var resolver = GDScriptSymbolResolver.new()
+	resolver.enable_type_inference = true
+	var tok = GDScriptTokenizer.new()
+	var ast = GDScriptParser.new().parse(tok.tokenize("func _c():\n	var c := preload(\"res://a.gd\")\n"))
+	var full = resolver.resolve(ast, "")
+	assert(full.type_table.get("c", "") == "res://a.gd", "c should be preload path")
 	print("  PASS")

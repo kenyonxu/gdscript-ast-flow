@@ -11,6 +11,10 @@ var result: GDScriptAnalysisResult = null
 # Phase 3.4: 内置函数过滤开关（默认 true；调试时可设 false 看全量调用图）
 var filter_builtin_calls := true
 
+# Phase 3.5: 类型推断开关（默认 true）
+var enable_type_inference := true
+var _return_type_table: Dictionary = {}
+
 
 # 入口 — Phase 1/2 阶段边界
 # p_ast: GDScriptToken.ClassNode — Phase 1 产出的 AST 根
@@ -36,6 +40,10 @@ func resolve(p_ast, p_file_path: String = "") -> GDScriptAnalysisResult:
 
 	# 预处理 const/var 标记
 	_preprocess_const_vars(p_ast)
+
+	# 第一遍 — 预建返回类型表（供 L1 类型推断）
+	if enable_type_inference:
+		_build_return_type_table(p_ast)
 
 	# 开始 AST 遍历
 	_resolve_class(p_ast, result.symbol_table)
@@ -70,6 +78,15 @@ func _preprocess_const_vars(p_ast):
 				var line_text = result._source_lines[line_idx].strip_edges()
 				if line_text.begins_with("const"):
 					_const_set[member] = true
+
+# 第一遍 — 预建函数返回类型表
+func _build_return_type_table(p_ast) -> void:
+	_return_type_table.clear()
+	for member in p_ast.members:
+		if member is GDScriptToken.FunctionNode:
+			var ret = member.return_type
+			if ret != null and ret.type_name != "":
+				_return_type_table[member.name] = ret.type_name
 
 
 # 核心分发 — 按 AST 节点类型匹配
@@ -286,7 +303,9 @@ func _resolve_variable(p_node, p_scope: GDScriptSymbolTable, p_current_function:
 	sym.is_exported = p_node.is_export
 
 	# Phase 3.2: 记录变量声明类型到 type_table（供跨文件解析）
-	var vtype = _type_to_string(p_node.datatype)
+	var vtype = _type_to_string(p_node.datatype)  # 显式标注
+	if vtype == "" and enable_type_inference and p_node.initializer != null:
+		vtype = GDSTypeInferrer.infer(p_node.initializer, _return_type_table)
 	if vtype != "":
 		result.type_table[p_node.name] = vtype
 
