@@ -117,7 +117,7 @@ func _on_dir_selected(p_path: String) -> void:
 func _remove_selected(p_tree: Tree) -> void:
 	var item = p_tree.get_selected()
 	if item:
-		item.queue_free()
+		item.free()
 
 func _on_save() -> void:
 	# 收集 include
