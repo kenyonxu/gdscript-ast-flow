@@ -248,3 +248,34 @@ func test_10_def_use_full_chain():
 		# read sites: print(x) → READ, x += 1 → READ_WRITE (not separately counted as read)
 		assert_true(usage.read_sites.size() >= 1, "x should have at least 1 read site")
 	print("  PASS")
+
+# Test 11: 内置函数过滤 — print/range 不记边，前向引用保留
+func test_11_builtin_filter():
+	print("Test 11: builtin function filter...")
+	var resolver = GDScriptSymbolResolver.new()
+
+	# 1. filter ON: print/range 不记边
+	resolver.filter_builtin_calls = true
+	var tok = GDScriptTokenizer.new()
+	var ast = GDScriptParser.new().parse(tok.tokenize("func _a():\n	print(\"x\")\n	range(5)\n"))
+	var full = resolver.resolve(ast, "")
+	assert(full.call_graph.edges.is_empty(), "with filter ON, print/range should produce no edges")
+	assert(full.call_in_degree.get("print", 0) == 0, "print in-degree should be 0")
+	assert(full.call_out_degree.get("_a", 0) == 0, "_a out-degree should be 0")
+
+	# 2. 前向引用（未声明的用户函数）仍记边
+	resolver.filter_builtin_calls = true
+	var tok2 = GDScriptTokenizer.new()
+	var ast2 = GDScriptParser.new().parse(tok2.tokenize("func _b():\n	helper()\n"))
+	var full2 = resolver.resolve(ast2, "")
+	assert(full2.call_graph.edges.size() >= 1, "forward ref helper() should produce an edge")
+	assert(full2.call_in_degree.get("helper", 0) >= 1, "helper in-degree should be >=1")
+
+	# 3. filter OFF: print 记边（回归验证）
+	resolver.filter_builtin_calls = false
+	var tok3 = GDScriptTokenizer.new()
+	var ast3 = GDScriptParser.new().parse(tok3.tokenize("func _c():\n	print(\"x\")\n"))
+	var full3 = resolver.resolve(ast3, "")
+	assert(full3.call_graph.edges.size() >= 1, "with filter OFF, print should produce an edge")
+	assert(full3.call_in_degree.get("print", 0) >= 1, "print in-degree should be >=1 with filter OFF")
+	print("  PASS")
