@@ -12,11 +12,10 @@ var _editing_include := true  # FileDialog 回调区分 include/exclude
 
 func _ready() -> void:
 	title = "Project Scan Settings"
-	# AcceptDialog 内部已有 VBoxContainer — 用 get_child(0) 获取
-	var vbox = get_child(0) as VBoxContainer
-	if vbox == null:
-		vbox = VBoxContainer.new()
-		add_child(vbox)
+	# 自己建 VBoxContainer，不依赖 AcceptDialog 内部布局
+	var vbox = VBoxContainer.new()
+	add_child(vbox)
+	set_ok_button_text("Save")
 
 	# Enable 开关
 	_enabled_check = CheckBox.new()
