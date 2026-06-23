@@ -10,8 +10,9 @@ This is a multi-line
 string with "quotes" inside.
 """
 
-# 2. 科学计数法数字（注: 1e6 as int 会卡 Godot 自身 parser，用 var 替代 const 测试）
-const SCI_FLOAT: float = 1.5e-3
+# 2. 科学计数法数字（const 不支持科学计数法，放进 func 测试）
+func _test_sci_notation() -> void:
+	var sci_float: float = 1.5e-3
 
 # 3. 二进制 / 八进制数字（Godot 4 原生 parser 不支持 0b/0o，仅测试我们的 tokenizer）
 const BIN := 0b1010
