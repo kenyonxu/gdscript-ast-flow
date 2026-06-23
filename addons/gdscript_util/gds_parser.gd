@@ -201,10 +201,6 @@ func _set_error(p_msg: String):
         if _peek():
             _error_line = _peek().start_line
             _error_column = _peek().start_column
-        if _peek():
-            error = p_msg
-        else:
-            error = p_msg
 
 func _skip_newlines():
     while _peek() and _peek().type == GDScriptToken.Type.NEWLINE:
