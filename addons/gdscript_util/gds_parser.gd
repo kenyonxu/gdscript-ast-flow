@@ -197,10 +197,10 @@ func _set_error(p_msg: String):
             error = p_msg
         return
     if error == "":  # 只记录第一个错误
-        error = p_msg
         if _peek():
-            _error_line = _peek().start_line
-            _error_column = _peek().start_column
+            error = "%s (line %d, token: %s)" % [p_msg, _peek().start_line, _peek().get_name()]
+        else:
+            error = p_msg
 
 func _skip_newlines():
     while _peek() and _peek().type == GDScriptToken.Type.NEWLINE:
