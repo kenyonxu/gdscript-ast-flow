@@ -58,9 +58,22 @@ exclude_dirs = [
 
 ### 3.2 优先级
 
-exclude **覆盖** include。即：`include=res://` + `exclude=addons/limboai` → 扫 res:// 全部但跳过 limboai。
+**include（更具体）覆盖 exclude（更宽泛）。** 类似 .gitignore 的 `!` 否定——显式 include 优先。
 
-如果一个目录既在 include 又在 exclude → 排除优先。
+判断逻辑（对每个 .gd 文件）：
+1. 先查 exclude —— 路径在排除列表中 → 标记排除
+2. 再查 include —— 路径**显式**在 include 列表中 → **取消排除，纳入扫描**
+3. 若 include 里只有宽泛的 `res://` → 不算"显式"（无法覆盖更具体的 exclude）
+
+**示例：**
+
+| include | exclude | 结果 |
+|---------|---------|------|
+| `res://` | `addons/` | 扫 res:// 全部，跳过所有 addon（默认行为） |
+| `res://`, `addons/my_addon/` | `addons/` | 扫 res:// + **my_addon**（显式 include 覆盖） |
+| `res://src/` | `addons/` | 只扫 src/，跳过 addons/ |
+
+**"显式"判定：** include 路径比 exclude 路径**更深**（更具体）时算显式覆盖。`res://` 是最浅的，不能覆盖 `addons/`；`addons/my_addon/` 比 `addons/` 深，能覆盖。
 
 ## 四、架构
 
@@ -138,10 +151,31 @@ func _scan_dir(p_dir: String, p_list: Array, p_excludes: Array, p_recursive: boo
 		name = da.get_next()
 	da.list_dir_end()
 
-func _is_excluded(p_path: String, p_excludes: Array) -> bool:
+func _is_excluded(p_path: String, p_excludes: Array, p_includes: Array) -> bool:
+	# 1. 先查 exclude
+	var excluded := false
 	for excl in p_excludes:
 		if p_path == excl or p_path.begins_with(excl + "/"):
-			return true
+			excluded = true
+			break
+	if not excluded:
+		return false
+	# 2. 再查 include — 显式更深的 include 覆盖排除
+	for entry in p_includes:
+		var inc_path = entry.get("path", "")
+		if inc_path == "res://" or inc_path == "":
+			continue  # 最浅的 res:// 不算显式覆盖
+		if p_path == inc_path or p_path.begins_with(inc_path + "/"):
+			# 这个 include 比 exclude 更深 → 覆盖排除
+			# 但要确认没有更深的 exclude 也排除它
+			return _is_deeper_exclude(p_path, inc_path, p_excludes)
+	return true  # 排除且无 include 覆盖
+
+func _is_deeper_exclude(p_path: String, p_include: String, p_excludes: Array) -> bool:
+	# 检查是否有比 include 更深的 exclude 仍然排除该路径
+	for excl in p_excludes:
+		if excl.length() > p_include.length() and p_path.begins_with(excl + "/"):
+			return true  # 更深的 exclude 优先
 	return false
 ```
 
