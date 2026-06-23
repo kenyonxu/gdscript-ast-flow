@@ -161,7 +161,9 @@ func _clear_highlight() -> void:
 			c.modulate.a = 1.0
 
 func _on_relayout() -> void:
-	_graph_edit.arrange_nodes()  # Godot 4 GraphEdit 内置自动布局
+	if get_tree() == null:
+		return  # 未入树（setup 阶段），跳过
+	_graph_edit.arrange_nodes()
 	# arrange_nodes 可能下一帧才更新 position_offset，用短延迟等它完成
 	var t = get_tree().create_timer(0.1)
 	t.timeout.connect(_center_view)
