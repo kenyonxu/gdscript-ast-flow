@@ -47,7 +47,10 @@ func test_call_graph_view():
 func test_project_graph_view():
 	print("Test: project graph view build...")
 	var pa = GDScriptProjectAnalyzer.new()
-	var proj = pa.analyze_full("res://samples/cross_file_demo")
+	# 测试用临时配置
+	GDSScanConfig.save_config([{"path": "res://samples/cross_file_demo", "recursive": true}], [])
+	GDSScanConfig.enable_scan()
+	var proj = pa.analyze_full()
 	var view = GDSProjectGraphView.new()
 	var ge = GraphEdit.new()
 	add_child(ge)

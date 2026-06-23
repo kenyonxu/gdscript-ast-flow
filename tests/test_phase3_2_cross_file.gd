@@ -12,12 +12,16 @@ func _ready():
 
 func analyze_project() -> GDScriptProjectResult:
 	var pa = GDScriptProjectAnalyzer.new()
-	return pa.analyze_full("res://samples/cross_file_demo")
+	# 测试用临时配置
+	GDSScanConfig.save_config([{"path": "res://samples/cross_file_demo", "recursive": true}], [])
+	GDSScanConfig.enable_scan()
+	return pa.analyze_full()
 
 func test_scan():
 	print("Test: project scan...")
 	var pa = GDScriptProjectAnalyzer.new()
-	var files = pa.scan_project("res://samples/cross_file_demo")
+	GDSScanConfig.save_config([{"path": "res://samples/cross_file_demo", "recursive": true}], [])
+	var files = pa.scan_project()
 	assert(files.size() >= 2, "Expected >=2 files, got %d" % files.size())
 	print("  PASS (%d files)" % files.size())
 
