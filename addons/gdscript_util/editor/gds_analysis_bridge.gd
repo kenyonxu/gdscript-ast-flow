@@ -48,12 +48,13 @@ func run_analysis(p_file_path: String) -> void:
 
 
 # Phase 1+2 分析管道 — tokenizer → parser → symbol resolver
+# 用 FileAccess 读源码（不用 load()）——避免 Godot 自身编译器卡死/返回 null
 func _run_pipeline(p_file_path: String) -> GDScriptAnalysisResult:
-	var script = load(p_file_path) as GDScript
-	if script == null:
+	var f = FileAccess.open(p_file_path, FileAccess.READ)
+	if f == null:
 		return null
-
-	var source = script.source_code
+	var source = f.get_as_text()
+	f.close()
 	if source == "":
 		return null
 
