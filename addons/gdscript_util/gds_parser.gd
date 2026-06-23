@@ -461,6 +461,9 @@ func _parse_variable(p_annotations: Array) -> GDScriptToken.VariableNode:
     # Phase 3: 内联 setter/getter block — var hp: int:\n    set(value):\n        hp = value
     if _match(GDScriptToken.Type.COLON) and _match(GDScriptToken.Type.NEWLINE) and _match(GDScriptToken.Type.INDENT):
         while _peek() and _peek().type not in [GDScriptToken.Type.DEDENT, GDScriptToken.Type.TK_EOF]:
+            _skip_newlines()
+            if _peek() == null or _peek().type in [GDScriptToken.Type.DEDENT, GDScriptToken.Type.TK_EOF]:
+                break
             if _peek() and _peek().type == GDScriptToken.Type.IDENTIFIER and _peek().literal == "set":
                 _advance()  # "set"
                 if _match(GDScriptToken.Type.PAREN_OPEN):
