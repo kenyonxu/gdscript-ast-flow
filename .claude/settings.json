@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(echo \"exit: $?\")",
+      "Bash(git -C /home/kai-remote/github/godot-byte-code-parser log --oneline -20)",
+      "Bash(ls /home/kai-remote/github/godot/graphify-out/ 2>/dev/null | head -20)",
+      "Read(//home/kai-remote/github/godot/graphify-out/**)",
+      "Bash(find /home/kai-remote/github/godot -maxdepth 1 -type f -name \"*.md\" 2>/dev/null | head -10)",
+      "Read(//home/kai-remote/github/godot/**)",
+      "Read(//home/kai-remote/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.2/skills/brainstorming/**)",
+      "Bash(/home/kai-remote/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.2/skills/brainstorming/scripts/start-server.sh --project-dir /home/kai-remote/github/godot-byte-code-parser --host 0.0.0.0 --url-host localhost)",
+      "Bash(git -C /home/kai-remote/github/godot-byte-code-parser add docs/)",
+      "Bash(git -C /home/kai-remote/github/godot-byte-code-parser commit -m \"📋 spec: Godot 4.7 GDScript解析器完全重写规范\")",
+      "Bash(git -C /home/kai-remote/github/godot-byte-code-parser commit -m \"📋 spec: 修正审查问题 — 错误处理策略/核心子集边界/lambda闭包/EditorPlugin扩展/缩进规则\")",
+      "Bash(git -C /home/kai-remote/github/godot-byte-code-parser commit -m \"📋 spec: 补充 Phase 2/3 目标说明，统一三阶段目标格式\")",
+      "Bash(git -C /home/kai-remote/github/godot-byte-code-parser add docs/superpowers/plans/)",
+      "Bash(git -C /home/kai-remote/github/godot-byte-code-parser commit -m \"📋 plan: Phase 1 GDScript解析管道实现计划 \\(17 tasks, 4 chunks\\)\")",
+      "Read(//home/kai-remote/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.2/skills/writing-plans/**)",
+      "Bash(git -C /home/kai-remote/github/godot-byte-code-parser commit -m \"📋 plan: 修正审查问题 — extends/class_name解析/as-is节点/UNOP逻辑/常量声明\")",
+      "Bash(git -C /home/kai-remote/github/godot-byte-code-parser commit -m \"📋 plan: 修正第2轮审查 — expect/const/lambda/export/NEWLINE处理\")",
+      "Bash(git -C /home/kai-remote/github/godot-byte-code-parser remote -v)",
+      "Bash(gh auth *)",
+      "Bash(gh repo *)",
+      "Bash(git -C /home/kai-remote/github/godot-byte-code-parser remote set-url origin https://github.com/kenyonxu/gdscript-ast-flow.git)",
+      "Bash(git -C /home/kai-remote/github/godot-byte-code-parser add CLAUDE.md)",
+      "Bash(git -C /home/kai-remote/github/godot-byte-code-parser commit -m \"🔧 rename: godot-byte-code-parser → gdscript-ast-flow \\(CLAUDE.md + remote\\)\")",
+      "Bash(git -C /home/kai-remote/github/godot-byte-code-parser add .gitignore)",
+      "Bash(git -C /home/kai-remote/github/godot-byte-code-parser commit -m \"🔧 gitignore: 添加 .superpowers/ .claude/\")",
+      "Bash(git -C /home/kai-remote/github/godot-byte-code-parser push origin master)"
+    ]
+  }
+}

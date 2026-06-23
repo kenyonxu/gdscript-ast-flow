@@ -1,0 +1,51 @@
+<h2>解析范围：全语言 vs 子集？</h2>
+<p class="subtitle">4.7 GDScript 相比 3.4 语言特性大幅扩展，确定需要支持的语法范围</p>
+
+<div class="section">
+  <h3>📋 4.7 新增语法特性</h3>
+</div>
+
+<table style="width:100%">
+  <tr><th style="text-align:left;padding:6px">特性</th><th style="text-align:left;padding:6px">语法示例</th><th style="text-align:center;padding:6px">复杂度</th></tr>
+  <tr><td style="padding:5px">Lambda 函数</td><td style="padding:5px"><code>func(x): return x * 2</code></td><td style="text-align:center">中</td></tr>
+  <tr><td style="padding:5px">注解</td><td style="padding:5px"><code>@export var hp = 10</code></td><td style="text-align:center">低</td></tr>
+  <tr><td style="padding:5px">await/异步</td><td style="padding:5px"><code>await get_tree().process_frame</code></td><td style="text-align:center">低</td></tr>
+  <tr><td style="padding:5px">match + when</td><td style="padding:5px"><code>match x: when 1, 2: ...</code></td><td style="text-align:center">中</td></tr>
+  <tr><td style="padding:5px">super 关键字</td><td style="padding:5px"><code>super._ready()</code></td><td style="text-align:center">低</td></tr>
+  <tr><td style="padding:5px">类型化数组</td><td style="padding:5px"><code>var a: Array[int] = []</code></td><td style="text-align:center">中</td></tr>
+  <tr><td style="padding:5px">is / as 运算符</td><td style="padding:5px"><code>if node is Player: ...</code></td><td style="text-align:center">低</td></tr>
+  <tr><td style="padding:5px">** 幂运算符</td><td style="padding:5px"><code>2 ** 10</code></td><td style="text-align:center">低</td></tr>
+  <tr><td style="padding:5px">.. / ... 范围</td><td style="padding:5px"><code>for i in 0..10: ...</code></td><td style="text-align:center">低</td></tr>
+  <tr><td style="padding:5px">$ 节点路径</td><td style="padding:5px"><code>$Player/Health</code></td><td style="text-align:center">低</td></tr>
+  <tr><td style="padding:5px">first-class callable</td><td style="padding:5px"><code>obj.method.bind(arg)</code></td><td style="text-align:center">中</td></tr>
+  <tr><td style="padding:5px">属性 setter/getter</td><td style="padding:5px"><code>var hp: set(v): hp = clamp(v, 0, 100)</code></td><td style="text-align:center">中</td></tr>
+  <tr><td style="padding:5px">namespace / trait</td><td style="padding:5px"><code>namespace MyMath: ...</code></td><td style="text-align:center">高</td></tr>
+</table>
+
+<div class="section">
+  <h3>🎯 选择方案</h3>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="full" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>完整 4.7 语法</h3>
+      <p>支持所有 4.7 语言特性。与引擎一致，未来兼容。但工作量大（~2000+ 行 GDScript），namespace/trait 等特性仍在演进中</p>
+    </div>
+  </div>
+  <div class="option" data-choice="core" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>核心子集（推荐）</h3>
+      <p>覆盖 95% 日常代码：类/函数/变量/控制流/表达式/lambda/注解。跳过 namespace/trait 等实验性/低频特性。分阶段扩展</p>
+    </div>
+  </div>
+  <div class="option" data-choice="minimal" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>最小可用（3.4 等价）</h3>
+      <p>仅迁移当前工程的语法覆盖范围到 4.7 令牌体系。不支持 lambda/注解/await 等新特性。快速可用但不完整</p>
+    </div>
+  </div>
+</div>

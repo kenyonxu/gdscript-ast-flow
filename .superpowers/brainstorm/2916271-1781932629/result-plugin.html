@@ -1,0 +1,148 @@
+<h2>组件 4/4：GDScriptAnalysisResult + EditorPlugin</h2>
+<p class="subtitle">统一输出容器 + Godot 编辑器集成入口</p>
+
+<div class="section">
+  <h3>GDScriptAnalysisResult — 统一输出</h3>
+</div>
+
+<div style="background:var(--surface);border-radius:8px;padding:16px;font-family:monospace;font-size:0.82em;line-height:1.8">
+<b>class_name</b> GDScriptAnalysisResult
+<b>extends</b> RefCounted
+│
+├── <b>var</b> file_path: String              <span style="color:var(--muted)"># 分析的源文件路径</span>
+├── <b>var</b> ast: ClassNode                 <span style="color:var(--muted)"># 语法树根节点</span>
+├── <b>var</b> symbol_table: SymbolTable      <span style="color:var(--muted)"># 嵌套符号表</span>
+├── <b>var</b> call_graph: CallGraph          <span style="color:var(--muted)"># 方法调用图</span>
+├── <b>var</b> signal_graph: SignalGraph      <span style="color:var(--muted)"># 信号连接图</span>
+├── <b>var</b> def_use_chain: DefUseChain     <span style="color:var(--muted)"># 变量定义使用链</span>
+├── <b>var</b> extends_path: String           <span style="color:var(--muted)"># extends 路径</span>
+├── <b>var</b> class_name: String             <span style="color:var(--muted)"># class_name 名称</span>
+├── <b>var</b> preloads: Array[String]        <span style="color:var(--muted)"># preload 依赖列表</span>
+├── <b>var</b> errors: Array[String]          <span style="color:var(--muted)"># 解析错误列表</span>
+│
+├── <b>func</b> get_all_functions() → Array[FunctionNode]
+├── <b>func</b> get_all_signals() → Array[SignalNode]
+├── <b>func</b> get_callers_of(func_name) → Array[CallSite]
+├── <b>func</b> get_callees_of(func_name) → Array[CallSite]
+├── <b>func</b> get_signal_flow(signal_name) → SignalFlow
+│       <span style="color:var(--muted)"># 返回: 声明 → connect绑定 → emit发射 → 回调执行 的完整链路</span>
+├── <b>func</b> get_variable_usages(var_name) → DefUseInfo
+│       <span style="color:var(--muted)"># 返回: 定义位置 + 所有读位置 + 所有写位置</span>
+└── <b>func</b> get_dependency_tree() → DependencyNode
+        <span style="color:var(--muted)"># 返回: extends + preload + class_name 的依赖树</span>
+</div>
+
+<div class="section">
+  <h3>完整数据流</h3>
+</div>
+
+<div style="background:var(--surface);border-radius:8px;padding:16px;font-size:0.85em;line-height:2.2">
+<pre style="margin:0;color:var(--text)">
+<span style="color:var(--muted)"># 使用方式</span>
+<b>var</b> source = <b>FileAccess</b>.get_file_as_string("res://player.gd")
+<b>var</b> tokenizer = <b>GDScriptTokenizer</b>.new()
+<b>var</b> tokens = tokenizer.tokenize(source)
+
+<b>var</b> parser = <b>GDScriptParser</b>.new()
+<b>var</b> ast = parser.parse(tokens)
+
+<b>var</b> resolver = <b>GDScriptSymbolResolver</b>.new()
+<b>var</b> result = resolver.resolve(ast, "res://player.gd")
+
+<span style="color:var(--muted)"># 查询</span>
+<span style="color:var(--green)">result.get_signal_flow("health_changed")</span>
+<span style="color:var(--muted)"># → signal health_changed @line 3</span>
+<span style="color:var(--muted)">#   ├─ connect: _on_health_changed @line 12 (hud.gd)</span>
+<span style="color:var(--muted)">#   ├─ emit @line 8 (take_damage)</span>
+<span style="color:var(--muted)">#   └─ emit @line 15 (heal)</span>
+
+<span style="color:var(--green)">result.get_callers_of("take_damage")</span>
+<span style="color:var(--muted)"># → _on_body_entered @line 22, _process @line 30</span>
+
+<span style="color:var(--green)">result.get_variable_usages("hp")</span>
+<span style="color:var(--muted)"># → def @line 2 (var hp := 100)</span>
+<span style="color:var(--muted)">#   reads: line 6, 8, 14</span>
+<span style="color:var(--muted)">#   writes: line 7, 15</span>
+</pre>
+</div>
+
+<div class="section">
+  <h3>EditorPlugin 集成</h3>
+</div>
+
+<div style="background:var(--surface);border-radius:8px;padding:16px;font-size:0.82em;line-height:1.8;font-family:monospace">
+<b>class_name</b> GDScriptUtil
+<b>extends</b> EditorPlugin
+
+<b>func</b> _enter_tree():
+    <span style="color:var(--muted)"># 注册到编辑器</span>
+    add_tool_menu_item("GDScript Analysis", _on_analyze)
+    <span style="color:var(--muted)"># 可选: 添加编辑器底部面板 Dock</span>
+    add_control_to_bottom_panel(analysis_panel, "GDScript Analysis")
+
+<b>func</b> analyze_script(path: String) → GDScriptAnalysisResult:
+    <span style="color:var(--muted)"># 便捷入口 — 一键分析</span>
+    <b>var</b> source = load(path).source_code
+    <b>var</b> tokens = GDScriptTokenizer.new().tokenize(source)
+    <b>var</b> ast = GDScriptParser.new().parse(tokens)
+    <b>return</b> GDScriptSymbolResolver.new().resolve(ast, path)
+</div>
+
+<div class="section">
+  <h3>最终文件清单</h3>
+</div>
+
+<table style="width:100%;font-size:0.85em">
+  <tr><th style="padding:6px">文件</th><th style="padding:6px">class_name</th><th style="padding:6px">预估行数</th><th style="padding:6px">职责</th></tr>
+  <tr style="background:rgba(0,200,100,0.06)"><td style="padding:5px"><code>gds_tokenizer.gd</code></td><td style="padding:5px">GDScriptTokenizer</td><td style="text-align:center">~400</td><td style="padding:5px">词法分析</td></tr>
+  <tr style="background:rgba(0,200,100,0.06)"><td style="padding:5px"><code>gds_ast_nodes.gd</code></td><td style="padding:5px">(节点类 + Token枚举)</td><td style="text-align:center">~300</td><td style="padding:5px">AST节点定义 + Token类型</td></tr>
+  <tr style="background:rgba(0,200,100,0.06)"><td style="padding:5px"><code>gds_parser.gd</code></td><td style="padding:5px">GDScriptParser</td><td style="text-align:center">~1200</td><td style="padding:5px">语法分析 → AST</td></tr>
+  <tr style="background:rgba(0,200,100,0.06)"><td style="padding:5px"><code>gds_symbol_resolver.gd</code></td><td style="padding:5px">GDScriptSymbolResolver</td><td style="text-align:center">~500</td><td style="padding:5px">符号解析 + 图构建</td></tr>
+  <tr style="background:rgba(0,200,100,0.06)"><td style="padding:5px"><code>gds_analysis_result.gd</code></td><td style="padding:5px">GDScriptAnalysisResult</td><td style="text-align:center">~300</td><td style="padding:5px">结果容器 + 查询API</td></tr>
+  <tr style="background:rgba(0,200,100,0.06)"><td style="padding:5px"><code>plugin.gd</code></td><td style="padding:5px">GDScriptUtil</td><td style="text-align:center">~100</td><td style="padding:5px">EditorPlugin 入口</td></tr>
+  <tr style="background:rgba(0,200,100,0.06)"><td style="padding:5px"><code>plugin.cfg</code></td><td style="padding:5px">—</td><td style="text-align:center">~10</td><td style="padding:5px">插件配置 (更新版本)</td></tr>
+  <tr><td style="padding:5px;font-weight:bold">总计</td><td></td><td style="text-align:center;font-weight:bold">~2810</td><td style="padding:5px">vs 当前工程 ~1478 行</td></tr>
+</table>
+
+<div class="section">
+  <h3>实现阶段建议</h3>
+</div>
+
+<div style="display:flex;gap:12px">
+  <div class="mockup" style="flex:1">
+    <div class="mockup-header">Phase 1: 基础管道</div>
+    <div class="mockup-body" style="font-size:0.82em">
+      <ol style="margin:0;padding-left:16px">
+        <li>Token 枚举 + AST 节点定义</li>
+        <li>GDScriptTokenizer (词法)</li>
+        <li>GDScriptParser (语法 → AST)</li>
+        <li>基础测试 (.gd 解析)</li>
+      </ol>
+      <p style="color:var(--muted);margin:8px 0 0 0">交付: 可解析 .gd → AST</p>
+    </div>
+  </div>
+  <div class="mockup" style="flex:1">
+    <div class="mockup-header">Phase 2: 符号分析</div>
+    <div class="mockup-body" style="font-size:0.82em">
+      <ol style="margin:0;padding-left:16px">
+        <li>SymbolTable + 作用域链</li>
+        <li>CallGraph 构建</li>
+        <li>SignalGraph 构建</li>
+        <li>DefUseChain 构建</li>
+      </ol>
+      <p style="color:var(--muted);margin:8px 0 0 0">交付: 完整逻辑流分析</p>
+    </div>
+  </div>
+  <div class="mockup" style="flex:1">
+    <div class="mockup-header">Phase 3: 扩展完善</div>
+    <div class="mockup-body" style="font-size:0.82em">
+      <ol style="margin:0;padding-left:16px">
+        <li>EditorPlugin 面板集成</li>
+        <li>完整语法覆盖 (namespace/trait)</li>
+        <li>GDScriptAnalysisResult 查询 API</li>
+        <li>性能优化 & 错误恢复</li>
+      </ol>
+      <p style="color:var(--muted);margin:8px 0 0 0">交付: 编辑器就绪的完整工具</p>
+    </div>
+  </div>
+</div>

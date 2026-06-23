@@ -1,0 +1,13 @@
+{"type":"server-started","port":63180,"host":"0.0.0.0","url_host":"localhost","url":"http://localhost:63180","screen_dir":"/home/kai-remote/github/godot-byte-code-parser/.superpowers/brainstorm/2916271-1781932629"}
+{"type":"screen-added","file":"/home/kai-remote/github/godot-byte-code-parser/.superpowers/brainstorm/2916271-1781932629/architecture-overview.html"}
+{"type":"screen-added","file":"/home/kai-remote/github/godot-byte-code-parser/.superpowers/brainstorm/2916271-1781932629/scope.html"}
+{"type":"screen-added","file":"/home/kai-remote/github/godot-byte-code-parser/.superpowers/brainstorm/2916271-1781932629/semantic.html"}
+{"type":"screen-added","file":"/home/kai-remote/github/godot-byte-code-parser/.superpowers/brainstorm/2916271-1781932629/level.html"}
+{"type":"screen-added","file":"/home/kai-remote/github/godot-byte-code-parser/.superpowers/brainstorm/2916271-1781932629/approaches.html"}
+{"type":"screen-added","file":"/home/kai-remote/github/godot-byte-code-parser/.superpowers/brainstorm/2916271-1781932629/tokenizer-design.html"}
+{"type":"screen-added","file":"/home/kai-remote/github/godot-byte-code-parser/.superpowers/brainstorm/2916271-1781932629/parser-design-1.html"}
+{"type":"screen-added","file":"/home/kai-remote/github/godot-byte-code-parser/.superpowers/brainstorm/2916271-1781932629/parser-design-2.html"}
+{"type":"screen-added","file":"/home/kai-remote/github/godot-byte-code-parser/.superpowers/brainstorm/2916271-1781932629/symbol-resolver.html"}
+{"type":"screen-added","file":"/home/kai-remote/github/godot-byte-code-parser/.superpowers/brainstorm/2916271-1781932629/result-plugin.html"}
+{"type":"screen-added","file":"/home/kai-remote/github/godot-byte-code-parser/.superpowers/brainstorm/2916271-1781932629/waiting.html"}
+{"type":"server-stopped","reason":"idle timeout"}

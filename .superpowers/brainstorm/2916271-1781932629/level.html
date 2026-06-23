@@ -1,0 +1,124 @@
+<h2>你的需求对应什么级别？</h2>
+<p class="subtitle">追踪信号/调用/数据流 需要语法树 + 符号解析，但不需要完整类型推断</p>
+
+<div class="section">
+  <h3>解析深度光谱</h3>
+</div>
+
+<div style="display:flex;gap:12px;margin-bottom:24px">
+  <div style="flex:1;background:var(--surface);border-radius:8px;padding:16px;border:2px solid var(--border)">
+    <div class="label">Level 1</div>
+    <h3>纯语法 AST</h3>
+    <p style="color:var(--muted);font-size:0.9em">当前 3.4 工程的深度</p>
+    <div class="pros-cons" style="margin-top:12px">
+      <div class="pros"><h4>能做</h4><ul>
+        <li>代码结构浏览</li>
+        <li>格式化/美化</li>
+        <li>复杂度指标</li>
+      </ul></div>
+      <div class="cons"><h4>不能做</h4><ul>
+        <li style="color:var(--red)">信号连接到方法</li>
+        <li style="color:var(--red)">跨函数调用追踪</li>
+        <li style="color:var(--red)">变量读写分析</li>
+      </ul></div>
+    </div>
+  </div>
+  <div style="flex:1;background:var(--surface);border-radius:8px;padding:16px;border:2px solid var(--green);box-shadow:0 0 12px rgba(0,200,100,0.15)">
+    <div class="label" style="color:var(--green)">Level 2 ← 你的需求</div>
+    <h3>语法 AST + 符号解析</h3>
+    <p style="color:var(--muted);font-size:0.9em">推荐目标级别</p>
+    <div class="pros-cons" style="margin-top:12px">
+      <div class="pros"><h4>能做</h4><ul>
+        <li>Level 1 全部功能</li>
+        <li style="color:var(--green)">信号声明 → emit/connect</li>
+        <li style="color:var(--green)">方法调用 → 定义</li>
+        <li style="color:var(--green)">变量定义 → 读写点</li>
+        <li>文件内符号查找</li>
+      </ul></div>
+      <div class="cons"><h4>不能做（暂不需要）</h4><ul>
+        <li>跨文件类型推断</li>
+        <li>泛型/多态解析</li>
+      </ul></div>
+    </div>
+  </div>
+  <div style="flex:1;background:var(--surface);border-radius:8px;padding:16px;border:2px solid var(--border)">
+    <div class="label">Level 3</div>
+    <h3>完整语义分析</h3>
+    <p style="color:var(--muted);font-size:0.9em">Godot 4.7 C++ 解析器级别</p>
+    <div class="pros-cons" style="margin-top:12px">
+      <div class="pros"><h4>能做</h4><ul>
+        <li>Level 2 全部功能</li>
+        <li>完整类型推断</li>
+        <li>跨文件类型追踪</li>
+      </ul></div>
+      <div class="cons"><h4>代价</h4><ul>
+        <li>~6500 行 C++</li>
+        <li>在 GDScript 中重写不现实</li>
+      </ul></div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Level 2 具体需要什么</h3>
+</div>
+
+<div class="mockup">
+  <div class="mockup-body" style="font-size:0.9em">
+    <table style="width:100%">
+      <tr><th style="text-align:left;padding:8px">能力</th><th style="text-align:left;padding:8px">示例</th><th style="text-align:center;padding:8px">来源</th></tr>
+      <tr>
+        <td style="padding:6px"><b>符号表</b></td>
+        <td style="padding:6px"><code>var hp</code> → 声明在 line 5, 类型 int</td>
+        <td style="text-align:center">AST 遍历构建</td>
+      </tr>
+      <tr>
+        <td style="padding:6px"><b>作用域链</b></td>
+        <td style="padding:6px">内层 <code>hp</code> 遮蔽外层 <code>hp</code></td>
+        <td style="text-align:center">AST 层级结构</td>
+      </tr>
+      <tr>
+        <td style="padding:6px"><b>信号注册表</b></td>
+        <td style="padding:6px"><code>signal died</code> → <code>emit("died")</code>, <code>.died.connect(f)</code></td>
+        <td style="text-align:center">AST 遍历收集</td>
+      </tr>
+      <tr>
+        <td style="padding:6px"><b>调用图</b></td>
+        <td style="padding:6px"><code>_process()</code> 调用 → <code>update_health()</code> → <code>emit("died")</code></td>
+        <td style="text-align:center">符号解析 + AST</td>
+      </tr>
+      <tr>
+        <td style="padding:6px"><b>定义-使用链</b></td>
+        <td style="padding:6px"><code>hp = 100</code>(写) → ... → <code>print(hp)</code>(读)</td>
+        <td style="text-align:center">符号 + 位置追踪</td>
+      </tr>
+      <tr>
+        <td style="padding:6px"><b>preload/extends 依赖</b></td>
+        <td style="padding:6px"><code>extends "res://Entity.gd"</code></td>
+        <td style="text-align:center">AST 叶子节点</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<div class="section">
+  <h3>架构推导</h3>
+  <p style="color:var(--muted)">解析器需要两个输出层</p>
+</div>
+
+<div style="background:var(--surface);border-radius:8px;padding:20px;font-family:monospace;font-size:0.85em;line-height:2">
+  .gd 源码
+  <br>　│
+  <br>　├─ <span style="color:var(--green)">GDScriptTokenizer</span> (词法分析)
+  <br>　│　　生成: Token 流
+  <br>　│
+  <br>　├─ <span style="color:var(--green)">GDScriptASTParser</span> (语法分析)
+  <br>　│　　生成: AST (ClassNode, FunctionNode, ...)
+  <br>　│
+  <br>　└─ <span style="color:var(--green)">GDScriptSymbolResolver</span> (符号解析) ← <b>新增</b>
+  <br>　　　　遍历 AST, 构建:
+  <br>　　　　• SymbolTable (变量/函数/信号 → 声明位置)
+  <br>　　　　• CallGraph (调用关系图)
+  <br>　　　　• DefUseChain (定义-使用链)
+  <br>　　　　• SignalGraph (信号连接图)
+</div>

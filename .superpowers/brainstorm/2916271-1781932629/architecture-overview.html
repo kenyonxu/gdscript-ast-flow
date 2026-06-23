@@ -1,0 +1,94 @@
+<h2>3.4 → 4.7 兼容性：完全重写范围</h2>
+<p class="subtitle">当前工程的两个核心模块与 Godot 4.7 均不兼容，需要全面重建</p>
+
+<div class="section">
+  <h3>📊 影响评估总览</h3>
+</div>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">GDScriptByteCodeParser（第1层）</div>
+    <div class="mockup-body">
+      <table style="width:100%;font-size:0.9em">
+        <tr><th style="text-align:left;padding:4px">组件</th><th style="text-align:center;padding:4px">级别</th></tr>
+        <tr><td style="padding:4px">.gdc 头部格式</td><td style="text-align:center;color:var(--red)">🔴 重写</td></tr>
+        <tr><td style="padding:4px">TOKENIZER_VERSION</td><td style="text-align:center;color:var(--red)">🔴 重写</td></tr>
+        <tr><td style="padding:4px">令牌二进制编码</td><td style="text-align:center;color:var(--red)">🔴 重写</td></tr>
+        <tr><td style="padding:4px">标识符编码</td><td style="text-align:center;color:var(--orange)">🟡 修改</td></tr>
+        <tr><td style="padding:4px">ZSTD 解压</td><td style="text-align:center;color:var(--red)">🔴 新增</td></tr>
+        <tr><td style="padding:4px">列映射</td><td style="text-align:center;color:var(--red)">🔴 新增</td></tr>
+        <tr><td style="padding:4px">Token 枚举 (120→60+)</td><td style="text-align:center;color:var(--red)">🔴 重写</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="mockup">
+    <div class="mockup-header">GDScriptASTParser（第2层）</div>
+    <div class="mockup-body">
+      <table style="width:100%;font-size:0.9em">
+        <tr><th style="text-align:left;padding:4px">组件</th><th style="text-align:center;padding:4px">级别</th></tr>
+        <tr><td style="padding:4px">令牌优化器</td><td style="text-align:center;color:var(--red)">🔴 重写</td></tr>
+        <tr><td style="padding:4px">缩进模型</td><td style="text-align:center;color:var(--red)">🔴 重写</td></tr>
+        <tr><td style="padding:4px">运算符优先级表</td><td style="text-align:center;color:var(--red)">🔴 重写</td></tr>
+        <tr><td style="padding:4px">表达式解析器</td><td style="text-align:center;color:var(--red)">🔴 重写</td></tr>
+        <tr><td style="padding:4px">AST 节点 (15→30+)</td><td style="text-align:center;color:var(--red)">🔴 重写</td></tr>
+        <tr><td style="padding:4px">语义类型系统</td><td style="text-align:center;color:var(--red)">🔴 新增</td></tr>
+        <tr><td style="padding:4px">新语法支持</td><td style="text-align:center;color:var(--red)">🔴 新增</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>🔄 数据流变化</h3>
+</div>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">Godot 3.4：当前工程</div>
+    <div class="mockup-body" style="font-size:0.85em;line-height:1.8">
+      <code>.gdc</code> (编译字节码)
+      <br>　↓ <code>GDScriptByteCodeParser.parse()</code>
+      <br>令牌列表 + 标识符 + 常量
+      <br>　↓ <code>GDScriptASTParser.parse()</code>
+      <br>AST 树 (<code>TreeBase</code>)
+    </div>
+  </div>
+  <div class="mockup">
+    <div class="mockup-header">Godot 4.7：目标工程</div>
+    <div class="mockup-body" style="font-size:0.85em;line-height:1.8">
+      <code>.gdc</code> (分词源码缓存, ZSTD可选压缩)
+      <br>　↓ <b>新</b> BinaryFormatParser
+      <br>令牌列表 + 标识符 + 常量 + 行列映射
+      <br>　↓ <b>新</b> ASTParser
+      <br>AST 树 (全新节点类型 + 语义类型)
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>🎯 核心问题</h3>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="format" onclick="toggleSelect(this)">
+    <div class="letter">1</div>
+    <div class="content">
+      <h3>解析 .gdc 还是 .gd？</h3>
+      <p>4.7 的 .gdc 存的是分词结果，.gd 是源码。工具应该解析哪个？（或两者都支持？）</p>
+    </div>
+  </div>
+  <div class="option" data-choice="scope" onclick="toggleSelect(this)">
+    <div class="letter">2</div>
+    <div class="content">
+      <h3>全语言 vs 子集？</h3>
+      <p>4.7 GDScript 语言特性远多于 3.4。是否需要支持所有 4.7 语法（lambda/注解/await/match-when等）？</p>
+    </div>
+  </div>
+  <div class="option" data-choice="semantic" onclick="toggleSelect(this)">
+    <div class="letter">3</div>
+    <div class="content">
+      <h3>纯语法 vs 语义分析？</h3>
+      <p>是否需要做语义分析（类型推断、变量解析），还是仅构建语法树？</p>
+    </div>
+  </div>
+</div>
