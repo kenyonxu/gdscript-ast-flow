@@ -44,7 +44,8 @@ func set_graph(p_nodes: Dictionary, p_edges: Array) -> void:
 		# 小图: 全量渲染（不用虚拟化，避免 viewport 时序问题）
 		for name in _logical_nodes:
 			_instantiate(name)
-		_connect_visible()
+		# defer 连接——节点需一个布局周期才初始化 port cache（否则 graph_node.cpp 越界）
+		call_deferred("_connect_visible")
 		_dirty = false
 	else:
 		# 大图: 虚拟化视口裁剪
