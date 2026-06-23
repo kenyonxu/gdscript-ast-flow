@@ -774,9 +774,12 @@ func _parse_return() -> GDScriptToken.ReturnNode:
 func _parse_assert() -> GDScriptToken.AssertNode:
     _advance()  # ASSERT token
     var node = GDScriptToken.AssertNode.new()
+    var has_paren = _match(GDScriptToken.Type.PAREN_OPEN)
     node.condition = _parse_expression()
     if _match(GDScriptToken.Type.COMMA):
         node.message = _parse_expression()
+    if has_paren:
+        _expect(GDScriptToken.Type.PAREN_CLOSE)
     return node
 
 func _parse_await() -> GDScriptToken.AwaitNode:
