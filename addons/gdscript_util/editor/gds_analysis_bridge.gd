@@ -70,10 +70,7 @@ func _run_pipeline(p_file_path: String) -> GDScriptAnalysisResult:
 
 	# Phase 2: symbol resolution
 	var resolver = GDScriptSymbolResolver.new()
-	var result = resolver.resolve(ast, p_file_path)
-	if result == null:
-	else:
-	return result
+	return resolver.resolve(ast, p_file_path)
 
 
 func get_current_result() -> GDScriptAnalysisResult:
