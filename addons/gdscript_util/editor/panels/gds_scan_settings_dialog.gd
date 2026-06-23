@@ -67,7 +67,7 @@ func _ready() -> void:
 	_file_dialog.access = FileDialog.ACCESS_RESOURCES
 	_file_dialog.dir_selected.connect(_on_dir_selected)
 	add_child(_file_dialog)
-	custom_minimum_size = Vector2(600, 500)
+	min_size = Vector2(600, 500)
 
 func _make_section_label(p_text: String) -> Label:
 	var l = Label.new()
@@ -77,8 +77,8 @@ func _make_section_label(p_text: String) -> Label:
 
 func _make_dir_tree() -> Tree:
 	var t = Tree.new()
-	t.size_flags_vertical = SIZE_EXPAND_FILL
-	t.size_flags_horizontal = SIZE_EXPAND_FILL
+	t.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	t.hide_root = true
 	t.columns = 2
 	t.set_column_title(0, "Directory")
