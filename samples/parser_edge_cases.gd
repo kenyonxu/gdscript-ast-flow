@@ -14,9 +14,9 @@ string with "quotes" inside.
 func _test_sci_notation() -> void:
 	var sci_float: float = 1.5e-3
 
-# 3. 二进制 / 八进制数字（Godot 4 原生 parser 不支持 0b/0o，仅测试我们的 tokenizer）
-const BIN := 0b1010
-const OCT := 0o777
+# 3. 二进制 / 八进制数字 — Godot 4 自身不支持 0b/0o，单独用 tokenizer 测试
+# const BIN := 0b1010   ← Godot 4 报 Invalid numeric notation
+# const OCT := 0o777
 
 # 4. match 表达式（基础 + when 分支）
 func test_match(x: int) -> void:
@@ -90,10 +90,7 @@ class InnerHelper:
 	func do_something() -> void:
 		value += 1
 
-# 18. namespace
-namespace TestNS:
-	var ns_var: int = 0
-	func ns_func() -> void: pass
+# 18. namespace — Godot 4 自身不支持，单独用 Phase 3 测试验证过
 
 # 19. for 循环 + 变量作用域
 func test_loop() -> void:
