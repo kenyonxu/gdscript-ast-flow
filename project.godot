@@ -30,7 +30,19 @@ project/assembly_name="gdscript-ast-flow"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/godot_mcp_editor/plugin.cfg", "res://addons/godot_mcp_runtime/plugin.cfg")
+enabled=PackedStringArray("res://addons/gdscript_util/plugin.cfg", "res://addons/godot_mcp_editor/plugin.cfg", "res://addons/godot_mcp_runtime/plugin.cfg")
+
+[gdscript_util]
+
+scan/include_dirs=[{
+"path": "res://demo",
+"recursive": true
+}, {
+"path": "res://samples",
+"recursive": true
+}]
+scan/exclude_dirs=["res://addons", "res://.godot", "res://.git"]
+scan/enabled=true
 
 [physics]
 

@@ -1,6 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://test_phase3_2_cross_file_scene"]
+[gd_scene format=3 uid="uid://de0klpceuk7mg"]
 
-[ext_resource type="Script" path="res://tests/test_phase3_2_cross_file.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://hmsvcpeffdcq" path="res://tests/test_phase3_2_cross_file.gd" id="1_script"]
 
-[node name="TestRunner" type="Node"]
+[node name="TestRunner" type="Node" unique_id=35882853]
 script = ExtResource("1_script")

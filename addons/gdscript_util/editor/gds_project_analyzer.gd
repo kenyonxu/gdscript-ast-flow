@@ -9,23 +9,17 @@ extends RefCounted
 func scan_project() -> Array:
 	var includes = GDSScanConfig.get_include_dirs()
 	var excludes = GDSScanConfig.get_exclude_dirs()
-	print("[D scan] enabled=%s  includes=%s  excludes=%s" % [GDSScanConfig.is_enabled(), includes, excludes])
 	var list: Array = []
 	for entry in includes:
 		var path: String = entry.get("path", "")
 		var recursive: bool = entry.get("recursive", true)
 		if path != "":
-			var before = list.size()
 			_scan_dir(path, list, excludes, recursive)
-			print("[D scan] %s (recursive=%s) → found %d files" % [path, recursive, list.size() - before])
-	if list.is_empty():
-		print("[D scan] NO files found — check include dirs (empty? excluded?)")
 	return list
 
 func _scan_dir(p_dir: String, p_list: Array, p_excludes: Array, p_recursive: bool) -> void:
 	var da = DirAccess.open(p_dir)
 	if da == null:
-		print("[D scan] DirAccess.open FAILED for: %s" % p_dir)
 		return
 	da.list_dir_begin()
 	var name = da.get_next()
@@ -35,9 +29,6 @@ func _scan_dir(p_dir: String, p_list: Array, p_excludes: Array, p_recursive: boo
 			continue
 		var full = p_dir.path_join(name)
 		if _is_excluded(full, p_excludes):
-			# 只打前 5 条 excluded 日志，避免刷屏
-			if p_list.size() <= 5:
-				print("[D scan] EXCLUDED: %s" % full)
 			name = da.get_next()
 			continue
 		if da.current_is_dir():
