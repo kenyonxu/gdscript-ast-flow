@@ -82,6 +82,8 @@ func _make_dir_tree() -> Tree:
 	t.columns = 2
 	t.set_column_title(0, "Directory")
 	t.set_column_title(1, "Recursive")
+	t.set_column_expand(1, false)
+	t.set_column_custom_minimum_width(1, 80)
 	return t
 
 func _populate_include_tree() -> void:
@@ -91,7 +93,7 @@ func _populate_include_tree() -> void:
 		var item = _include_tree.create_item(root)
 		item.set_text(0, entry.get("path", ""))
 		item.set_checked(1, entry.get("recursive", true))
-		item.set_editable(1, true)
+		item.set_cell_mode(1, TreeItem.CELL_MODE_CHECK)  # 勾选框而非输入框
 
 func _populate_exclude_tree() -> void:
 	_exclude_tree.clear()
@@ -112,7 +114,7 @@ func _on_dir_selected(p_path: String) -> void:
 	item.set_text(0, p_path)
 	if _editing_include:
 		item.set_checked(1, true)
-		item.set_editable(1, true)
+		item.set_cell_mode(1, TreeItem.CELL_MODE_CHECK)
 
 func _remove_selected(p_tree: Tree) -> void:
 	var item = p_tree.get_selected()
