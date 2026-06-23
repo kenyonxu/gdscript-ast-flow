@@ -16,11 +16,13 @@
 
 ### 做：
 
-1. **ProjectSettings 配置项** — 在 Godot Project Settings 里暴露扫描配置（EditorPlugin 可读写）
-2. **扫描目录列表** — 多个目录，每个标注是否递归
-3. **排除目录列表** — 用户可增减；默认含 `.godot`/`.git` + 插件自身
-4. **ProjectAnalyzer 读配置** — `scan_project` 改为按配置扫描
-5. **UI 入口** — Project tab 加"Settings"按钮打开配置面板
+1. **扫描开关** — ProjectSettings 布尔项，默认关；首次安装不扫描
+2. **ProjectSettings 配置项** — 在 Godot Project Settings 里暴露扫描配置（EditorPlugin 可读写）
+3. **扫描目录列表** — 多个目录，每个标注是否递归
+4. **排除目录列表** — 用户可增减；默认含 `.godot`/`.git` + 插件自身
+5. **ProjectAnalyzer 读配置** — `scan_project` 改为按配置扫描
+6. **UI 入口** — Project tab 加"Settings"按钮打开配置面板
+7. **启动提示** — 编辑器启动时在 Output 输出扫描状态信息
 
 ### 不做：
 
@@ -33,6 +35,7 @@
 ### 3.1 ProjectSettings 存储结构
 
 ```
+gdscript_util/scan/enabled = false           # 扫描开关（默认关）
 gdscript_util/scan/include_dirs = [
     { "path": "res://src", "recursive": true },
     { "path": "res://addons/gdscript_util", "recursive": true },
@@ -46,14 +49,37 @@ gdscript_util/scan/exclude_dirs = [
 默认值（首次使用时）：
 
 ```
-include_dirs = [
-    { "path": "res://", "recursive": true }
-]
+enabled = false                              # 不扫描，等用户显式开启
+include_dirs = []                            # 空——用户需自行配置
 exclude_dirs = [
-    "res://addons",        # 第三方插件默认排除
+    "res://addons",        # 第三方插件默认排除（含插件自身）
     "res://.godot",
     "res://.git",
 ]
+```
+
+### 3.2 扫描生命周期
+
+```
+首次安装插件
+  enabled=false, include_dirs=[]
+  → 不扫描，项目图空
+  → Output 提示: "[GDScriptUtil] Project scan: OFF. Configure in Project tab → Settings."
+
+用户配置 Settings 弹窗
+  → 设置 include_dirs（至少 1 个目录）
+  → 勾选 "Enable Project Scan"
+  → Save → enabled=true → 触发首次全量扫描
+
+用户修改配置（增删目录）
+  → Save → enabled=false（自动关闭，防误扫）
+  → Output 提示: "[GDScriptUtil] Config changed, scan paused. Re-enable in Settings."
+  → 用户检查配置 → 勾选 Enable → enabled=true → 重新扫描
+
+编辑器重启
+  → 读 enabled 状态
+  → enabled=true → 正常 deferred 扫描
+  → enabled=false → 跳过扫描，Output 提示
 ```
 
 ### 3.2 优先级
@@ -92,23 +118,33 @@ addons/gdscript_util/
 class_name GDSScanConfig
 extends RefCounted
 
+const SETTING_ENABLED := "gdscript_util/scan/enabled"
 const SETTING_INCLUDE := "gdscript_util/scan/include_dirs"
 const SETTING_EXCLUDE := "gdscript_util/scan/exclude_dirs"
 
+static func is_enabled() -> bool:
+    return ProjectSettings.get_setting(SETTING_ENABLED, false)
+
 static func get_include_dirs() -> Array:
-    # 读 ProjectSettings，若无则返回默认值
-    if ProjectSettings.has_setting(SETTING_INCLUDE):
-        return ProjectSettings.get_setting(SETTING_INCLUDE)
-    return [{ "path": "res://", "recursive": true }]
+    return ProjectSettings.get_setting(SETTING_INCLUDE, [])
 
 static func get_exclude_dirs() -> Array:
-    if ProjectSettings.has_setting(SETTING_EXCLUDE):
-        return ProjectSettings.get_setting(SETTING_EXCLUDE)
-    return ["res://addons", "res://.godot", "res://.git"]
+    return ProjectSettings.get_setting(SETTING_EXCLUDE, ["res://addons", "res://.godot", "res://.git"])
 
-static func set_config(p_include: Array, p_exclude: Array) -> void:
+# Save 按钮调用 — 保存配置并自动关闭扫描（用户需重新 Enable）
+static func save_config(p_include: Array, p_exclude: Array) -> void:
     ProjectSettings.set_setting(SETTING_INCLUDE, p_include)
     ProjectSettings.set_setting(SETTING_EXCLUDE, p_exclude)
+    ProjectSettings.set_setting(SETTING_ENABLED, false)  # 配置变更后自动关闭
+    ProjectSettings.save()
+
+# Enable 勾选调用 — 显式开启扫描
+static func enable_scan() -> void:
+    ProjectSettings.set_setting(SETTING_ENABLED, true)
+    ProjectSettings.save()
+
+static func disable_scan() -> void:
+    ProjectSettings.set_setting(SETTING_ENABLED, false)
     ProjectSettings.save()
 ```
 
@@ -220,8 +256,12 @@ Project tab 加 "Settings" 按钮 → 打开 `GDSscanSettingsDialog`（AcceptDia
 
 ## 六、验收标准
 
-- [ ] Project Settings → gdscript_util/scan/ 出现配置项
-- [ ] 默认：include=`res://` 递归，exclude=`addons`/`.godot`/`.git`
+- [ ] Project Settings → gdscript_util/scan/ 出现配置项（enabled/include/exclude）
+- [ ] 首次安装：enabled=false，不扫描，Output 提示配置方法
+- [ ] 默认：include=[]（空），exclude=`addons`/`.godot`/`.git`
+- [ ] Settings 弹窗配置 include + 勾选 Enable → 开始扫描
+- [ ] 修改配置后自动关闭扫描，Output 提示重新 Enable
+- [ ] 重启编辑器：enabled 状态持久化（true→自动扫，false→跳过+提示）
 - [ ] 加 `res://addons/gdscript_util` 到 include → 项目图出现自身代码
 - [ ] 加 `res://addons/limboai` 到 exclude → 不扫 limboai
 - [ ] 非递归目录：只扫顶层 .gd，不进子目录
