@@ -101,15 +101,15 @@ func should_reanalyze(p_path: String) -> bool:
 # ---- Phase 3.2: 项目分析 ----
 
 # 全量项目分析（deferred，不阻塞）
-func run_project_analysis(p_root: String = "res://") -> void:
+func run_project_analysis() -> void:
 	project_analysis_started.emit()
 	# deferred 跑重活
-	call_deferred("_do_project_analysis", p_root)
+	call_deferred("_do_project_analysis")
 
-func _do_project_analysis(p_root: String) -> void:
+func _do_project_analysis() -> void:
 	if _project_analyzer == null:
 		_project_analyzer = GDScriptProjectAnalyzer.new()
-	_project_result = _project_analyzer.analyze_full(p_root)
+	_project_result = _project_analyzer.analyze_full()  # 不传 root，读配置
 	project_analysis_completed.emit(_project_result)
 
 func get_project_result() -> GDScriptProjectResult:
