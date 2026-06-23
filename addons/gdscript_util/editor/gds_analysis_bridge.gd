@@ -55,10 +55,12 @@ func run_analysis(p_file_path: String) -> void:
 func _run_pipeline(p_file_path: String) -> GDScriptAnalysisResult:
 	var script = load(p_file_path) as GDScript
 	if script == null:
+		print("[D bridge] _run_pipeline FAIL: load returned null for %s" % p_file_path)
 		return null
 
 	var source = script.source_code
 	if source == "":
+		print("[D bridge] _run_pipeline FAIL: empty source for %s" % p_file_path)
 		return null
 
 	# Phase 1: tokenize + parse
@@ -68,6 +70,7 @@ func _run_pipeline(p_file_path: String) -> GDScriptAnalysisResult:
 	var ast = parser.parse(tokens)
 
 	if parser.error != "":
+		print("[D bridge] _run_pipeline FAIL: Parse error in %s: %s" % [p_file_path, parser.error])
 		push_warning("[GDSAnalysisBridge] Parse error in %s: %s" % [p_file_path, parser.error])
 		return null
 
