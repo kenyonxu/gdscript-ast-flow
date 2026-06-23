@@ -6,6 +6,7 @@ extends GraphEdit
 
 const MAX_NODES := 500
 const MARGIN_RATIO := 0.2
+const SMALL_GRAPH_THRESHOLD := 50  # 以下节点数直接全量渲染，跳过虚拟化时序问题
 
 var _logical_nodes: Dictionary = {}
 var _logical_edges: Array = []
@@ -24,15 +25,31 @@ func _ready() -> void:
 	scroll_offset_changed.connect(_on_view_changed)
 
 func set_graph(p_nodes: Dictionary, p_edges: Array) -> void:
-	for c in _rendered.values():
+	# 立即移除旧 GraphNode（remove_child 即时，queue_free 延迟内存释放）
+	# 不用 queue_free 直接移除——旧节点还在树里时新节点同名创建会被 Godot 自动改名 → 连接失败
+	var old: Array = []
+	for c in get_children():
+		if c is GraphNode:
+			old.append(c)
+	for c in old:
+		remove_child(c)
 		c.queue_free()
 	_rendered.clear()
 	_rendered_by_name.clear()
 	clear_connections()
 	_logical_nodes = p_nodes
 	_logical_edges = p_edges
-	_dirty = true
-	_update_viewport()
+
+	if p_nodes.size() <= SMALL_GRAPH_THRESHOLD:
+		# 小图: 全量渲染（不用虚拟化，避免 viewport 时序问题）
+		for name in _logical_nodes:
+			_instantiate(name)
+		_connect_visible()
+		_dirty = false
+	else:
+		# 大图: 虚拟化视口裁剪
+		_dirty = true
+		_update_viewport()
 
 func _on_view_changed(_offset: Vector2) -> void:
 	if _throttle_timer:
@@ -49,7 +66,9 @@ func _process(_delta: float) -> void:
 
 func _update_viewport() -> void:
 	if not is_inside_tree():
-		return  # 未入树时 get_viewport_rect 无效（canvas_item.cpp 报错根因）
+		return  # 未入树时 get_viewport_rect 无效
+	if _logical_nodes.size() <= SMALL_GRAPH_THRESHOLD:
+		return  # 小图已全量渲染，无需视口裁剪
 	var vis = _visible_rect()
 	for name in _logical_nodes:
 		if _rendered.has(name):
@@ -96,12 +115,8 @@ func _instantiate(p_name: String) -> void:
 
 func _connect_visible() -> void:
 	for edge in _logical_edges:
-		var has_from = _rendered_by_name.has(edge[0])
-		var has_to = _rendered_by_name.has(edge[1])
-		if has_from and has_to:
+		if _rendered_by_name.has(edge[0]) and _rendered_by_name.has(edge[1]):
 			var from_port = edge[2] if edge.size() > 2 else 0
 			var to_port = edge[3] if edge.size() > 3 else 0
 			if not is_node_connected(edge[0], from_port, edge[1], to_port):
 				connect_node(edge[0], from_port, edge[1], to_port)
-		elif _logical_edges.size() <= 20:
-			print("[D connect] edge %s→%s: from=%s to=%s rendered_keys=%s" % [edge[0], edge[1], has_from, has_to, _rendered_by_name.keys()])

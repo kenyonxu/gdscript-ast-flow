@@ -114,11 +114,7 @@ func _on_data_changed(_arg = null) -> void:
 	_rebuild()
 
 func _rebuild() -> void:
-	# 清空
-	for c in _graph_edit.get_children():
-		if c is GraphNode:
-			c.queue_free()
-	_graph_edit.clear_connections()
+	# set_graph 内部已做清空（remove_child + clear_connections），此处无需重复
 	# 图例按当前视图刷新（只显当前视图真实用到的颜色）
 	_refresh_legend()
 	# 按 Scope × Kind 分发
@@ -133,6 +129,8 @@ func _rebuild() -> void:
 		else:
 			var logical = _signal_view.build_logical(_bridge.get_current_result(), _min_degree)
 			_graph_edit.set_graph(logical.nodes, logical.edges)
+	# 每次重建后自动整理布局 + 居中（静态分析工具，用户不需手动布局）
+	_on_relayout()
 
 
 func _on_node_selected(p_node: Node) -> void:
