@@ -7,7 +7,7 @@ class_name GDSGraphMainScreen
 extends VBoxContainer
 
 var _bridge: GDSAnalysisBridge = null
-var _graph_edit: GraphEdit = null
+var _graph_edit: GDSVirtualGraphEdit = null
 var _scope: int = 0  # 0=当前文件, 1=项目
 var _graph_kind: int = 0  # 0=调用, 1=信号
 var _call_view: GDSCallGraphView = null
@@ -68,7 +68,7 @@ func _build_ui() -> void:
 	_legend = HBoxContainer.new()
 	add_child(_legend)
 	# GraphEdit
-	_graph_edit = GraphEdit.new()
+	_graph_edit = GDSVirtualGraphEdit.new()
 	_graph_edit.size_flags_horizontal = SIZE_EXPAND_FILL
 	_graph_edit.size_flags_vertical = SIZE_EXPAND_FILL
 	_graph_edit.custom_minimum_size = Vector2(800, 500)  # 兜底：父容器未布局时也可见
@@ -124,12 +124,15 @@ func _rebuild() -> void:
 	# 按 Scope × Kind 分发
 	if _scope == 1:
 		# 项目级（调用图语义=文件耦合；信号图=跨文件信号）
-		_project_view.build(_graph_edit, _bridge.get_project_result(), _graph_kind, _min_degree)
+		var logical = _project_view.build_logical(_bridge.get_project_result(), _graph_kind, _min_degree)
+		_graph_edit.set_graph(logical.nodes, logical.edges)
 	else:
 		if _graph_kind == 0:
-			_call_view.build(_graph_edit, _bridge.get_current_result(), _min_degree)
+			var logical = _call_view.build_logical(_bridge.get_current_result(), _min_degree)
+			_graph_edit.set_graph(logical.nodes, logical.edges)
 		else:
-			_signal_view.build(_graph_edit, _bridge.get_current_result(), _min_degree)
+			var logical = _signal_view.build_logical(_bridge.get_current_result(), _min_degree)
+			_graph_edit.set_graph(logical.nodes, logical.edges)
 
 
 func _on_node_selected(p_node: Node) -> void:
@@ -177,6 +180,6 @@ func _center_view() -> void:
 		# scroll_offset 是屏幕像素空间；position_offset 是图空间
 		# 公式: scroll = center_graph * zoom - viewport / 2
 		var center_graph = sum / float(count)
-		var screen_center = center_graph * _graph_edit.get_zoom()
+		var screen_center = center_graph * _graph_edit.zoom
 		var vp = _graph_edit.get_viewport_rect().size
 		_graph_edit.set_scroll_offset(screen_center - vp / 2.0)
