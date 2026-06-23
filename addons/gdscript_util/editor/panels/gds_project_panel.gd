@@ -7,6 +7,7 @@ extends VBoxContainer
 var _bridge: GDSAnalysisBridge = null
 var _tree: Tree = null
 var _rebuild_btn: Button = null
+var _settings_dialog: GDSScanSettingsDialog = null
 
 func setup(p_bridge: GDSAnalysisBridge) -> void:
 	_bridge = p_bridge
@@ -22,6 +23,11 @@ func _build_ui() -> void:
 	_rebuild_btn.pressed.connect(_on_rebuild)
 	toolbar.add_child(_rebuild_btn)
 
+	var settings_btn = Button.new()
+	settings_btn.text = "Settings"
+	settings_btn.pressed.connect(_on_settings)
+	toolbar.add_child(settings_btn)
+
 	_tree = Tree.new()
 	_tree.size_flags_horizontal = SIZE_EXPAND_FILL
 	_tree.size_flags_vertical = SIZE_EXPAND_FILL
@@ -31,10 +37,33 @@ func _build_ui() -> void:
 	_tree.set_column_title(1, "Refs")
 	add_child(_tree)
 
+func _on_settings() -> void:
+	if _settings_dialog == null:
+		_settings_dialog = GDSScanSettingsDialog.new()
+		_settings_dialog.confirmed.connect(_on_settings_saved)
+		EditorInterface.get_base_control().add_child(_settings_dialog)
+	_settings_dialog.popup_centered()
+
+func _on_settings_saved() -> void:
+	# 配置保存后若 enabled，触发重建
+	if GDSScanConfig.is_enabled():
+		_bridge.run_project_analysis()
+	_refresh(_bridge.get_project_result())
+
 func _refresh(p_result: GDScriptProjectResult) -> void:
 	_rebuild_btn.disabled = false
 	_tree.clear()
 	var root = _tree.create_item()
+	if not GDSScanConfig.is_enabled():
+		var item = _tree.create_item(root)
+		item.set_text(0, "Project scan is OFF")
+		item.set_custom_color(0, Color.GRAY)
+		var hint = _tree.create_item(root)
+		hint.set_text(0, "Click Settings to configure and enable.")
+		hint.set_custom_color(0, Color.GRAY)
+		return
+	if p_result == null:
+		return
 	# 文件列表 + 引用数
 	for path in p_result.files:
 		var refs = p_result.get_files_referencing(path).size()
@@ -74,6 +103,6 @@ func _add_cross_edges(p_parent: TreeItem, p_path: String, p_result: GDScriptProj
 
 func _on_rebuild() -> void:
 	_rebuild_btn.disabled = true
-	_bridge.run_project_analysis("res://")
+	_bridge.run_project_analysis()
 	# 完成后通过 project_analysis_completed 重启用按钮
 	_rebuild_btn.set_deferred("disabled", false)
