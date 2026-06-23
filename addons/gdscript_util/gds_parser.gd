@@ -468,16 +468,15 @@ func _parse_variable(p_annotations: Array) -> GDScriptToken.VariableNode:
                     _expect(GDScriptToken.Type.PAREN_CLOSE)
                 _expect(GDScriptToken.Type.COLON)
                 var sg = GDScriptToken.SetterGetterNode.new()
-                sg.setter = _parse_expression() if _peek() and _peek().type != GDScriptToken.Type.NEWLINE else _parse_suite()
+                # getter/setter body 可能是单行表达式或 return 语句 — 统一用 _parse_suite
+                sg.setter = _parse_suite()
                 node.setter = sg
-                _match(GDScriptToken.Type.NEWLINE)
             elif _peek() and _peek().type == GDScriptToken.Type.IDENTIFIER and _peek().literal == "get":
                 _advance()  # "get"
                 _expect(GDScriptToken.Type.COLON)
-                var sg = GDScriptToken.SetterGetterNode.new()
-                sg.getter = _parse_expression() if _peek() and _peek().type != GDScriptToken.Type.NEWLINE else _parse_suite()
-                node.getter = sg
-                _match(GDScriptToken.Type.NEWLINE)
+                var sg2 = GDScriptToken.SetterGetterNode.new()
+                sg2.getter = _parse_suite()
+                node.getter = sg2
             else:
                 break
         _match(GDScriptToken.Type.DEDENT)
