@@ -8,6 +8,9 @@ extends RefCounted
 
 var result: GDScriptAnalysisResult = null
 
+# Phase 3.4: 内置函数过滤开关（默认 true；调试时可设 false 看全量调用图）
+var filter_builtin_calls := true
+
 
 # 入口 — Phase 1/2 阶段边界
 # p_ast: GDScriptToken.ClassNode — Phase 1 产出的 AST 根
@@ -408,9 +411,15 @@ func _resolve_call(p_node, p_scope: GDScriptSymbolTable, p_current_function: Str
 			return
 		# 1b: 隐式 self 调用 foo()
 		var sym = p_scope.resolve(callee.name)
-		if sym == null or sym.kind == GDScriptSymbol.Kind.FUNCTION:
+		if sym != null and sym.kind == GDScriptSymbol.Kind.FUNCTION:
+			# 已声明的用户函数 → 记边（不变）
 			_add_call_edge(p_current_function, callee.name, callee.line, GDScriptCallEdge.CallType.SELF, "", p_node.arguments)
-		# 否则可能是内置函数 (print, range 等) — 不记录 CallEdge
+		elif sym == null:
+			# 未解析 — 可能是内置函数或前向引用
+			if not (filter_builtin_calls and GDSBuiltinFunctions.is_builtin(callee.name)):
+				# 非内置 → 前向引用，记边
+				_add_call_edge(p_current_function, callee.name, callee.line, GDScriptCallEdge.CallType.SELF, "", p_node.arguments)
+			# 内置 → 不记边、不计度数
 
 	# 模式 2: 属性调用 — self.foo() / obj.method() / super.foo() / sig.connect() / sig.emit()
 	elif callee is GDScriptToken.AttributeNode:
