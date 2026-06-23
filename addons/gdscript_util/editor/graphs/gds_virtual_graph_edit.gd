@@ -14,14 +14,13 @@ var _dirty := true
 var _throttle_timer: Timer = null
 var _last_zoom: float = 1.0
 
-func _init() -> void:
+func _ready() -> void:
 	_throttle_timer = Timer.new()
 	_throttle_timer.wait_time = 0.05
 	_throttle_timer.one_shot = true
 	_throttle_timer.timeout.connect(_update_viewport)
 	add_child(_throttle_timer)
 	scroll_offset_changed.connect(_on_view_changed)
-	# zoom 无直接信号，用 _process 轮询
 
 func set_graph(p_nodes: Dictionary, p_edges: Array) -> void:
 	for c in _rendered.values():
@@ -33,8 +32,9 @@ func set_graph(p_nodes: Dictionary, p_edges: Array) -> void:
 	_dirty = true
 	_update_viewport()
 
-func _on_view_changed() -> void:
-	_throttle_timer.start()
+func _on_view_changed(_offset: Vector2) -> void:
+	if _throttle_timer:
+		_throttle_timer.start()
 
 func _process(_delta: float) -> void:
 	var current_zoom = zoom
@@ -46,6 +46,8 @@ func _process(_delta: float) -> void:
 		_update_viewport()
 
 func _update_viewport() -> void:
+	if not is_inside_tree():
+		return  # 未入树时 get_viewport_rect 无效（canvas_item.cpp 报错根因）
 	var vis = _visible_rect()
 	for name in _logical_nodes:
 		if _rendered.has(name):
