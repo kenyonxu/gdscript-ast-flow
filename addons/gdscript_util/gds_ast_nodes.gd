@@ -256,6 +256,7 @@ class TypeTestNode:
 class LambdaNode:
     extends ASTNode
     var params: Array[ParameterNode] = []
+    var return_type: TypeNode = null
     var body = null                     # ExpressionNode (单表达式) 或 SuiteNode (多语句)
     var captured_vars: Array[String] = []  # 由 SymbolResolver 填充
 
