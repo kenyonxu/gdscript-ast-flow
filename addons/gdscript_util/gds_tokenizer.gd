@@ -367,70 +367,70 @@ func _scan_format_string(p_quote: String) -> GDScriptToken:
 
 
 func _scan_string(p_quote: String) -> GDScriptToken:
-	# Godot 4: 三引号多行字符串 """..."""
-	if _peek() == p_quote and _peek(1) == p_quote:
-		_advance()  # skip 2nd quote
-		_advance()  # skip 3rd quote
-		return _scan_triple_string(p_quote)
-	return _scan_single_string(p_quote)
+    # Godot 4: 三引号多行字符串 """..."""
+    if _peek() == p_quote and _peek(1) == p_quote:
+        _advance()  # skip 2nd quote
+        _advance()  # skip 3rd quote
+        return _scan_triple_string(p_quote)
+    return _scan_single_string(p_quote)
 
 func _scan_triple_string(p_quote: String) -> GDScriptToken:
-	var str_value = ""
-	while _pos < source.length():
-		var c = _advance()
-		if c == "":
-			return _make_token(GDScriptToken.Type.ERROR, "未终止的三引号字符串")
-		# 三引号结束: """ 检测
-		if c == p_quote and _peek() == p_quote and _peek(1) == p_quote:
-			_advance()  # skip 2nd
-			_advance()  # skip 3rd
-			break
-		if c == "\\":
-			var next = _advance()
-			if next == "n":
-				str_value += "\n"
-			elif next == "t":
-				str_value += "\t"
-			elif next == "\\":
-				str_value += "\\"
-			elif next == "\"":
-				str_value += "\""
-			elif next == "'":
-				str_value += "'"
-			else:
-				str_value += next
-		else:
-			str_value += c
-	return _make_token(GDScriptToken.Type.LITERAL, str_value)
+    var str_value = ""
+    while _pos < source.length():
+        var c = _advance()
+        if c == "":
+            return _make_token(GDScriptToken.Type.ERROR, "未终止的三引号字符串")
+        # 三引号结束: """ 检测
+        if c == p_quote and _peek() == p_quote and _peek(1) == p_quote:
+            _advance()  # skip 2nd
+            _advance()  # skip 3rd
+            break
+        if c == "\\":
+            var next = _advance()
+            if next == "n":
+                str_value += "\n"
+            elif next == "t":
+                str_value += "\t"
+            elif next == "\\":
+                str_value += "\\"
+            elif next == "\"":
+                str_value += "\""
+            elif next == "'":
+                str_value += "'"
+            else:
+                str_value += next
+        else:
+            str_value += c
+    return _make_token(GDScriptToken.Type.LITERAL, str_value)
 
 func _scan_single_string(p_quote: String) -> GDScriptToken:
-	var str_value = ""
-	while _pos < source.length():
-		var c = _advance()
-		if c == "":
-			return _make_token(GDScriptToken.Type.ERROR, "未终止的字符串")
-		if c == "\\":
-			var next = _advance()
-			if next == "n":
-				str_value += "\n"
-			elif next == "t":
-				str_value += "\t"
-			elif next == "r":
-				str_value += "\r"
-			elif next == "\\":
-				str_value += "\\"
-			elif next == "\"":
-				str_value += "\""
-			elif next == "'":
-				str_value += "'"
-			else:
-				str_value += next
-		elif c == p_quote:
-			break
-		else:
-			str_value += c
+    var str_value = ""
+    while _pos < source.length():
+        var c = _advance()
+        if c == "":
+            return _make_token(GDScriptToken.Type.ERROR, "未终止的字符串")
+        if c == "\\":
+            var next = _advance()
+            if next == "n":
+                str_value += "\n"
+            elif next == "t":
+                str_value += "\t"
+            elif next == "r":
+                str_value += "\r"
+            elif next == "\\":
+                str_value += "\\"
+            elif next == "\"":
+                str_value += "\""
+            elif next == "'":
+                str_value += "'"
+            else:
+                str_value += next
+        elif c == p_quote:
+            break
+        else:
+            str_value += c
 
-	return _make_token(GDScriptToken.Type.LITERAL, str_value)
+    return _make_token(GDScriptToken.Type.LITERAL, str_value)
 
 
 func _scan_operator(p_first: String) -> GDScriptToken:

@@ -197,10 +197,14 @@ func _set_error(p_msg: String):
             error = p_msg
         return
     if error == "":  # 只记录第一个错误
+        error = p_msg
         if _peek():
-            error = "%s (line %d, token: %s literal: %s)" % [p_msg, _peek().start_line, _peek().get_name(), str(_peek().literal)]
+            _error_line = _peek().start_line
+            _error_column = _peek().start_column
+        if _peek():
+            error = p_msg
         else:
-            error = "%s (at EOF)" % p_msg
+            error = p_msg
 
 func _skip_newlines():
     while _peek() and _peek().type == GDScriptToken.Type.NEWLINE:
@@ -1060,7 +1064,7 @@ func _parse_lambda():
 
     # 返回类型 (可选)
     if _match(GDScriptToken.Type.FORWARD_ARROW):
-        pass  # Phase 2: node.return_type
+        node.return_type = _parse_type()
 
     _expect(GDScriptToken.Type.COLON)
 

@@ -39,7 +39,7 @@ scan/include_dirs=[{
 "recursive": true
 }]
 scan/exclude_dirs=["res://addons", "res://.godot", "res://.git", "res://demo"]
-scan/enabled=false
+scan/enabled=true
 
 [physics]
 
