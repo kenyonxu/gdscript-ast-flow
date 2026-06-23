@@ -52,25 +52,30 @@ func run_analysis(p_file_path: String) -> void:
 func _run_pipeline(p_file_path: String) -> GDScriptAnalysisResult:
 	var f = FileAccess.open(p_file_path, FileAccess.READ)
 	if f == null:
+		print("[D] FAIL FileAccess: %s" % p_file_path)
 		return null
 	var source = f.get_as_text()
 	f.close()
-	if source == "":
-		return null
+	print("[D] source length: %d" % source.length())
 
 	# Phase 1: tokenize + parse
 	var tokenizer = GDScriptTokenizer.new()
 	var tokens = tokenizer.tokenize(source)
+	print("[D] tokens: %d" % tokens.size())
+
 	var parser = GDScriptParser.new()
 	var ast = parser.parse(tokens)
 
 	if parser.error != "":
-		push_warning("[GDSAnalysisBridge] Parse error in %s: %s" % [p_file_path, parser.error])
+		print("[D] PARSE ERROR: %s" % parser.error)
 		return null
+	print("[D] parse OK, members: %d" % ast.members.size())
 
 	# Phase 2: symbol resolution
 	var resolver = GDScriptSymbolResolver.new()
-	return resolver.resolve(ast, p_file_path)
+	var result = resolver.resolve(ast, p_file_path)
+	print("[D] resolve: %s" % ("OK" if result else "NULL"))
+	return result
 
 
 func get_current_result() -> GDScriptAnalysisResult:
