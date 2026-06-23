@@ -71,8 +71,9 @@ func _run_queued_analysis() -> void:
 	var path = _analysis_queued
 	_analysis_queued = ""
 	_bridge.run_analysis(path)
-	# Phase 3.2 增量: 若已有项目结果，重分析该文件 + 重解析跨文件边
-	_bridge.refresh_file_in_project(path)
+	# Phase 3.2 增量: 若已有项目结果且扫描开启，重分析该文件 + 重解析跨文件边
+	if GDSScanConfig.is_enabled():
+		_bridge.refresh_file_in_project(path)
 	_is_analyzing = false
 	# 若期间又有新保存请求，继续处理
 	if _analysis_queued != "":
@@ -87,7 +88,11 @@ func set_main_screen_visible(p_visible: bool) -> void:
 			_graph_main_screen.call_deferred("_on_relayout")
 
 func _initial_project_scan() -> void:
-	_bridge.run_project_analysis("res://")
+	if GDSScanConfig.is_enabled():
+		_bridge.run_project_analysis()
+		print("[GDScriptUtil] Project scan: ON — analyzing...")
+	else:
+		print("[GDScriptUtil] Project scan: OFF. Configure in Analysis tab → Project → Settings.")
 
 # 焦点跟随: 检测当前脚本编辑器焦点是否变化，变了就触发分析
 func _on_focus_tick() -> void:
