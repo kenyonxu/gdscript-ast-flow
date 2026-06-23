@@ -1,22 +1,23 @@
 # tests/benchmark.gd
 # 性能基准 — 测量 tokenize/parse/resolve 各阶段耗时
+# 用法: Script Editor 打开此文件 → File → Run (Ctrl+Shift+X)
 # 参考 ADR-0001: profile first, 再决定是否需要 C# 优化
 
-extends SceneTree
+@tool
+extends EditorScript
 
-func _init():
+func _run():
 	print("=== GDScript Analysis Pipeline Benchmark ===\n")
 	var files := [
-		"samples/analysis_demo.gd",
-		"addons/gdscript_util/gds_tokenizer.gd",
-		"addons/gdscript_util/gds_parser.gd",
-		"addons/gdscript_util/gds_symbol_resolver.gd",
-		"addons/gdscript_util/editor/gds_project_analyzer.gd",
+		"res://samples/analysis_demo.gd",
+		"res://addons/gdscript_util/gds_tokenizer.gd",
+		"res://addons/gdscript_util/gds_parser.gd",
+		"res://addons/gdscript_util/gds_symbol_resolver.gd",
+		"res://addons/gdscript_util/editor/gds_project_analyzer.gd",
 	]
 	for path in files:
-		_bench_file("res://" + path)
+		_bench_file(path)
 	print("\n=== Done ===")
-	quit()
 
 func _bench_file(p_path: String) -> void:
 	var f = FileAccess.open(p_path, FileAccess.READ)
@@ -55,7 +56,7 @@ func _bench_file(p_path: String) -> void:
 	if result and result.signal_graph:
 		sigs = result.signal_graph.signals.size()
 
-	print("%-55s %5d lines | tok %6.1fms  parse %6.1fms  resolve %6.1fms  = %6.1fms  | %3d edges %2d sigs %s" % [
+	print("%-50s %5d lines | tok %6.1fms  parse %6.1fms  resolve %6.1fms  = %6.1fms  | %3d edges %2d sigs %s" % [
 		p_path.get_file(), lines,
 		t_tok / 1000.0, t_parse / 1000.0, t_resolve / 1000.0,
 		total / 1000.0, edges, sigs,
