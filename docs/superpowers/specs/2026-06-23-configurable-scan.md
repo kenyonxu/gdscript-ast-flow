@@ -1,6 +1,6 @@
 # 可配置项目扫描 设计规范
 
-> 日期: 2026-06-23 | 状态: 设计中 | 依赖: Phase 3.2 跨文件分析 (已完成 ✅)
+> 日期: 2026-06-23 | 状态: 已完成 ✅ | 依赖: Phase 3.2 跨文件分析 (已完成 ✅)
 
 ## 一、目标
 
@@ -256,18 +256,18 @@ Project tab 加 "Settings" 按钮 → 打开 `GDSscanSettingsDialog`（AcceptDia
 
 ## 六、验收标准
 
-- [ ] Project Settings → gdscript_util/scan/ 出现配置项（enabled/include/exclude）
-- [ ] 首次安装：enabled=false，不扫描，Output 提示配置方法
-- [ ] 默认：include=[]（空），exclude=`addons`/`.godot`/`.git`
-- [ ] Settings 弹窗配置 include + 勾选 Enable → 开始扫描
-- [ ] 修改配置后自动关闭扫描，Output 提示重新 Enable
-- [ ] 重启编辑器：enabled 状态持久化（true→自动扫，false→跳过+提示）
-- [ ] 加 `res://addons/gdscript_util` 到 include → 项目图出现自身代码
-- [ ] 加 `res://addons/limboai` 到 exclude → 不扫 limboai
-- [ ] 非递归目录：只扫顶层 .gd，不进子目录
-- [ ] exclude 覆盖 include（同目录在两者中 → 排除）
-- [ ] Settings 弹窗增删目录 → Save → 项目图刷新
-- [ ] ProjectSettings.save() 持久化（重启编辑器配置不丢）
+- [x] Project Settings → gdscript_util/scan/ 出现配置项（enabled/include/exclude）
+- [x] 首次安装：enabled=false，不扫描，Output 提示配置方法
+- [x] 默认：include=[]（空），exclude=`addons`/`.godot`/`.git`
+- [x] Settings 弹窗配置 include + 勾选 Enable → 开始扫描
+- [x] 修改配置后自动关闭扫描，Output 提示重新 Enable
+- [x] 重启编辑器：enabled 状态持久化（true→自动扫，false→跳过+提示）
+- [x] 加 `res://addons/gdscript_util` 到 include → 项目图出现自身代码
+- [x] 加 `res://addons/limboai` 到 exclude → 不扫 limboai
+- [x] 非递归目录：只扫顶层 .gd，不进子目录
+- [x] exclude 覆盖 include（同目录在两者中 → 排除）
+- [x] Settings 弹窗增删目录 → Save → 项目图刷新
+- [x] ProjectSettings.save() 持久化（重启编辑器配置不丢）
 
 ## 七、风险
 

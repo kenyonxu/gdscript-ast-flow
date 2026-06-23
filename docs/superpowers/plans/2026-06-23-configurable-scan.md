@@ -498,14 +498,14 @@ git commit -m "test: configurable scan acceptance pass"
 
 ## 完成检查清单
 
-- [ ] `gds_scan_config.gd` — ProjectSettings enabled/include/exclude 读写
-- [ ] `gds_project_analyzer.gd` — scan_project 读配置 + include 覆盖 exclude 优先级
-- [ ] `gds_analysis_bridge.gd` — run_project_analysis 不传 root
-- [ ] `gds_editor_bootstrap.gd` — 按 enabled 条件扫描 + Output 提示
-- [ ] `gds_scan_settings_dialog.gd` — include/exclude 编辑 + Enable 勾选
-- [ ] `gds_project_panel.gd` — Settings 按钮 + 禁用态提示
-- [ ] 首次安装不扫描
-- [ ] 配置后 Enable → 扫描
-- [ ] 改配置自动关闭 → 重新 Enable
-- [ ] 重启持久化
-- [ ] 单文件分析不受影响
+- [x] `gds_scan_config.gd` — ProjectSettings enabled/include/exclude 读写
+- [x] `gds_project_analyzer.gd` — scan_project 读配置 + include 覆盖 exclude 优先级
+- [x] `gds_analysis_bridge.gd` — run_project_analysis 不传 root
+- [x] `gds_editor_bootstrap.gd` — 按 enabled 条件扫描 + Output 提示
+- [x] `gds_scan_settings_dialog.gd` — include/exclude 编辑 + Enable 勾选
+- [x] `gds_project_panel.gd` — Settings 按钮 + 禁用态提示
+- [x] 首次安装不扫描
+- [x] 配置后 Enable → 扫描
+- [x] 改配置自动关闭 → 重新 Enable
+- [x] 重启持久化
+- [x] 单文件分析不受影响
