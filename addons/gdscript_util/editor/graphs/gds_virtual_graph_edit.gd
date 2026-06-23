@@ -96,8 +96,12 @@ func _instantiate(p_name: String) -> void:
 
 func _connect_visible() -> void:
 	for edge in _logical_edges:
-		if _rendered_by_name.has(edge[0]) and _rendered_by_name.has(edge[1]):
+		var has_from = _rendered_by_name.has(edge[0])
+		var has_to = _rendered_by_name.has(edge[1])
+		if has_from and has_to:
 			var from_port = edge[2] if edge.size() > 2 else 0
 			var to_port = edge[3] if edge.size() > 3 else 0
 			if not is_node_connected(edge[0], from_port, edge[1], to_port):
 				connect_node(edge[0], from_port, edge[1], to_port)
+		elif _logical_edges.size() <= 20:
+			print("[D connect] edge %s→%s: from=%s to=%s rendered_keys=%s" % [edge[0], edge[1], has_from, has_to, _rendered_by_name.keys()])
