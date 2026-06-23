@@ -5,31 +5,63 @@
 class_name GDScriptProjectAnalyzer
 extends RefCounted
 
-const SKIP_DIRS := [".", "..", ".godot", ".git", "addons"]  # addons 第三方噪音，可调
-
-# 递归扫描 root 下所有 .gd 文件
-func scan_project(p_root: String) -> Array:
+# 按配置扫描 — 读 GDSScanConfig 的 include/exclude 目录
+func scan_project() -> Array:
+	var includes = GDSScanConfig.get_include_dirs()
+	var excludes = GDSScanConfig.get_exclude_dirs()
 	var list: Array = []
-	_scan_dir(p_root, list)
+	for entry in includes:
+		var path: String = entry.get("path", "")
+		var recursive: bool = entry.get("recursive", true)
+		if path != "":
+			_scan_dir(path, list, excludes, recursive)
 	return list
 
-func _scan_dir(p_dir: String, p_list: Array) -> void:
+func _scan_dir(p_dir: String, p_list: Array, p_excludes: Array, p_recursive: bool) -> void:
 	var da = DirAccess.open(p_dir)
 	if da == null:
 		return
 	da.list_dir_begin()
 	var name = da.get_next()
 	while name != "":
-		if name in SKIP_DIRS:
+		if name in [".", ".."]:
 			name = da.get_next()
 			continue
 		var full = p_dir.path_join(name)
+		if _is_excluded(full, p_excludes):
+			name = da.get_next()
+			continue
 		if da.current_is_dir():
-			_scan_dir(full, p_list)
+			if p_recursive:
+				_scan_dir(full, p_list, p_excludes, true)
 		elif name.ends_with(".gd"):
 			p_list.append(full)
 		name = da.get_next()
 	da.list_dir_end()
+
+# include（更具体）覆盖 exclude（更宽泛）
+func _is_excluded(p_path: String, p_excludes: Array) -> bool:
+	var excluded := false
+	for excl in p_excludes:
+		if p_path == excl or p_path.begins_with(excl + "/"):
+			excluded = true
+			break
+	if not excluded:
+		return false
+	# 检查是否有更深的 include 覆盖
+	var includes = GDSScanConfig.get_include_dirs()
+	for entry in includes:
+		var inc_path: String = entry.get("path", "")
+		if inc_path == "" or inc_path == "res://":
+			continue  # 最浅的不算显式覆盖
+		if p_path == inc_path or p_path.begins_with(inc_path + "/"):
+			# include 比 exclude 深 → 覆盖
+			# 但确认没有更深的 exclude 仍排除
+			for excl in p_excludes:
+				if excl.length() > inc_path.length() and p_path.begins_with(excl + "/"):
+					return true  # 更深的 exclude 优先
+			return false  # include 覆盖生效
+	return true  # 排除且无 include 覆盖
 
 # 单文件管道 — 直接读源码（不 load）
 func _analyze_file(p_path: String) -> GDScriptAnalysisResult:
@@ -52,10 +84,10 @@ func _analyze_file(p_path: String) -> GDScriptAnalysisResult:
 
 
 # 全量分析: 扫描 + 单文件管道，返回 GDScriptProjectResult（无跨文件边，待 B3）
-func analyze_all(p_root: String) -> GDScriptProjectResult:
+func analyze_all() -> GDScriptProjectResult:
 	var result = GDScriptProjectResult.new()
-	result.root_path = p_root
-	var paths = scan_project(p_root)
+	result.root_path = "res://"
+	var paths = scan_project()  # 不传参，读配置
 	for path in paths:
 		var file_result = _analyze_file(path)
 		if file_result != null:
@@ -136,7 +168,7 @@ func _file_defines_symbol(p_result: GDScriptAnalysisResult, p_name: String) -> b
 
 
 # 完整入口
-func analyze_full(p_root: String) -> GDScriptProjectResult:
-	var result = analyze_all(p_root)
+func analyze_full() -> GDScriptProjectResult:
+	var result = analyze_all()
 	resolve_cross_file(result)
 	return result
