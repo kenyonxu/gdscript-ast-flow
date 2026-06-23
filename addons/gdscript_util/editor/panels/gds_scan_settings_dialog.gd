@@ -94,6 +94,7 @@ func _populate_include_tree() -> void:
 		var item = _include_tree.create_item(root)
 		item.set_text(0, entry.get("path", ""))
 		item.set_cell_mode(1, TreeItem.CELL_MODE_CHECK)
+		item.set_editable(1, true)    # 必须！tree.cpp:3314 editable 门控 CELL_MODE_CHECK 点击
 		item.set_checked(1, entry.get("recursive", true))
 
 func _populate_exclude_tree() -> void:
@@ -115,6 +116,7 @@ func _on_dir_selected(p_path: String) -> void:
 	item.set_text(0, p_path)
 	if _editing_include:
 		item.set_cell_mode(1, TreeItem.CELL_MODE_CHECK)
+		item.set_editable(1, true)
 		item.set_checked(1, true)
 
 func _remove_selected(p_tree: Tree) -> void:
