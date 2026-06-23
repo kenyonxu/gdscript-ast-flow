@@ -24,7 +24,9 @@ func setup(p_bridge: GDSAnalysisBridge) -> void:
 	_signal_view = GDSSignalGraphView.new()
 	_project_view = GDSProjectGraphView.new()
 	_build_ui()
-	_rebuild()
+	# deferred: 等 bootstrap add_child 完成后（节点入树）再 _rebuild
+	# 否则 set_graph→connect_node 在未入树时触发 data.tree null
+	call_deferred("_rebuild")
 
 func _build_ui() -> void:
 	# 主屏铺满编辑器主屏区域：
