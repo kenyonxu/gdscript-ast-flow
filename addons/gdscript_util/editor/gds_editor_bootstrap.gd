@@ -105,5 +105,6 @@ func _on_focus_tick() -> void:
 	var path: String = current.resource_path
 	if path != _last_script_path and path.ends_with(".gd"):
 		_last_script_path = path
+^I^Iprint("[D focus] switched to: " + path)
 		# 直接分析（bridge 内部有 timestamp 缓存，未修改的会秒回）
 		_bridge.run_analysis(path)
