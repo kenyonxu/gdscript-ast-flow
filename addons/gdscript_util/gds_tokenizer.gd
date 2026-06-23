@@ -220,6 +220,20 @@ func _scan_token(p_first: String) -> GDScriptToken:
             _advance()  # skip the opening quote
             return _scan_format_string(next)
 
+    # Godot 4: &"..." StringName 字面量前缀
+    if p_first == "&":
+        var next = _peek()
+        if next == "\"" or next == "'":
+            _advance()
+            return _scan_string(next)
+
+    # Godot 4.4+: ^"..." NodePath/StringName 字面量前缀
+    if p_first == "^":
+        var next = _peek()
+        if next == "\"" or next == "'":
+            _advance()
+            return _scan_string(next)
+
     if p_first == "_" or (p_first >= "a" and p_first <= "z") or (p_first >= "A" and p_first <= "Z"):
         return _scan_identifier(p_first)
 
