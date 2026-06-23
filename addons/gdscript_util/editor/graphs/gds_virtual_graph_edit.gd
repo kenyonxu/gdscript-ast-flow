@@ -9,7 +9,8 @@ const MARGIN_RATIO := 0.2
 
 var _logical_nodes: Dictionary = {}
 var _logical_edges: Array = []
-var _rendered: Dictionary = {}
+var _rendered: Dictionary = {}               # logical_key → GraphNode
+var _rendered_by_name: Dictionary = {}       # node_name → GraphNode（供 _connect_visible 查找）
 var _dirty := true
 var _throttle_timer: Timer = null
 var _last_zoom: float = 1.0
@@ -26,6 +27,7 @@ func set_graph(p_nodes: Dictionary, p_edges: Array) -> void:
 	for c in _rendered.values():
 		c.queue_free()
 	_rendered.clear()
+	_rendered_by_name.clear()
 	clear_connections()
 	_logical_nodes = p_nodes
 	_logical_edges = p_edges
@@ -63,6 +65,8 @@ func _update_viewport() -> void:
 			node.queue_free()
 			to_remove.append(name)
 	for name in to_remove:
+		var node = _rendered[name]
+		_rendered_by_name.erase(node.name)
 		_rendered.erase(name)
 	_connect_visible()
 
@@ -88,10 +92,11 @@ func _instantiate(p_name: String) -> void:
 		gn.set_slot(0, true, sc.left[0], sc.left[1], true, sc.right[0], sc.right[1])
 	add_child(gn)
 	_rendered[p_name] = gn
+	_rendered_by_name[info.node_name] = gn
 
 func _connect_visible() -> void:
 	for edge in _logical_edges:
-		if _rendered.has(edge[0]) and _rendered.has(edge[1]):
+		if _rendered_by_name.has(edge[0]) and _rendered_by_name.has(edge[1]):
 			var from_port = edge[2] if edge.size() > 2 else 0
 			var to_port = edge[3] if edge.size() > 3 else 0
 			if not is_node_connected(edge[0], from_port, edge[1], to_port):
