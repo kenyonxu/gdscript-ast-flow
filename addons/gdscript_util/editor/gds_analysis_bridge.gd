@@ -29,21 +29,25 @@ var _project_analyzer: GDScriptProjectAnalyzer = null
 
 
 func run_analysis(p_file_path: String) -> void:
+	print("[D bridge] run_analysis: %s" % p_file_path)
 	analysis_started.emit(p_file_path)
 
 	# Phase 3: 时间戳缓存 — 未修改文件跳过分析
 	if not should_reanalyze(p_file_path) and _cache.has(p_file_path):
 		_current_result = _cache[p_file_path]
+		print("[D bridge] cache hit, emitting analysis_completed")
 		analysis_completed.emit(_current_result)
 		return
 
 	# 直接运行 Phase 1+2 管道（不依赖 plugin.gd — 避免 class_name 依赖问题）
 	var result = _run_pipeline(p_file_path)
 	if result == null:
+		print("[D bridge] analysis FAILED (null result)")
 		analysis_failed.emit(p_file_path, "Parse error or file not found")
 		return
 	_current_result = result
 	_cache[p_file_path] = result
+	print("[D bridge] analysis OK — %d edges, %d functions" % [result.call_graph.edges.size(), result.get_all_functions().size()])
 	analysis_completed.emit(result)
 
 
