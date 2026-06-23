@@ -318,6 +318,9 @@ func _parse_inner_class() -> GDScriptToken.ClassNode:
     # 类体
     _expect(GDScriptToken.Type.INDENT)
     while _peek() and _peek().type not in [GDScriptToken.Type.DEDENT, GDScriptToken.Type.TK_EOF]:
+        _skip_newlines()
+        if _peek() == null or _peek().type in [GDScriptToken.Type.DEDENT, GDScriptToken.Type.TK_EOF]:
+            break
         var m = _parse_class_member()
         if m:
             node.members.append(m)
