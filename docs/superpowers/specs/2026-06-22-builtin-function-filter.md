@@ -1,6 +1,6 @@
 # 内置函数过滤 设计规范
 
-> 日期: 2026-06-22 | 状态: 设计中 | 依赖: Phase 2 SymbolResolver
+> 日期: 2026-06-22 | 状态: 已完成 ✅ | 依赖: Phase 2 SymbolResolver
 
 ## 一、目标
 
@@ -95,11 +95,11 @@ elif sym == null:
 
 ## 六、验收标准
 
-- [ ] `print(...)`/`range(...)` 不产生 CallEdge、不计度数
-- [ ] 用户函数 `foo()`（未声明/前向引用）仍记边
-- [ ] 已声明用户函数调用不受影响
-- [ ] Phase 2 回归测试全过（test_symbol_resolver 调用图不含 print 等）
-- [ ] 调用图节点数减少（噪声消失）
+- [x] `print(...)`/`range(...)` 不产生 CallEdge、不计度数
+- [x] 用户函数 `foo()`（未声明/前向引用）仍记边
+- [x] 已声明用户函数调用不受影响
+- [x] Phase 2 回归测试全过（test_symbol_resolver 调用图不含 print 等）
+- [x] 调用图节点数减少（噪声消失）
 
 ## 七、风险
 

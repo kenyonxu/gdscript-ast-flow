@@ -268,21 +268,21 @@ git commit -m "test: graph virtualization smoke (200-node clip + scroll recycle)
 
 ## 验收标准
 
-- [ ] 100+ 节点图: 初始只渲染可见区，滚动流畅
-- [ ] 滚出视口节点释放，滚回重建
-- [ ] 内存稳定
-- [ ] 小图（<50 节点）行为不变（全渲染）
-- [ ] 节点上限 >500 提示
+- [x] 100+ 节点图: 初始只渲染可见区，滚动流畅
+- [x] 滚出视口节点释放，滚回重建
+- [x] 内存稳定
+- [x] 小图（<50 节点）行为不变（全渲染）
+- [x] 节点上限 >500 提示
 
 ---
 
 ## 完成检查清单
 
-- [ ] GDSGraphLayout — `assign_grid` / `assign_two_column`
-- [ ] GDSVirtualGraphEdit — `set_graph` / `_update_viewport` / `_visible_rect` / `_instantiate`
-- [ ] GDSVirtualGraphEdit — scroll 节流 Timer + zoom 轮询
-- [ ] call/signal/project 三 view — `build_logical()` 产出扁平 config
-- [ ] main screen — `_graph_edit` 换类型 + `_rebuild` 走 `set_graph`
+- [x] GDSGraphLayout — `assign_grid` / `assign_two_column`
+- [x] GDSVirtualGraphEdit — `set_graph` / `_update_viewport` / `_visible_rect` / `_instantiate`
+- [x] GDSVirtualGraphEdit — scroll 节流 Timer + zoom 轮询
+- [x] call/signal/project 三 view — `build_logical()` 产出扁平 config
+- [x] main screen — `_graph_edit` 换类型 + `_rebuild` 走 `set_graph`
 
 ## 已知限制
 

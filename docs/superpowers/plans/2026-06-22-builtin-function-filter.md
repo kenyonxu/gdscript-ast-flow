@@ -209,26 +209,26 @@ git commit -m "test: builtin-function-filter acceptance pass"
 
 ## 验收标准（对照 spec 第六节）
 
-- [ ] `print(...)`/`range(...)` 不产生 CallEdge、不计度数（Task C0-2 实现 + C0-3 断言）
-- [ ] 用户函数（未声明/前向引用）仍记边（`helper` 断言）
-- [ ] 已声明用户函数调用不受影响（`sym != null and FUNCTION` 分支保留）
-- [ ] Phase 2 回归测试全过（Task V-1 Step 1，Test 1–11 PASS）
-- [ ] 调用图节点数减少、`print` 枢纽噪声消失（Task V-1 Step 2）
+- [x] `print(...)`/`range(...)` 不产生 CallEdge、不计度数（Task C0-2 实现 + C0-3 断言）
+- [x] 用户函数（未声明/前向引用）仍记边（`helper` 断言）
+- [x] 已声明用户函数调用不受影响（`sym != null and FUNCTION` 分支保留）
+- [x] Phase 2 回归测试全过（Task V-1 Step 1，Test 1–11 PASS）
+- [x] 调用图节点数减少、`print` 枢纽噪声消失（Task V-1 Step 2）
 
 ---
 
 ## 完成检查清单
 
 C0:
-- [ ] GDSBuiltinFunctions — 80 项名表 + `is_builtin`
-- [ ] resolver — `filter_builtin_calls` 开关（默认 true）
-- [ ] resolver — 模式 1b：已声明用户函数记边 / 未声明且非内置记边 / 内置跳过
-- [ ] test_11_builtin_filter — 4 组断言（内置无边/度、前向引用保留、helper 无 callee、开关 OFF 回归）
+- [x] GDSBuiltinFunctions — 80 项名表 + `is_builtin`
+- [x] resolver — `filter_builtin_calls` 开关（默认 true）
+- [x] resolver — 模式 1b：已声明用户函数记边 / 未声明且非内置记边 / 内置跳过
+- [x] test_11_builtin_filter — 4 组断言（内置无边/度、前向引用保留、helper 无 callee、开关 OFF 回归）
 
 V:
-- [ ] Test 1–11 全 PASS
-- [ ] 真实样本无 `print`/`range` 节点、度数失真消除
-- [ ] 开关 OFF 时内置边回归
+- [x] Test 1–11 全 PASS
+- [x] 真实样本无 `print`/`range` 节点、度数失真消除
+- [x] 开关 OFF 时内置边回归
 
 ## 已知限制 / 风险（对照 spec 第七节）
 

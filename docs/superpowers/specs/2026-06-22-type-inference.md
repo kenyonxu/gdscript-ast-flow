@@ -1,6 +1,6 @@
 # 类型推断 设计规范
 
-> 日期: 2026-06-22 | 状态: 设计中 | 依赖: Phase 3.2 跨文件分析 + Phase 2 SymbolResolver
+> 日期: 2026-06-22 | 状态: 已完成 ✅ | 依赖: Phase 3.2 跨文件分析 + Phase 2 SymbolResolver
 
 ## 一、目标
 
@@ -104,12 +104,12 @@ resolver 第一遍建 `{func_name: return_type_string}`（从 FunctionNode.retur
 
 ## 六、验收标准
 
-- [ ] `var x := Player.new()` → type_table["x"] = "Player" → 跨文件 x.method() 可解析
-- [ ] `var p = get_player()`（`func get_player() -> Player`）→ type_table["p"] = "Player"
-- [ ] `var c = preload("res://a.gd")` → type_table 含 a.gd
-- [ ] 未标注 + 不可推断的变量仍跳过（不报错）
-- [ ] Phase 3.2 跨文件测试仍过 + 新增推断用例
-- [ ] 跨文件边覆盖率提升（可量化：推断前后 cross_edges 数）
+- [x] `var x := Player.new()` → type_table["x"] = "Player" → 跨文件 x.method() 可解析
+- [x] `var p = get_player()`（`func get_player() -> Player`）→ type_table["p"] = "Player"
+- [x] `var c = preload("res://a.gd")` → type_table 含 a.gd
+- [x] 未标注 + 不可推断的变量仍跳过（不报错）
+- [x] Phase 3.2 跨文件测试仍过 + 新增推断用例
+- [x] 跨文件边覆盖率提升（可量化：推断前后 cross_edges 数）
 
 ## 七、风险
 

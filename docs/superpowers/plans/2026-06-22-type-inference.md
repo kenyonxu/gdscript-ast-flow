@@ -194,22 +194,22 @@ git commit -m "test: type inference acceptance pass"
 
 ## 验收标准
 
-- [ ] `var x := Player.new()` → `type_table["x"] = "Player"` → 跨文件 `x.method()` 可解析
-- [ ] `var p = get_player()`（`func get_player() -> Player`）→ `type_table["p"] = "Player"`
-- [ ] `var c = preload("res://a.gd")` → `type_table` 含 a.gd
-- [ ] 未标注 + 不可推断的变量仍跳过（不报错）
-- [ ] Phase 3.2 跨文件测试仍过 + 新增推断用例
-- [ ] 跨文件边覆盖率提升（可量化：推断前后 `cross_edges` 数）
+- [x] `var x := Player.new()` → `type_table["x"] = "Player"` → 跨文件 `x.method()` 可解析
+- [x] `var p = get_player()`（`func get_player() -> Player`）→ `type_table["p"] = "Player"`
+- [x] `var c = preload("res://a.gd")` → `type_table` 含 a.gd
+- [x] 未标注 + 不可推断的变量仍跳过（不报错）
+- [x] Phase 3.2 跨文件测试仍过 + 新增推断用例
+- [x] 跨文件边覆盖率提升（可量化：推断前后 `cross_edges` 数）
 
 ---
 
 ## 完成检查清单
 
-- [ ] GDSTypeInferrer — `infer()` 三模式
-- [ ] resolver — `_return_type_table` + `enable_type_inference` 开关
-- [ ] resolver — `_build_return_type_table()` 第一遍预建
-- [ ] resolver — `_resolve_variable` 显式标注优先 + 推断回退
-- [ ] test_12–14 — new/return/preload 三组断言
+- [x] GDSTypeInferrer — `infer()` 三模式
+- [x] resolver — `_return_type_table` + `enable_type_inference` 开关
+- [x] resolver — `_build_return_type_table()` 第一遍预建
+- [x] resolver — `_resolve_variable` 显式标注优先 + 推断回退
+- [x] test_12–14 — new/return/preload 三组断言
 
 ## 已知限制
 
