@@ -18,6 +18,7 @@ func run_all_tests():
 	test_8_signal_connect()
 	test_9_external_connect()
 	test_10_def_use_full_chain()
+	test_11_builtin_filter()
 	print("\n=== All tests completed ===")
 
 
