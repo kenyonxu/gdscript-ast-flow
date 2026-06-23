@@ -80,11 +80,17 @@ func _instantiate(p_name: String) -> void:
 	gn.position_offset = info.pos
 	if info.has("jump") and not info.jump.file.is_empty():
 		gn.set_meta("jump", info.jump)
+	# 应用自定义 slot 配置（信号图需要）
+	if info.has("slot_config"):
+		var sc = info.slot_config
+		gn.set_slot(0, true, sc.left[0], sc.left[1], true, sc.right[0], sc.right[1])
 	add_child(gn)
 	_rendered[p_name] = gn
 
 func _connect_visible() -> void:
 	for edge in _logical_edges:
 		if _rendered.has(edge[0]) and _rendered.has(edge[1]):
-			if not is_node_connected(edge[0], 0, edge[1], 0):
-				connect_node(edge[0], 0, edge[1], 0)
+			var from_port = edge[2] if edge.size() > 2 else 0
+			var to_port = edge[3] if edge.size() > 3 else 0
+			if not is_node_connected(edge[0], from_port, edge[1], to_port):
+				connect_node(edge[0], from_port, edge[1], to_port)
