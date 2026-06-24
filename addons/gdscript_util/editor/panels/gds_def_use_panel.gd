@@ -6,6 +6,7 @@ class_name GDSDefUsePanel
 extends VBoxContainer
 
 var _bridge: GDSAnalysisBridge = null
+var _l10n: GDSL10n = null
 var _tree: Tree = null
 
 const COLORS := {
@@ -15,8 +16,9 @@ const COLORS := {
 	3: Color.RED,           # READ_WRITE
 }
 
-func setup(p_bridge: GDSAnalysisBridge) -> void:
+func setup(p_bridge: GDSAnalysisBridge, p_l10n: GDSL10n = null) -> void:
 	_bridge = p_bridge
+	_l10n = p_l10n if p_l10n else GDSL10n.new()
 	_bridge.analysis_completed.connect(_refresh)
 	_bridge.variable_selected.connect(_on_variable_selected)
 	_build_ui()

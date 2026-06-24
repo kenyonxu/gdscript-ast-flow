@@ -5,10 +5,12 @@ class_name GDSSignalFlowPanel
 extends VBoxContainer
 
 var _bridge: GDSAnalysisBridge = null
+var _l10n: GDSL10n = null
 var _tree: Tree = null
 
-func setup(p_bridge: GDSAnalysisBridge) -> void:
+func setup(p_bridge: GDSAnalysisBridge, p_l10n: GDSL10n = null) -> void:
 	_bridge = p_bridge
+	_l10n = p_l10n if p_l10n else GDSL10n.new()
 	_bridge.analysis_completed.connect(_refresh)
 	_build_ui()
 

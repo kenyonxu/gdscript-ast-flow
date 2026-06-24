@@ -7,6 +7,7 @@ class_name GDSCallGraphPanel
 extends HSplitContainer
 
 var _bridge: GDSAnalysisBridge = null
+var _l10n: GDSL10n = null
 var _tree: Tree = null
 var _detail: RichTextLabel = null
 var _search_edit: LineEdit = null
@@ -22,8 +23,9 @@ const COLORS := {
 	7: Color.RED,          # EMIT
 }
 
-func setup(p_bridge: GDSAnalysisBridge) -> void:
+func setup(p_bridge: GDSAnalysisBridge, p_l10n: GDSL10n = null) -> void:
 	_bridge = p_bridge
+	_l10n = p_l10n if p_l10n else GDSL10n.new()
 	_bridge.analysis_completed.connect(_refresh)
 	_bridge.function_selected.connect(_on_function_selected)
 	_build_ui()

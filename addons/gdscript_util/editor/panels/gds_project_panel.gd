@@ -5,11 +5,13 @@ class_name GDSProjectPanel
 extends VBoxContainer
 
 var _bridge: GDSAnalysisBridge = null
+var _l10n: GDSL10n = null
 var _tree: Tree = null
 var _rebuild_btn: Button = null
 
-func setup(p_bridge: GDSAnalysisBridge) -> void:
+func setup(p_bridge: GDSAnalysisBridge, p_l10n: GDSL10n = null) -> void:
 	_bridge = p_bridge
+	_l10n = p_l10n if p_l10n else GDSL10n.new()
 	_bridge.project_analysis_completed.connect(_refresh)
 	_build_ui()
 
@@ -18,7 +20,7 @@ func _build_ui() -> void:
 	add_child(toolbar)
 
 	_rebuild_btn = Button.new()
-	_rebuild_btn.text = "Rebuild Project"
+	_rebuild_btn.text = _l10n.t("btn.rebuild")
 	_rebuild_btn.pressed.connect(_on_rebuild)
 	toolbar.add_child(_rebuild_btn)
 
@@ -37,10 +39,10 @@ func _refresh(p_result: GDScriptProjectResult) -> void:
 	var root = _tree.create_item()
 	if not GDSScanConfig.is_enabled():
 		var item = _tree.create_item(root)
-		item.set_text(0, "Project scan is OFF")
+		item.set_text(0, _l10n.t("msg.scan_off"))
 		item.set_custom_color(0, Color.GRAY)
 		var hint = _tree.create_item(root)
-		hint.set_text(0, "Configure in Project Settings → GDScript Util → Scan.")
+		hint.set_text(0, _l10n.t("msg.scan_off_hint"))
 		hint.set_custom_color(0, Color.GRAY)
 		return
 	if p_result == null:
