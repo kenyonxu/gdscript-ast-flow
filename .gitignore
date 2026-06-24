@@ -26,3 +26,6 @@ graphify-out/
 
 # RuFlo 数据
 ruvector.db
+
+# 发布产物
+release/
