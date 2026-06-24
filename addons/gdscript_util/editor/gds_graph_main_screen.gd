@@ -7,6 +7,7 @@ class_name GDSGraphMainScreen
 extends VBoxContainer
 
 var _bridge: GDSAnalysisBridge = null
+var _l10n: GDSL10n = null
 var _graph_edit: GDSVirtualGraphEdit = null
 var _scope: int = 0  # 0=当前文件, 1=项目
 var _graph_kind: int = 0  # 0=调用, 1=信号
@@ -16,8 +17,9 @@ var _project_view: GDSProjectGraphView = null
 var _min_degree: int = 0
 var _legend: HBoxContainer = null
 
-func setup(p_bridge: GDSAnalysisBridge) -> void:
+func setup(p_bridge: GDSAnalysisBridge, p_l10n: GDSL10n = null) -> void:
 	_bridge = p_bridge
+	_l10n = p_l10n if p_l10n else GDSL10n.new()
 	_bridge.analysis_completed.connect(_on_data_changed)
 	_bridge.project_analysis_completed.connect(_on_data_changed)
 	_call_view = GDSCallGraphView.new()
@@ -41,24 +43,24 @@ func _build_ui() -> void:
 	add_child(toolbar)
 	# Scope 切换
 	var scope_box = OptionButton.new()
-	scope_box.add_item("Scope: Current File", 0)
-	scope_box.add_item("Scope: Project", 1)
+	scope_box.add_item(_l10n.t("scope.current_file"), 0)
+	scope_box.add_item(_l10n.t("scope.project"), 1)
 	scope_box.item_selected.connect(func(i): _scope = i; _rebuild())
 	toolbar.add_child(scope_box)
 	# Graph 类型切换
 	var kind_box = OptionButton.new()
-	kind_box.add_item("Graph: Call", 0)
-	kind_box.add_item("Graph: Signal", 1)
+	kind_box.add_item(_l10n.t("graph.call"), 0)
+	kind_box.add_item(_l10n.t("graph.signal"), 1)
 	kind_box.item_selected.connect(func(i): _graph_kind = i; _rebuild())
 	toolbar.add_child(kind_box)
 	# Re-layout
 	var relayout = Button.new()
-	relayout.text = "Re-layout"
+	relayout.text = _l10n.t("btn.relayout")
 	relayout.pressed.connect(_on_relayout)
 	toolbar.add_child(relayout)
 	# Min-degree 筛选
 	var thresh_label = Label.new()
-	thresh_label.text = "Min degree:"
+	thresh_label.text = _l10n.t("label.min_degree")
 	toolbar.add_child(thresh_label)
 	var thresh_box = SpinBox.new()
 	thresh_box.min_value = 0
@@ -68,7 +70,7 @@ func _build_ui() -> void:
 	toolbar.add_child(thresh_box)
 	# Export JSON 按钮
 	var export_btn = Button.new()
-	export_btn.text = "Export JSON"
+	export_btn.text = _l10n.t("btn.export_json")
 	export_btn.pressed.connect(_on_export)
 	toolbar.add_child(export_btn)
 	# 图例（按当前视图动态填充，见 _refresh_legend）
@@ -98,24 +100,24 @@ func _refresh_legend() -> void:
 		# 项目级
 		if _graph_kind == 1:
 			# 项目信号图：emit/connect/both 边
-			_add_legend_chip(_legend, "■ emit", Color.RED)
-			_add_legend_chip(_legend, "■ connect", Color.DODGER_BLUE)
-			_add_legend_chip(_legend, "■ emit+connect", Color.MEDIUM_PURPLE)
+			_add_legend_chip(_legend, _l10n.t("legend.emit"), Color.RED)
+			_add_legend_chip(_legend, _l10n.t("legend.connect"), Color.DODGER_BLUE)
+			_add_legend_chip(_legend, _l10n.t("legend.emit_connect"), Color.MEDIUM_PURPLE)
 		else:
 			# 项目调用图：文件耦合（枢纽=高耦合文件）
-			_add_legend_chip(_legend, "▲ 高耦合文件", Color.ORANGE_RED)
+			_add_legend_chip(_legend, _l10n.t("legend.high_coupling"), Color.ORANGE_RED)
 	else:
 		# 单文件
 		if _graph_kind == 1:
 			# 信号图：emit/connect 边 + 节点标记
-			_add_legend_chip(_legend, "■ emit", Color.RED)
-			_add_legend_chip(_legend, "■ connect", Color.DODGER_BLUE)
-			_add_legend_chip(_legend, "▶ 入口", Color.LIME_GREEN)
-			_add_legend_chip(_legend, "● 枢纽", Color.ORANGE_RED)
+			_add_legend_chip(_legend, _l10n.t("legend.emit"), Color.RED)
+			_add_legend_chip(_legend, _l10n.t("legend.connect"), Color.DODGER_BLUE)
+			_add_legend_chip(_legend, _l10n.t("legend.entry"), Color.LIME_GREEN)
+			_add_legend_chip(_legend, _l10n.t("legend.hub"), Color.ORANGE_RED)
 		else:
 			# 调用图：仅节点标记（边未按 call_type 着色）
-			_add_legend_chip(_legend, "▶ 入口函数", Color.LIME_GREEN)
-			_add_legend_chip(_legend, "● 枢纽(度≥5)", Color.ORANGE_RED)
+			_add_legend_chip(_legend, _l10n.t("legend.entry"), Color.LIME_GREEN)
+			_add_legend_chip(_legend, _l10n.t("legend.hub"), Color.ORANGE_RED)
 
 func _on_data_changed(_arg = null) -> void:
 	_rebuild()
@@ -193,7 +195,7 @@ func _center_view() -> void:
 
 func _on_export() -> void:
 	var dialog = FileDialog.new()
-	dialog.title = "Export Code Graph"
+	dialog.title = _l10n.t("dialog.export_title")
 	dialog.file_mode = FileDialog.FILE_MODE_SAVE_FILE
 	dialog.add_filter("*.json", "JSON")
 	dialog.access = FileDialog.ACCESS_FILESYSTEM
@@ -208,8 +210,8 @@ func _on_export_path(p_path: String) -> void:
 	if result and result.files.size() > 0:
 		var err = result.export_json(p_path)
 		if err == OK:
-			print("[GDScriptUtil] Code graph exported to: %s" % p_path)
+			print("[GDScriptUtil] " + _l10n.t("msg.export_ok") % p_path)
 		else:
-			push_warning("[GDScriptUtil] Export failed: error %d" % err)
+			push_warning("[GDScriptUtil] " + _l10n.t("msg.export_fail") % err)
 	else:
-		push_warning("[GDScriptUtil] No project data to export. Enable scan first.")
+		push_warning("[GDScriptUtil] " + _l10n.t("msg.export_no_data"))
