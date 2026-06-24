@@ -930,6 +930,24 @@ func _parse_expression(p_level: int = 0):
     return left
 
 
+# 对 f-string {expr} 的文本创建子 tokenizer+parser 解析成表达式节点
+func _parse_fstring_expr(p_expr_text: String):
+	if p_expr_text == "":
+		return null
+	var sub_tokenizer = GDScriptTokenizer.new()
+	var sub_tokens = sub_tokenizer.tokenize(p_expr_text)
+	var sub_parser = GDScriptParser.new()
+	var sub_ast = sub_parser.parse(sub_tokens)
+	if sub_parser.error != "" or sub_ast == null:
+		return null  # 解析失败 → 优雅降级（保留为文本）
+	# parse() 返回 ClassNode，表达式语句在 members[0]
+	if sub_ast.members.size() > 0:
+		var member = sub_ast.members[0]
+		if member is GDScriptToken.ExpressionStatementNode:
+			return member.expression  # 提取表达式
+	return null
+
+
 func _parse_atom():
     var t = _peek()
     if t == null:
