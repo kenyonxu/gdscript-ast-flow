@@ -12,6 +12,25 @@ A Godot 4.7 GDScript AST parser + logic flow analysis tool. Integrated as an Edi
 
 ---
 
+## What Can It Do for You?
+
+### 🎮 Game Developers
+
+- **Refactor with confidence** — See every caller before renaming a function. Know what will break.
+- **Debug signal spaghetti** — Where is `health_changed` actually emitted? Who connected to it? Signal flow panel traces the entire chain.
+- **Track variable flow** — "When did this value change?" Def-Use panel lists every read and write site.
+- **Understand inherited code** — Drop into someone else's project, run a project scan, and build a mental model from the call graph.
+- **Export for AI consumption** — One-click CodeGraph JSON export. Let Claude or other AI read your code structure directly.
+
+### 🔌 Plugin Developers
+
+- **Analyze any GDScript project** — Use as the analysis backend for your own plugin. Read sources, run the pipeline, get structured results.
+- **Build visual programming tools** — Auto-generate blueprint nodes and connections from call graphs.
+- **Auto-generate documentation** — Walk function lists and call relationships to output API docs.
+- **Cross-file dependency analysis** — Track class_name references to understand module coupling in large plugins or frameworks.
+
+---
+
 ## Features
 
 ### Three-Phase Analysis Pipeline
