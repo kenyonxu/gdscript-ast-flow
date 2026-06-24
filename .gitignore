@@ -6,5 +6,23 @@
 /addons/limboai/
 /demo/
 
+# 导出产物
 codegraph.json
-graphify-out/cache/
+
+# 个人开发环境
+.claude/
+.superpowers/
+.swarm/
+.vscode/
+
+# AI 代理指令（非用户面）
+CLAUDE.md
+
+# 内部开发文档
+docs/superpowers/
+
+# 知识图谱产物
+graphify-out/
+
+# RuFlo 数据
+ruvector.db
