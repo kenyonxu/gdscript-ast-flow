@@ -19,3 +19,15 @@ var target_file: String = ""       # 目标类所在文件
 var target_class: String = ""      # 目标类名
 var target_symbol: String = ""     # 目标方法/信号名
 var line: int = 0
+
+const KIND_NAMES := ["CALL", "SIGNAL_EMIT", "SIGNAL_CONNECT", "INSTANCE", "EXTENDS"]
+
+func to_dict() -> Dictionary:
+	return {
+		"source_file": source_file,
+		"target_file": target_file,
+		"target_class": target_class,
+		"target_symbol": target_symbol,
+		"kind": KIND_NAMES[kind] if kind >= 0 and kind < KIND_NAMES.size() else "UNKNOWN",
+		"line": line,
+	}
