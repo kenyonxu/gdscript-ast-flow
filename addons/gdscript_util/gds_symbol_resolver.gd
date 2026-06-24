@@ -178,6 +178,12 @@ func _resolve_expression(p_expr, p_scope: GDScriptSymbolTable, p_current_functio
 	elif p_expr is GDScriptToken.PreloadNode:
 		if result.preloads.find(p_expr.path) == -1:
 			result.preloads.append(p_expr.path)
+
+	elif p_expr is GDScriptToken.FormattedStringNode:
+		# f-string: 递归解析每个 {expr} 段
+		for seg in p_expr.segments:
+			if seg.get("type", "") == "expr" and seg.get("node", null) != null:
+				_resolve_expression(seg.node, p_scope, p_current_function, p_lambda_node)
 	elif p_expr is GDScriptToken.AssignmentNode:
 		_resolve_assignment(p_expr, p_scope, p_current_function)
 
