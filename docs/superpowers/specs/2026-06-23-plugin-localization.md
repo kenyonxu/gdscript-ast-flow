@@ -41,6 +41,8 @@ TranslationServer
 - ❌ 完整翻译所有字符串（先做框架 + 核心路径，逐步覆盖）
 - ❌ 运行时动态切换（跟随编辑器语言，重启生效）
 - ❌ 翻译分析结果（AST 节点名/函数名不翻译）
+- ❌ JSON key 翻译 — 导出的 CodeGraph JSON 中所有 key（函数名、节点名等）均为原始标识符，不受 UI 语言影响
+- ❌ Output 日志翻译 — 编辑器 Output 面板的调试/错误日志保留英文，仅面向用户的 UI 字符串走翻译系统
 
 ## 四、架构
 
@@ -123,9 +125,9 @@ keys,en
 "legend.connect","■ connect"
 "legend.entry","▶ Entry function"
 "legend.hub","● Hub (degree≥5)"
-"panel.no_script","No script open"
-"panel.empty","Empty script"
-"panel.parse_error","Parse error: %s"
+"msg.no_script","No script open"
+"msg.empty_script","Empty script"
+"msg.parse_error","Parse error: %s"
 ```
 
 `gdscript_util.zh_CN.csv`：
@@ -147,9 +149,9 @@ keys,zh_CN
 "legend.connect","■ 连接"
 "legend.entry","▶ 入口函数"
 "legend.hub","● 枢纽(度≥5)"
-"panel.no_script","没有打开的脚本"
-"panel.empty","空脚本"
-"panel.parse_error","解析错误: %s"
+"msg.no_script","没有打开的脚本"
+"msg.empty_script","空脚本"
+"msg.parse_error","解析错误: %s"
 ```
 
 ### 4.3 使用方式
@@ -176,12 +178,15 @@ _tab_bar.add_tab(_l10n.t("tab.call_graph"))
 
 | 优先级 | 覆盖 | 示例 |
 |--------|------|------|
-| **P0** | Tab 标题、按钮文字 | Call Graph / Summary / Rebuild / Re-layout |
+| **P0** | Tab 标题、按钮文字 | Call Graph / Summary / Rebuild / Re-layout / Export JSON |
 | **P0** | 状态提示 | Scan ON/OFF / No script |
+| **P0** | 对话框标题、导出日志 | Export Code Graph / Export OK / Export failed |
 | **P1** | 图例 | emit / connect / Entry / Hub |
 | **P1** | 面板标题 | Analysis / Min degree |
 | **P2** | 错误消息 | Parse error / File not found |
+| **P2** | graph 节点副文本 | ref / functions / signals（节点标签/提示） |
 | **不做** | 技术术语 | AST 节点名、GDScript 关键字、函数名 |
+| **不做** | JSON key | 导出 JSON 中所有标识符保持原始值，不受语言影响 |
 
 ## 五、交付物
 
