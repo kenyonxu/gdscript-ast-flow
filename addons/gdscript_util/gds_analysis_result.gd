@@ -82,3 +82,70 @@ func get_dependency_tree() -> Dictionary:
 
 func add_error(p_msg: String):
 	errors.append(p_msg)
+
+
+# ---- 序列化 ----
+
+const ENTRY_METHODS := preload("res://addons/gdscript_util/editor/gds_entry_methods.gd")
+
+func to_dict() -> Dictionary:
+	var funcs: Array = []
+	for fn in get_all_functions():
+		funcs.append(_function_to_dict(fn))
+	var sigs: Array = []
+	for sig in get_all_signals():
+		sigs.append(_signal_to_dict(sig))
+	var call_edges: Array = []
+	if call_graph:
+		for edge in call_graph.edges:
+			call_edges.append({
+				"caller": edge.caller,
+				"callee": edge.callee,
+				"type": _call_type_str(edge.call_type),
+				"line": edge.site_line,
+			})
+	return {
+		"class_name": classname_id,
+		"extends": extends_path,
+		"functions": funcs,
+		"signals": sigs,
+		"call_edges": call_edges,
+		"errors": errors,
+	}
+
+func _function_to_dict(p_fn) -> Dictionary:
+	var params: Array = []
+	for p in p_fn.params:
+		params.append({"name": p.name, "type": _type_str(p.datatype)})
+	return {
+		"name": p_fn.name,
+		"line": p_fn.line,
+		"params": params,
+		"return_type": _type_str(p_fn.return_type),
+		"is_entry": ENTRY_METHODS.is_entry(p_fn.name),
+		"is_static": p_fn.is_static,
+		"in_degree": call_in_degree.get(p_fn.name, 0),
+		"out_degree": call_out_degree.get(p_fn.name, 0),
+	}
+
+func _signal_to_dict(p_sig) -> Dictionary:
+	var params: Array = []
+	for p in p_sig.params:
+		params.append(_type_str(p.datatype))
+	var info = signal_graph.get_signal_flow(p_sig.name) if signal_graph else null
+	return {
+		"name": p_sig.name,
+		"line": p_sig.line,
+		"params": params,
+		"emit_count": info.emit_sites.size() if info else 0,
+		"connect_count": info.connect_sites.size() if info else 0,
+	}
+
+static func _type_str(p_type) -> String:
+	if p_type == null:
+		return ""
+	return p_type.type_name if "type_name" in p_type else ""
+
+static func _call_type_str(p_type: int) -> String:
+	const NAMES := ["SELF", "SUPER", "EXTERNAL", "CONNECT", "SIGNAL_CONNECT", "LAMBDA", "STATIC", "EMIT"]
+	return NAMES[p_type] if p_type >= 0 and p_type < NAMES.size() else "UNKNOWN"
