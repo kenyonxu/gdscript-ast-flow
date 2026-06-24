@@ -8,7 +8,7 @@
 
 Godot 4.7 GDScript AST 解析 + 逻辑流分析工具。以 EditorPlugin 形式集成，支持信号连接追踪、方法调用图、变量定义-使用链分析、跨文件引用。
 
-**作者**：v3.4 原版 あるる / きのもと 結衣 @arlez80 · v2.0 重写 kenyonxu
+**作者**：原版 あるる / きのもと 結衣 @arlez80（Godot 3.x 字节码解析器） · 本版 kenyonxu（Godot 4.7 AST 重写）
 
 ---
 
