@@ -3,14 +3,17 @@ extends EditorPlugin
 
 var analysis_cache: Dictionary = {}  # String(path) → GDScriptAnalysisResult
 var _phase3_bootstrap: GDSEditorBootstrap = null
+var _l10n: GDSL10n = null
 
 
 func _enter_tree():
 	add_tool_menu_item("GDScript Analysis – Parse Current", _on_parse_current)
 	# Phase 3: 编辑器面板（含 resource_saved 自动分析，由 bootstrap 统一管理）
 	# 注意: 不再在 plugin.gd 单独连接 resource_saved，避免与 bootstrap 双重触发
+	_l10n = GDSL10n.new()
+	_l10n.setup()
 	_phase3_bootstrap = GDSEditorBootstrap.new()
-	_phase3_bootstrap.setup(self)
+	_phase3_bootstrap.setup(self, _l10n)
 	# 注册扫描配置到 Project Settings
 	_register_scan_settings()
 	print("[GDScriptUtil v3.0] Plugin loaded — Phase 3: Editor Integration")

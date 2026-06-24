@@ -6,6 +6,7 @@ class_name GDSEditorBootstrap
 extends RefCounted
 
 var _plugin: EditorPlugin = null
+var _l10n: GDSL10n = null
 var _bridge: GDSAnalysisBridge = null
 var _main_panel: GDSAnalysisMainPanel = null
 var _analysis_queued: String = ""  # 待分析路径（非空表示有待执行）
@@ -14,13 +15,14 @@ var _graph_main_screen: GDSGraphMainScreen = null  # Phase 3.3: 主屏 tab
 var _focus_timer: Timer = null              # 轮询当前脚本焦点
 var _last_script_path: String = ""          # 上次分析的脚本路径（用于检测切换）
 
-func setup(p_plugin: EditorPlugin) -> void:
+func setup(p_plugin: EditorPlugin, p_l10n: GDSL10n = null) -> void:
 	_plugin = p_plugin
+	_l10n = p_l10n if p_l10n else GDSL10n.new()
 	_bridge = GDSAnalysisBridge.new()
 
 	# 底部面板 — 含 4 个子 tab（Summary / Call Graph / Signal Flow / Def-Use）
 	_main_panel = GDSAnalysisMainPanel.new()
-	_main_panel.setup(_bridge)
+	_main_panel.setup(_bridge, _l10n)
 	_plugin.add_control_to_bottom_panel(_main_panel, "GDScript Analysis")
 
 	_plugin.resource_saved.connect(_on_resource_saved)
@@ -33,7 +35,7 @@ func setup(p_plugin: EditorPlugin) -> void:
 
 	# Phase 3.3: 注册主屏 tab
 	_graph_main_screen = GDSGraphMainScreen.new()
-	_graph_main_screen.setup(_bridge)
+	_graph_main_screen.setup(_bridge, _l10n)
 	EditorInterface.get_editor_main_screen().add_child(_graph_main_screen)
 	_graph_main_screen.visible = false  # 默认隐藏，切到 Analysis tab 才显示
 
