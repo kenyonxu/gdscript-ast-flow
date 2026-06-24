@@ -1,6 +1,10 @@
 # GDScript AST Flow
 
 [![MIT License](https://img.shields.io/badge/license-MIT-green)](LICENSE.txt)
+[![爱发电](https://img.shields.io/badge/赞助-爱发电-ff69b4?style=flat-square)](https://afdian.com/a/kai2045)
+[![PayPal](https://img.shields.io/badge/Donate-PayPal-00457C?style=flat-square&logo=paypal)](https://www.paypal.com/paypalme/kai2045)
+
+📖 **Docs**：[中文](readme.md) · [用户指南](addons/gdscript_util/docs/user_guide_cn.md) · [User Guide](addons/gdscript_util/docs/user_guide_en.md) · [开发者指南](addons/gdscript_util/docs/dev_guide_cn.md) · [Developer Guide](addons/gdscript_util/docs/dev_guide_en.md)
 
 A Godot 4.7 GDScript AST parser + logic flow analysis tool. Integrated as an EditorPlugin, supporting signal connection tracing, method call graphs, variable def-use chain analysis, and cross-file reference tracking.
 

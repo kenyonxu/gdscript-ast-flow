@@ -1,6 +1,10 @@
 # GDScript AST Flow
 
 [![MIT License](https://img.shields.io/badge/license-MIT-green)](LICENSE.txt)
+[![爱发电](https://img.shields.io/badge/赞助-爱发电-ff69b4?style=flat-square)](https://afdian.com/a/kai2045)
+[![PayPal](https://img.shields.io/badge/Donate-PayPal-00457C?style=flat-square&logo=paypal)](https://www.paypal.com/paypalme/kai2045)
+
+📖 **文档**：[English](README.en.md) · [用户指南](addons/gdscript_util/docs/user_guide_cn.md) · [User Guide](addons/gdscript_util/docs/user_guide_en.md) · [开发者指南](addons/gdscript_util/docs/dev_guide_cn.md) · [Developer Guide](addons/gdscript_util/docs/dev_guide_en.md)
 
 Godot 4.7 GDScript AST 解析 + 逻辑流分析工具。以 EditorPlugin 形式集成，支持信号连接追踪、方法调用图、变量定义-使用链分析、跨文件引用。
 
