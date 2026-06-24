@@ -173,5 +173,275 @@
     "mtime": 1782129664.7062433,
     "ast_hash": "43377eae7ff1ebf9f1fb4862475e6e22",
     "semantic_hash": ""
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\.claude\\settings.json": {
+    "mtime": 1782179464.534779,
+    "ast_hash": "fadf0f14f7db108885ebc83cdbf69fed",
+    "semantic_hash": "fadf0f14f7db108885ebc83cdbf69fed"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\.graphify_detect.json": {
+    "mtime": 1782279186.3476412,
+    "ast_hash": "d3334eb254049534e342d6378f9ccef6",
+    "semantic_hash": "d3334eb254049534e342d6378f9ccef6"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\.swarm\\schema.sql": {
+    "mtime": 1782132150.8997629,
+    "ast_hash": "d1b8f7f6f0b83856fd92c90ddb0bceb1",
+    "semantic_hash": "d1b8f7f6f0b83856fd92c90ddb0bceb1"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\.vscode\\settings.json": {
+    "mtime": 1781937645.4740248,
+    "ast_hash": "71d033ef045256d917bb7545f592837f",
+    "semantic_hash": "71d033ef045256d917bb7545f592837f"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\_graphify_step2.py": {
+    "mtime": 1782279181.7730708,
+    "ast_hash": "a379d3fcf2dab8ecfdd494aab7969dfa",
+    "semantic_hash": "a379d3fcf2dab8ecfdd494aab7969dfa"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\.superpowers\\brainstorm\\2916271-1781932629\\approaches.html": {
+    "mtime": 1782179464.5367837,
+    "ast_hash": "cfb2aa3a6b68e67e1cc32379128ca63e",
+    "semantic_hash": "cfb2aa3a6b68e67e1cc32379128ca63e"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\.superpowers\\brainstorm\\2916271-1781932629\\architecture-overview.html": {
+    "mtime": 1782179464.5367837,
+    "ast_hash": "752309935557445b161628d0896e5d08",
+    "semantic_hash": "752309935557445b161628d0896e5d08"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\.superpowers\\brainstorm\\2916271-1781932629\\level.html": {
+    "mtime": 1782179464.5367837,
+    "ast_hash": "f1340c97c23d2daa5bb22154c636b442",
+    "semantic_hash": "f1340c97c23d2daa5bb22154c636b442"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\.superpowers\\brainstorm\\2916271-1781932629\\parser-design-1.html": {
+    "mtime": 1782179464.5367837,
+    "ast_hash": "8bf7bbf7a914028acff7e579fb70d703",
+    "semantic_hash": "8bf7bbf7a914028acff7e579fb70d703"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\.superpowers\\brainstorm\\2916271-1781932629\\parser-design-2.html": {
+    "mtime": 1782179464.5382864,
+    "ast_hash": "ec2f1f275ad816be5793f85c61cffd0d",
+    "semantic_hash": "ec2f1f275ad816be5793f85c61cffd0d"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\.superpowers\\brainstorm\\2916271-1781932629\\result-plugin.html": {
+    "mtime": 1782179464.5382864,
+    "ast_hash": "2f86b45cf9d47b6387ec1d71295fe5b5",
+    "semantic_hash": "2f86b45cf9d47b6387ec1d71295fe5b5"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\.superpowers\\brainstorm\\2916271-1781932629\\scope.html": {
+    "mtime": 1782179464.5382864,
+    "ast_hash": "c7d239a32b860f8300d1014d02603706",
+    "semantic_hash": "c7d239a32b860f8300d1014d02603706"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\.superpowers\\brainstorm\\2916271-1781932629\\semantic.html": {
+    "mtime": 1782179464.538878,
+    "ast_hash": "7c49708eb3bf6a01ab15620ecbfea188",
+    "semantic_hash": "7c49708eb3bf6a01ab15620ecbfea188"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\.superpowers\\brainstorm\\2916271-1781932629\\symbol-resolver.html": {
+    "mtime": 1782179464.538878,
+    "ast_hash": "949d93bd868e5066a1bfbdda1f2d3e0e",
+    "semantic_hash": "949d93bd868e5066a1bfbdda1f2d3e0e"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\.superpowers\\brainstorm\\2916271-1781932629\\tokenizer-design.html": {
+    "mtime": 1782179464.538878,
+    "ast_hash": "ee38c7aae824326bd7b70569037a76fa",
+    "semantic_hash": "ee38c7aae824326bd7b70569037a76fa"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\.superpowers\\brainstorm\\2916271-1781932629\\waiting.html": {
+    "mtime": 1782179464.538878,
+    "ast_hash": "94031159612aac471e470df93d16e55b",
+    "semantic_hash": "94031159612aac471e470df93d16e55b"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\CLAUDE.md": {
+    "mtime": 1781937020.5207424,
+    "ast_hash": "ba9a3c14c3a4366c68e0a38142a8c789",
+    "semantic_hash": "ba9a3c14c3a4366c68e0a38142a8c789"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\LICENSE.txt": {
+    "mtime": 1781937020.5207424,
+    "ast_hash": "31d3a616e0b5a91a6ccc255d357249b1",
+    "semantic_hash": "31d3a616e0b5a91a6ccc255d357249b1"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\decisions\\0001-defer-csharp-rewrite.md": {
+    "mtime": 1782108017.0289047,
+    "ast_hash": "604f89769c5aec1346313664fd68f30d",
+    "semantic_hash": "604f89769c5aec1346313664fd68f30d"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\decisions\\0002-performance-baseline.md": {
+    "mtime": 1782191115.6141863,
+    "ast_hash": "4b436881781d1847c42f7e3af7cb2a4b",
+    "semantic_hash": "4b436881781d1847c42f7e3af7cb2a4b"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\plans\\2026-06-20-phase1-gdscript-parser.md": {
+    "mtime": 1781944326.1980586,
+    "ast_hash": "8cb2f50e7b00343e7f47b418585a8ade",
+    "semantic_hash": "8cb2f50e7b00343e7f47b418585a8ade"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\plans\\2026-06-20-phase2-extract-inner-classes.md": {
+    "mtime": 1781954619.8651004,
+    "ast_hash": "15506f9ea9fb9d09a12b2fcb1991a545",
+    "semantic_hash": "15506f9ea9fb9d09a12b2fcb1991a545"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\plans\\2026-06-20-phase2-symbol-resolver.md": {
+    "mtime": 1781960643.6397812,
+    "ast_hash": "b5ee7e2b06b5ac10651584a2de056d19",
+    "semantic_hash": "b5ee7e2b06b5ac10651584a2de056d19"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\plans\\2026-06-20-phase3-editor-integration.md": {
+    "mtime": 1782102479.715037,
+    "ast_hash": "f1345f15e1c299b05fbb05f79bfcc54f",
+    "semantic_hash": "f1345f15e1c299b05fbb05f79bfcc54f"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\plans\\2026-06-21-phase3-2-cross-file-analysis.md": {
+    "mtime": 1782107306.3350818,
+    "ast_hash": "421a7344f453b12fbc14f2808b499b26",
+    "semantic_hash": "421a7344f453b12fbc14f2808b499b26"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\plans\\2026-06-21-phase3-3-graph-visualization.md": {
+    "mtime": 1782127321.3280754,
+    "ast_hash": "05f1e1edde87d72fd92e830064b03bc9",
+    "semantic_hash": "05f1e1edde87d72fd92e830064b03bc9"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\plans\\2026-06-22-builtin-function-filter.md": {
+    "mtime": 1782186534.1941645,
+    "ast_hash": "647137affdc55689277ff250c305389e",
+    "semantic_hash": "647137affdc55689277ff250c305389e"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\plans\\2026-06-22-graph-usability-enhancement.md": {
+    "mtime": 1782140528.4162512,
+    "ast_hash": "10fa8d8a347c94e2f95506dd21d3b985",
+    "semantic_hash": "10fa8d8a347c94e2f95506dd21d3b985"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\plans\\2026-06-22-large-graph-virtualization.md": {
+    "mtime": 1782186534.293068,
+    "ast_hash": "c8191e6f128dc90d83d9d9c913252c50",
+    "semantic_hash": "c8191e6f128dc90d83d9d9c913252c50"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\plans\\2026-06-22-type-inference.md": {
+    "mtime": 1782186534.24425,
+    "ast_hash": "8e1524ad55a5d591d8759172f613179b",
+    "semantic_hash": "8e1524ad55a5d591d8759172f613179b"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\plans\\2026-06-23-ast-line-numbers.md": {
+    "mtime": 1782270618.181599,
+    "ast_hash": "1b7f215fa2f391625a0e33b5f0124fb0",
+    "semantic_hash": "1b7f215fa2f391625a0e33b5f0124fb0"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\plans\\2026-06-23-codegraph-export.md": {
+    "mtime": 1782225230.406925,
+    "ast_hash": "850e8acf6fd208500b64b6a5c6a768fa",
+    "semantic_hash": "850e8acf6fd208500b64b6a5c6a768fa"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\plans\\2026-06-23-configurable-scan.md": {
+    "mtime": 1782223257.832201,
+    "ast_hash": "f0c2b3abd379295fac8ef11e34b6df74",
+    "semantic_hash": "f0c2b3abd379295fac8ef11e34b6df74"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\plans\\2026-06-23-fstring-parsing.md": {
+    "mtime": 1782269747.2921824,
+    "ast_hash": "7249c1e354f266cae7622119e7a8f8f1",
+    "semantic_hash": "7249c1e354f266cae7622119e7a8f8f1"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\plans\\2026-06-23-plugin-localization.md": {
+    "mtime": 1782278690.603144,
+    "ast_hash": "8c6316e94d5bccdc515455ad753d3cb8",
+    "semantic_hash": "8c6316e94d5bccdc515455ad753d3cb8"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\plans\\2026-06-23-scan-settings-project-settings.md": {
+    "mtime": 1782276998.652491,
+    "ast_hash": "8fcfa174f4570d63b45a679c55cdf171",
+    "semantic_hash": "8fcfa174f4570d63b45a679c55cdf171"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\specs\\2026-06-20-godot47-gdscript-parser-design.md": {
+    "mtime": 1781944342.5087466,
+    "ast_hash": "ad544a39a2592c3773c168a06ca0877b",
+    "semantic_hash": "ad544a39a2592c3773c168a06ca0877b"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\specs\\2026-06-20-phase2-extract-inner-classes.md": {
+    "mtime": 1781954543.574125,
+    "ast_hash": "29c3b229d9ef9b9cdadf7978a0f98ffb",
+    "semantic_hash": "29c3b229d9ef9b9cdadf7978a0f98ffb"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\specs\\2026-06-20-phase2-symbol-resolver-design.md": {
+    "mtime": 1781960628.7825713,
+    "ast_hash": "d8b545b5d38aa5e72338642d26797ec8",
+    "semantic_hash": "d8b545b5d38aa5e72338642d26797ec8"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\specs\\2026-06-20-phase3-editor-integration-design.md": {
+    "mtime": 1782102449.9639795,
+    "ast_hash": "adf6eb86563ba53012109adb2dce0887",
+    "semantic_hash": "adf6eb86563ba53012109adb2dce0887"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\specs\\2026-06-21-phase3-2-cross-file-analysis.md": {
+    "mtime": 1782107284.263153,
+    "ast_hash": "916c86d2bfb24ae17f4cb1db6229a917",
+    "semantic_hash": "916c86d2bfb24ae17f4cb1db6229a917"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\specs\\2026-06-21-phase3-3-graph-visualization.md": {
+    "mtime": 1782127303.962213,
+    "ast_hash": "6a1f86d171b2738fb1d1844647a57e87",
+    "semantic_hash": "6a1f86d171b2738fb1d1844647a57e87"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\specs\\2026-06-22-builtin-function-filter.md": {
+    "mtime": 1782186893.5175855,
+    "ast_hash": "7f8deab1d509a1152b72445d62927897",
+    "semantic_hash": "7f8deab1d509a1152b72445d62927897"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\specs\\2026-06-22-graph-usability-enhancement.md": {
+    "mtime": 1782187472.424602,
+    "ast_hash": "187545ef970db7c03c68218312a0d520",
+    "semantic_hash": "187545ef970db7c03c68218312a0d520"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\specs\\2026-06-22-large-graph-virtualization.md": {
+    "mtime": 1782186893.5629306,
+    "ast_hash": "b2d58d8332ad1711cc33f2bd7aafa9ab",
+    "semantic_hash": "b2d58d8332ad1711cc33f2bd7aafa9ab"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\specs\\2026-06-22-type-inference.md": {
+    "mtime": 1782186893.54136,
+    "ast_hash": "e9af39123cb1f8b8a88a4da2a374f39c",
+    "semantic_hash": "e9af39123cb1f8b8a88a4da2a374f39c"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\specs\\2026-06-23-ast-line-numbers.md": {
+    "mtime": 1782270569.9871192,
+    "ast_hash": "1817caf1928cbad8e87983624026e3e2",
+    "semantic_hash": "1817caf1928cbad8e87983624026e3e2"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\specs\\2026-06-23-codegraph-export.md": {
+    "mtime": 1782225171.9396083,
+    "ast_hash": "1b7923c9b701f4d08a74ee31a957c2a5",
+    "semantic_hash": "1b7923c9b701f4d08a74ee31a957c2a5"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\specs\\2026-06-23-configurable-scan.md": {
+    "mtime": 1782223257.8574085,
+    "ast_hash": "f8895cab6932cf39f03fcfeb57f6ec59",
+    "semantic_hash": "f8895cab6932cf39f03fcfeb57f6ec59"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\specs\\2026-06-23-fstring-parsing.md": {
+    "mtime": 1782269747.3193011,
+    "ast_hash": "0935b57691ce3ddc1c627b5bac4ff2a1",
+    "semantic_hash": "0935b57691ce3ddc1c627b5bac4ff2a1"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\specs\\2026-06-23-plugin-localization.md": {
+    "mtime": 1782278678.0717149,
+    "ast_hash": "6cd75768adb095a19d0c0304cbd795cd",
+    "semantic_hash": "6cd75768adb095a19d0c0304cbd795cd"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\docs\\superpowers\\specs\\2026-06-23-scan-settings-project-settings.md": {
+    "mtime": 1782276998.652491,
+    "ast_hash": "f5560cabddd1721dc369a999534717a4",
+    "semantic_hash": "f5560cabddd1721dc369a999534717a4"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\readme.md": {
+    "mtime": 1781937020.5262947,
+    "ast_hash": "a2069746a2878249e9e078946b4ec220",
+    "semantic_hash": "a2069746a2878249e9e078946b4ec220"
+  },
+  "E:\\GitHub\\gdscript-ast-flow\\icon.svg": {
+    "mtime": 1781937556.4651222,
+    "ast_hash": "a16f2eed1b4496c4abf03d329708ba09",
+    "semantic_hash": "a16f2eed1b4496c4abf03d329708ba09"
   }
 }
