@@ -1,39 +1,40 @@
 # addons/gdscript_util/editor/gds_scan_config.gd
-# 项目扫描配置读写 — 存储在 ProjectSettings，持久化跨编辑器重启
+# 项目扫描配置 — 存储在 ProjectSettings (PackedStringArray)，原生 Project Settings 编辑
 
 class_name GDSScanConfig
 extends RefCounted
 
 const SETTING_ENABLED := "gdscript_util/scan/enabled"
-const SETTING_INCLUDE := "gdscript_util/scan/include_dirs"
-const SETTING_EXCLUDE := "gdscript_util/scan/exclude_dirs"
+const SETTING_INCLUDE := "gdscript_util/scan/include"
+const SETTING_EXCLUDE := "gdscript_util/scan/exclude"
 
-const DEFAULT_EXCLUDE := ["res://addons", "res://.godot", "res://.git"]
+const DEFAULT_EXCLUDE := PackedStringArray("res://addons", "res://.godot", "res://.git")
 
 static func is_enabled() -> bool:
 	return ProjectSettings.get_setting(SETTING_ENABLED, false)
 
 static func get_include_dirs() -> Array:
-	return ProjectSettings.get_setting(SETTING_INCLUDE, [])
+	var arr: PackedStringArray = ProjectSettings.get_setting(SETTING_INCLUDE, PackedStringArray())
+	return Array(arr)
 
 static func get_exclude_dirs() -> Array:
-	return ProjectSettings.get_setting(SETTING_EXCLUDE, DEFAULT_EXCLUDE)
+	var arr: PackedStringArray = ProjectSettings.get_setting(SETTING_EXCLUDE, DEFAULT_EXCLUDE)
+	return Array(arr)
 
-# Settings 弹窗 Save 调用 — 保存配置 + 自动关闭扫描
-static func save_config(p_include: Array, p_exclude: Array) -> void:
-	ProjectSettings.set_setting(SETTING_INCLUDE, p_include)
-	ProjectSettings.set_setting(SETTING_EXCLUDE, p_exclude)
-	ProjectSettings.set_setting(SETTING_ENABLED, false)
-	# 注册到 ProjectSettings 使其在编辑器 Settings 面板可见
-	if not ProjectSettings.has_setting(SETTING_ENABLED):
-		ProjectSettings.set_initial_value(SETTING_ENABLED, false)
-	ProjectSettings.save()
-
-# Enable 勾选调用 — 显式开启扫描
-static func enable_scan() -> void:
-	ProjectSettings.set_setting(SETTING_ENABLED, true)
-	ProjectSettings.save()
-
-static func disable_scan() -> void:
-	ProjectSettings.set_setting(SETTING_ENABLED, false)
-	ProjectSettings.save()
+# 迁移旧格式（Array<Dictionary> → PackedStringArray）
+static func migrate_if_needed() -> void:
+	# include_dirs → include
+	var old_include = ProjectSettings.get_setting("gdscript_util/scan/include_dirs", null)
+	if old_include != null and old_include is Array and old_include.size() > 0:
+		var new_arr := PackedStringArray()
+		for entry in old_include:
+			var path = entry.get("path", "") if entry is Dictionary else str(entry)
+			if path != "":
+				new_arr.append(path)
+		ProjectSettings.set_setting(SETTING_INCLUDE, new_arr)
+		ProjectSettings.set_setting("gdscript_util/scan/include_dirs", null)
+	# exclude_dirs → exclude
+	var old_exclude = ProjectSettings.get_setting("gdscript_util/scan/exclude_dirs", null)
+	if old_exclude != null and old_exclude is Array and old_exclude.size() > 0:
+		ProjectSettings.set_setting(SETTING_EXCLUDE, PackedStringArray(old_exclude))
+		ProjectSettings.set_setting("gdscript_util/scan/exclude_dirs", null)

@@ -25,6 +25,9 @@ func setup(p_plugin: EditorPlugin) -> void:
 
 	_plugin.resource_saved.connect(_on_resource_saved)
 
+	# 迁移旧格式配置（Array<Dictionary> → PackedStringArray）
+	GDSScanConfig.migrate_if_needed()
+
 	# Phase 3.2: 首次启动 deferred 全量项目分析
 	call_deferred("_initial_project_scan")
 
