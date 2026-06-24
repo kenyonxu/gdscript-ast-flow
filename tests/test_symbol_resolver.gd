@@ -22,6 +22,7 @@ func run_all_tests():
 	test_12_type_infer_new()
 	test_13_type_infer_return()
 	test_14_type_infer_preload()
+	test_15_fstring()
 	print("\n=== All tests completed ===")
 
 
@@ -36,6 +37,16 @@ func resolve(p_source: String) -> GDScriptAnalysisResult:
 	var resolver = GDScriptSymbolResolver.new()
 	var result = resolver.resolve(ast, "")
 	return result
+
+
+# 辅助: 源码 → AST（仅解析，不 resolve）
+func parse(p_source: String) -> GDScriptToken.ClassNode:
+	var tokenizer = GDScriptTokenizer.new()
+	var tokens = tokenizer.tokenize(p_source)
+	var parser = GDScriptParser.new()
+	var ast = parser.parse(tokens)
+	assert(parser.error == "", "Parse error: %s" % parser.error)
+	return ast
 
 
 # 辅助: 从 SymbolTable 查找符号
@@ -316,4 +327,23 @@ func test_14_type_infer_preload():
 	var ast = GDScriptParser.new().parse(tok.tokenize("func _c():\n	var c := preload(\"res://a.gd\")\n"))
 	var full = resolver.resolve(ast, "")
 	assert(full.type_table.get("c", "") == "res://a.gd", "c should be preload path")
+	print("  PASS")
+
+
+# Test 15: f-string 结构化解析
+func test_15_fstring():
+	print("Test 15: f-string parsing...")
+	var source = "var name: String = \"World\"\nvar count: int = 42\nvar msg = f\"Hello, {name}! You have {count} items.\"\n"
+	var ast = parse(source)
+	var v = ast.members[2]  # var msg
+	assert(v is GDScriptToken.VariableNode, "Expected VariableNode for msg")
+	assert(v.initializer is GDScriptToken.FormattedStringNode, "Expected FormattedStringNode")
+	var fs = v.initializer
+	# 至少有 expr 段
+	var has_expr = false
+	for seg in fs.segments:
+		if seg.get("type", "") == "expr":
+			has_expr = true
+			break
+	assert(has_expr, "FormattedStringNode should have at least one expr segment")
 	print("  PASS")
