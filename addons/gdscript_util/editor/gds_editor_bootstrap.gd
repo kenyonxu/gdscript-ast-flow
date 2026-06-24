@@ -95,7 +95,7 @@ func _initial_project_scan() -> void:
 		_bridge.run_project_analysis()
 		print("[GDScriptUtil] Project scan: ON — analyzing...")
 	else:
-		print("[GDScriptUtil] Project scan: OFF. Configure in Analysis tab → Project → Settings.")
+		print("[GDScriptUtil] Project scan: OFF. Configure in Project Settings → GDScript Util → Scan.")
 
 # 焦点跟随: 检测当前脚本编辑器焦点是否变化，变了就触发分析
 func _on_focus_tick() -> void:
