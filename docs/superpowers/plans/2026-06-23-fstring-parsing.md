@@ -29,7 +29,7 @@ tests/
 
 **Files:** Modify: `addons/gdscript_util/gds_ast_nodes.gd`
 
-- [ ] **Step 1: 在 PreloadNode 之后追加**
+- [x] **Step 1: 在 PreloadNode 之后追加**
 
 ```gdscript
 # ---- Phase 3.4: f-string 结构化节点 ----
@@ -38,7 +38,7 @@ class FormattedStringNode:
     var segments: Array = []  # of {"type":"text", "value":String} 或 {"type":"expr", "node":ExpressionNode}
 ```
 
-- [ ] **Step 2: 提交**
+- [x] **Step 2: 提交**
 
 ```bash
 git add addons/gdscript_util/gds_ast_nodes.gd
@@ -51,7 +51,7 @@ git commit -m "feat: FormattedStringNode — structured f-string AST node"
 
 **Files:** Modify: `addons/gdscript_util/gds_parser.gd`
 
-- [ ] **Step 1: 添加 _parse_fstring_expr 方法**
+- [x] **Step 1: 添加 _parse_fstring_expr 方法**
 
 在 `_parse_atom` 之前添加：
 
@@ -74,7 +74,7 @@ func _parse_fstring_expr(p_expr_text: String):
 	return null
 ```
 
-- [ ] **Step 2: 提交**
+- [x] **Step 2: 提交**
 
 ```bash
 git add addons/gdscript_util/gds_parser.gd
@@ -87,7 +87,7 @@ git commit -m "feat: _parse_fstring_expr — sub-tokenizer+parser for {expr} seg
 
 **Files:** Modify: `addons/gdscript_util/gds_parser.gd`
 
-- [ ] **Step 1: 替换 FORMAT_STRING_LITERAL 分支**
+- [x] **Step 1: 替换 FORMAT_STRING_LITERAL 分支**
 
 找到 `_parse_atom` 中的 `FORMAT_STRING_LITERAL` 分支（当前包进 LiteralNode），替换为：
 
@@ -113,7 +113,7 @@ git commit -m "feat: _parse_fstring_expr — sub-tokenizer+parser for {expr} seg
 
 > **注意：** Token 枚举名 `FORMAT_STRING_LITERAL` 需确认与 `gds_ast_nodes.gd` 里一致。如 Token 名有出入，用 `Type.find_key` 确认。
 
-- [ ] **Step 2: 提交**
+- [x] **Step 2: 提交**
 
 ```bash
 git add addons/gdscript_util/gds_parser.gd
@@ -126,7 +126,7 @@ git commit -m "feat: _parse_atom FORMAT_STRING_LITERAL → FormattedStringNode w
 
 **Files:** Modify: `addons/gdscript_util/gds_symbol_resolver.gd`
 
-- [ ] **Step 1: 在 _resolve_expression 的叶子节点分支之前加**
+- [x] **Step 1: 在 _resolve_expression 的叶子节点分支之前加**
 
 找到 `_resolve_expression` 中 `PreloadNode` 分支附近，追加：
 
@@ -138,7 +138,7 @@ git commit -m "feat: _parse_atom FORMAT_STRING_LITERAL → FormattedStringNode w
 				_resolve_expression(seg.node, p_scope, p_current_function, p_lambda_node)
 ```
 
-- [ ] **Step 2: 提交**
+- [x] **Step 2: 提交**
 
 ```bash
 git add addons/gdscript_util/gds_symbol_resolver.gd
@@ -151,7 +151,7 @@ git commit -m "feat: resolver — recurse into FormattedStringNode expr segments
 
 **Files:** Modify: `tests/test_symbol_resolver.gd`
 
-- [ ] **Step 1: 追加 test_15_fstring**
+- [x] **Step 1: 追加 test_15_fstring**
 
 ```gdscript
 func test_15_fstring():
@@ -172,7 +172,7 @@ func test_15_fstring():
 	print("  PASS")
 ```
 
-- [ ] **Step 2: 提交**
+- [x] **Step 2: 提交**
 
 ```bash
 git add tests/test_symbol_resolver.gd
@@ -183,18 +183,18 @@ git commit -m "test: test_15_fstring — verify FormattedStringNode segments"
 
 ## Task 6: 回归 + 验收
 
-- [ ] **Step 1: 运行 test_symbol_resolver.tscn** — Test 1-15 全 PASS
-- [ ] **Step 2: 双击 analysis_demo.gd** — 确认调用图/def-use 不受影响（demo 无 f-string）
-- [ ] **Step 3: 双击 parser_edge_cases.gd** — 确认 f-string 正常解析
-- [ ] **Step 4: 提交（如有调整）**
+- [x] **Step 1: 运行 test_symbol_resolver.tscn** — Test 1-15 全 PASS
+- [x] **Step 2: 双击 analysis_demo.gd** — 确认调用图/def-use 不受影响（demo 无 f-string）
+- [x] **Step 3: 双击 parser_edge_cases.gd** — 确认 f-string 正常解析
+- [x] **Step 4: 提交（如有调整）**
 
 ---
 
 ## 完成检查清单
 
-- [ ] `gds_ast_nodes.gd` — FormattedStringNode
-- [ ] `gds_parser.gd` — _parse_fstring_expr + _parse_atom FORMAT_STRING_LITERAL
-- [ ] `gds_symbol_resolver.gd` — _resolve_expression FormattedStringNode 分支
-- [ ] test_15_fstring — FormattedStringNode segments 断言
-- [ ] Test 1-15 全 PASS
-- [ ] analysis_demo / parser_edge_cases 回归通过
+- [x] `gds_ast_nodes.gd` — FormattedStringNode
+- [x] `gds_parser.gd` — _parse_fstring_expr + _parse_atom FORMAT_STRING_LITERAL
+- [x] `gds_symbol_resolver.gd` — _resolve_expression FormattedStringNode 分支
+- [x] test_15_fstring — FormattedStringNode segments 断言
+- [x] Test 1-15 全 PASS
+- [x] analysis_demo / parser_edge_cases 回归通过

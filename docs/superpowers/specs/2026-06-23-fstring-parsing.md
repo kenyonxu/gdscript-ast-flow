@@ -1,6 +1,6 @@
 # f-string 真解析 设计规范
 
-> 日期: 2026-06-23 | 状态: 设计中 | 依赖: Phase 1 Parser + Tokenizer (已完成 ✅)
+> 日期: 2026-06-23 | 状态: 已完成 ✅ | 依赖: Phase 1 Parser + Tokenizer (已完成 ✅)
 
 ## 一、目标
 
@@ -112,13 +112,13 @@ elif p_expr is GDScriptToken.FormattedStringNode:
 
 ## 六、验收标准
 
-- [ ] `f"Hello, {name}!"` → FormattedStringNode，含 IdentifierNode("name")
-- [ ] `name` 的 READ 被记录到 DefUseChain
-- [ ] `f"{obj.method()}"` → 含 CallNode → 调用图记录 method()
-- [ ] `f"{x + y}"` → 含 BinaryOpNode → def-use 记录 x/y 的 READ
-- [ ] 纯文本段 `f"hello"` → segments 只有 text，无 expr
-- [ ] Phase 1-3 回归测试全过
-- [ ] `{expr}` 解析失败时优雅降级（保留为文本，不崩溃）
+- [x] `f"Hello, {name}!"` → FormattedStringNode，含 IdentifierNode("name")
+- [x] `name` 的 READ 被记录到 DefUseChain
+- [x] `f"{obj.method()}"` → 含 CallNode → 调用图记录 method()
+- [x] `f"{x + y}"` → 含 BinaryOpNode → def-use 记录 x/y 的 READ
+- [x] 纯文本段 `f"hello"` → segments 只有 text，无 expr
+- [x] Phase 1-3 回归测试全过
+- [x] `{expr}` 解析失败时优雅降级（保留为文本，不崩溃）
 
 ## 七、风险
 
