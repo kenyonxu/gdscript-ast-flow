@@ -11,6 +11,8 @@ func _enter_tree():
 	# 注意: 不再在 plugin.gd 单独连接 resource_saved，避免与 bootstrap 双重触发
 	_phase3_bootstrap = GDSEditorBootstrap.new()
 	_phase3_bootstrap.setup(self)
+	# 注册扫描配置到 Project Settings
+	_register_scan_settings()
 	print("[GDScriptUtil v3.0] Plugin loaded — Phase 3: Editor Integration")
 
 
@@ -151,6 +153,23 @@ func _make_visible(p_visible: bool) -> void:
 
 func _get_plugin_icon() -> Texture2D:
 	return null  # 用默认图标
+
+
+func _register_scan_settings() -> void:
+	# enabled
+	if not ProjectSettings.has_setting("gdscript_util/scan/enabled"):
+		ProjectSettings.set_setting("gdscript_util/scan/enabled", false)
+	ProjectSettings.set_initial_value("gdscript_util/scan/enabled", false)
+
+	# include (PackedStringArray)
+	if not ProjectSettings.has_setting("gdscript_util/scan/include"):
+		ProjectSettings.set_setting("gdscript_util/scan/include", PackedStringArray())
+	ProjectSettings.set_initial_value("gdscript_util/scan/include", PackedStringArray())
+
+	# exclude (PackedStringArray)
+	if not ProjectSettings.has_setting("gdscript_util/scan/exclude"):
+		ProjectSettings.set_setting("gdscript_util/scan/exclude", PackedStringArray("res://addons"))
+	ProjectSettings.set_initial_value("gdscript_util/scan/exclude", PackedStringArray("res://addons"))
 
 
 # Phase 3: Bridge 使用的静态分析函数
