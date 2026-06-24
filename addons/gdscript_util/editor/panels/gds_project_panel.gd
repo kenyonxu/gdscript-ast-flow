@@ -19,6 +19,11 @@ func _build_ui() -> void:
 	var toolbar = HBoxContainer.new()
 	add_child(toolbar)
 
+	var settings_btn = Button.new()
+	settings_btn.text = "Scan Settings"
+	settings_btn.pressed.connect(_on_scan_settings)
+	toolbar.add_child(settings_btn)
+
 	_rebuild_btn = Button.new()
 	_rebuild_btn.text = _l10n.t("btn.rebuild")
 	_rebuild_btn.pressed.connect(_on_rebuild)
@@ -89,3 +94,10 @@ func _on_rebuild() -> void:
 	_bridge.run_project_analysis()
 	# 完成后通过 project_analysis_completed 重启用按钮
 	_rebuild_btn.set_deferred("disabled", false)
+
+func _on_scan_settings() -> void:
+	var dialog = GDSScanSettingsDialog.new()
+	EditorInterface.get_base_control().add_child(dialog)
+	dialog.confirmed.connect(dialog.queue_free)
+	dialog.canceled.connect(dialog.queue_free)
+	dialog.popup_centered()

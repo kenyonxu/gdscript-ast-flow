@@ -34,12 +34,9 @@ enabled=PackedStringArray("res://addons/gdscript_util/plugin.cfg", "res://addons
 
 [gdscript_util]
 
-scan/include_dirs=[{
-"path": "res://samples",
-"recursive": true
-}]
-scan/exclude_dirs=["res://addons", "res://.godot", "res://.git", "res://demo"]
 scan/enabled=true
+scan/include=PackedStringArray("res://samples")
+scan/exclude=PackedStringArray("res://addons", "res://.godot", "res://.git", "res://demo")
 
 [physics]
 

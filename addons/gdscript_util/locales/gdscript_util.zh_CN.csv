@@ -17,7 +17,7 @@ keys,zh_CN
 "graph.signal","信号"
 "msg.scan_on","项目扫描: 开启 — 分析中..."
 "msg.scan_off","项目扫描: 关闭"
-"msg.scan_off_hint","在 项目设置 > GDScript Util > Scan 中配置"
+"msg.scan_off_hint","点击 \"Scan Settings\" 按钮浏览和添加目录"
 "msg.no_script","没有打开的脚本"
 "msg.empty_script","空脚本"
 "msg.parse_error","解析错误: %s"

@@ -4,9 +4,11 @@
 
 **Goal:** 参考 clef-dev 的 TranslationDomain 模式，为插件 UI 提供 CSV 驱动的多语言支持（英文源 + 中文翻译）。
 
-**Architecture:** GDSL10n 辅助类管理自定义域 "gdscript_util"；CSV → .translation 资源；plugin.gd 初始化；面板字符串改用 `t("KEY")`。
+**Architecture:** GDSL10n 辅助类管理自定义域 "gdscript_util"（通过 `TranslationServer.get_or_add_domain()` → `TranslationDomain`）；CSV → .translation 资源（compress=0）；plugin.gd 初始化；面板字符串改用 `t("KEY")`。
 
-**Tech Stack:** Godot 4.7, GDScript, TranslationServer, CSV
+**Tech Stack:** Godot 4.7, GDScript, TranslationServer, TranslationDomain, CSV
+
+**修订 (2026-06-24):** 实际 API 与设计稿不同。Godot 4.7 无 `translation.message` 属性，改用 `TranslationDomain` 系统。详见 spec 修订历史。
 
 **Spec reference:** `docs/superpowers/specs/2026-06-23-plugin-localization.md`
 
@@ -288,12 +290,14 @@ git commit -m "feat: graph main screen — toolbar + legend strings localized"
 
 ---
 
-## 完成检查清单
+## 完成检查清单（2026-06-24 修订）
 
-- [ ] CSV 文件（en + zh_CN）
-- [ ] GDSL10n 辅助类
-- [ ] plugin.gd + bootstrap 初始化
-- [ ] 底部面板 P0 字符串替换
-- [ ] 主屏图视图 P0-P1 字符串替换
-- [ ] 英文/中文切换验证
-- [ ] 优雅降级（无翻译 → key 本身）
+- [x] CSV 文件（en + zh_CN）
+- [x] GDSL10n 辅助类（改用 `TranslationDomain` API）
+- [x] plugin.gd + bootstrap 初始化（实例化模式，非单例）
+- [x] 底部面板 P0 字符串替换
+- [x] 主屏图视图 P0-P1 字符串替换
+- [x] 英文/中文切换验证
+- [x] 优雅降级（无翻译 → key 本身）
+- [x] CSV 导入 compress=0（避免 `OptimizedTranslation` 不可写）
+- [x] `msg.scan_off_hint` 更新（指向 "Scan Settings" 按钮）

@@ -1,6 +1,13 @@
-# 扫描设置迁移到 Project Settings 设计规范
+# 扫描设置设计规范
 
-> 日期: 2026-06-23 | 状态: 设计中 | 依赖: 可配置项目扫描 (已完成 ✅)
+> 日期: 2026-06-23 | 修订: 2026-06-24 | 状态: 已完成 ✅ | 依赖: 可配置项目扫描 (已完成 ✅)
+
+## 修订历史
+
+| 日期 | 变更 |
+|------|------|
+| 2026-06-23 | 初版：扫描配置迁移到 Project Settings 对话框 |
+| 2026-06-24 | **方向修正**：Project Settings 仅作静默存储，用户通过可视化弹窗编辑目录（浏览添加/删除）。原因：PackedStringArray 在 Project Settings 中只能手写路径，无法浏览目录，体验差。同时工具菜单改为二级结构 `GDScript AST Flow → Parse Current / Scan Settings...`。 |
 
 ## 一、目标
 
@@ -15,14 +22,16 @@
 
 ### 做：
 
-1. **简化数据模型** — 从 `Array<Dictionary>` 改为 `PackedStringArray`（Project Settings 原生支持多行文本编辑）
-2. **注册到 ProjectSettings** — 用 `set_initial_value` + `set_property_info` 让配置出现在 Project Settings 对话框
-3. **去掉 GDSScanSettingsDialog** — 不再需要自定义弹窗
-4. **Project tab 简化** — 只保留 Rebuild 按钮 + Enable 快捷开关，去掉 Settings 按钮
+1. **简化数据模型** — 从 `Array<Dictionary>` 改为 `PackedStringArray`（纯路径字符串数组）
+2. **静默存储到 ProjectSettings** — 用 `set_setting` 存储，不调 `set_initial_value`（配置不显示在 Project Settings 对话框）
+3. **重建 GDSScanSettingsDialog** — 可视化目录浏览弹窗：Browse 添加目录、Remove 删除、Enable 开关
+4. **Project tab 加 Scan Settings 按钮** — 打开上述弹窗
+5. **工具菜单** — `GDScript AST Flow → Scan Settings...` + `Parse Current`
+6. **兼容桥接** — `save_config()` + `enable_scan()` 兼容旧测试 API
 
 ### 不做：
 
-- ❌ **自定义 EditorInspectorPlugin** — PackedStringArray 原生编辑器够用，不额外开发
+- ❌ **在 Project Settings 对话框显示配置** — PackedStringArray 无目录浏览 UI，手写体验差
 - ❌ **保留每目录递归开关** — YAGNI，改为全部递归（绝大多数场景）
 
 ## 三、数据模型变更
@@ -48,46 +57,26 @@ PackedStringArray 在 ProjectSettings 原生显示为多行文本编辑器（每
 
 **递归开关简化：** 全部 include 目录默认递归。不做非递归（极少需要）。
 
-## 四、ProjectSettings 注册
+## 四、ProjectSettings 静默存储
+
+配置通过 `ProjectSettings.set_setting()` 静默存储，**不调 `set_initial_value`**，因此不在 Project Settings 对话框显示。用户通过可视化弹窗编辑。
 
 ```gdscript
-# plugin.gd _enter_tree 或 bootstrap setup:
-func _register_scan_settings() -> void:
-    # enabled
-    if not ProjectSettings.has_setting("gdscript_util/scan/enabled"):
-        ProjectSettings.set_setting("gdscript_util/scan/enabled", false)
-    ProjectSettings.set_initial_value("gdscript_util/scan/enabled", false)
-    ProjectSettings.add_property_info({
-        "name": "gdscript_util/scan/enabled",
-        "type": TYPE_BOOL,
-    })
-    # include
-    if not ProjectSettings.has_setting("gdscript_util/scan/include"):
-        ProjectSettings.set_setting("gdscript_util/scan/include", PackedStringArray())
-    ProjectSettings.set_initial_value("gdscript_util/scan/include", PackedStringArray())
-    ProjectSettings.add_property_info({
-        "name": "gdscript_util/scan/include",
-        "type": TYPE_PACKED_STRING_ARRAY,
-    })
-    # exclude
-    if not ProjectSettings.has_setting("gdscript_util/scan/exclude"):
-        ProjectSettings.set_setting("gdscript_util/scan/exclude", PackedStringArray("res://addons"))
-    ProjectSettings.set_initial_value("gdscript_util/scan/exclude", PackedStringArray("res://addons"))
-    ProjectSettings.add_property_info({
-        "name": "gdscript_util/scan/exclude",
-        "type": TYPE_PACKED_STRING_ARRAY,
-    })
+# GDSScanSettingsDialog._on_save() — 写入，不注册到 UI
+ProjectSettings.set_setting(GDSScanConfig.SETTING_INCLUDE, inc_arr)
+ProjectSettings.set_setting(GDSScanConfig.SETTING_EXCLUDE, exc_arr)
+ProjectSettings.set_setting(GDSScanConfig.SETTING_ENABLED, _enabled_check.button_pressed)
 ```
 
-注册后 Project Settings 对话框显示：
+配置键（隐藏，不显示在 Project Settings 对话框）：
 
 ```
-▶ GDScript Util
-    Scan/
-      Enabled: [ ]
-      Include: (多行文本，每行一个路径)
-      Exclude: (多行文本，每行一个路径)
+gdscript_util/scan/enabled   = false          (bool)
+gdscript_util/scan/include   = PackedStringArray(...)  (目录路径列表)
+gdscript_util/scan/exclude   = PackedStringArray(["res://addons"])
 ```
+
+**为什么不注册到 Project Settings？** PackedStringArray 的原生编辑器是多行文本框，用户只能手写路径字符串，无法浏览目录。改为自定义弹窗（`GDSScanSettingsDialog`）提供 FileDialog 浏览目录 + Tree 列表管理。
 
 ## 五、GDSScanConfig 适配
 
@@ -95,21 +84,35 @@ func _register_scan_settings() -> void:
 class_name GDSScanConfig
 extends RefCounted
 
+const SETTING_ENABLED := "gdscript_util/scan/enabled"
+const SETTING_INCLUDE := "gdscript_util/scan/include"
+const SETTING_EXCLUDE := "gdscript_util/scan/exclude"
+
+static var DEFAULT_EXCLUDE: PackedStringArray = PackedStringArray(["res://addons", "res://.godot", "res://.git"])
+
 static func is_enabled() -> bool:
-    return ProjectSettings.get_setting("gdscript_util/scan/enabled", false)
+    return ProjectSettings.get_setting(SETTING_ENABLED, false)
 
 static func get_include_dirs() -> Array:
-    # 返回 PackedStringArray 转为 Array<String>
-    var arr: PackedStringArray = ProjectSettings.get_setting("gdscript_util/scan/include", PackedStringArray())
+    var arr: PackedStringArray = ProjectSettings.get_setting(SETTING_INCLUDE, PackedStringArray())
     return Array(arr)
 
 static func get_exclude_dirs() -> Array:
-    var arr: PackedStringArray = ProjectSettings.get_setting("gdscript_util/scan/exclude", PackedStringArray("res://addons"))
+    var arr: PackedStringArray = ProjectSettings.get_setting(SETTING_EXCLUDE, DEFAULT_EXCLUDE)
     return Array(arr)
 
-# 用户在 Project Settings 改了配置后，Godot 自动 save
-# 不需要 save_config/enable_scan/disable_scan — Project Settings 对话框管理
+# 兼容旧测试 API — 桥接到 ProjectSettings
+static func save_config(p_include: Array, p_exclude: Array = []) -> void:
+    # 将旧格式 Array[Dict] 或 Array[String] 转为 PackedStringArray 写入
+
+static func enable_scan() -> void:
+    ProjectSettings.set_setting(SETTING_ENABLED, true)
+
+# 迁移旧格式（Array<Dictionary> → PackedStringArray）
+static func migrate_if_needed() -> void: ...
 ```
+
+> **注意**: `save_config` 和 `enable_scan` 是为旧测试兼容保留的桥接函数。新代码应直接用可视化弹窗或 `ProjectSettings.set_setting`。
 
 ## 六、迁移兼容
 
@@ -136,11 +139,13 @@ static func _migrate_old_format() -> void:
 
 | 文件 | 类型 | 说明 |
 |------|------|------|
-| `plugin.gd` | 修改 | `_enter_tree` 注册 ProjectSettings 属性 |
-| `gds_scan_config.gd` | 修改 | PackedStringArray API + 迁移 + 去掉 save/enable/disable |
+| `plugin.gd` | 修改 | 工具子菜单 `GDScript AST Flow → Parse Current / Scan Settings...`；不注册扫描配置到 Project Settings 对话框 |
+| `gds_scan_config.gd` | 修改 | PackedStringArray API + 迁移 + `save_config`/`enable_scan` 桥接 |
 | `gds_project_analyzer.gd` | 修改 | `_scan_dir` 简化（全部递归） |
-| `gds_project_panel.gd` | 修改 | 去掉 Settings 按钮 + 弹窗引用 |
-| `gds_scan_settings_dialog.gd` | 删除 | 不再需要 |
+| `gds_project_panel.gd` | 修改 | 加 "Scan Settings" 按钮 → 打开可视化弹窗 |
+| `gds_scan_settings_dialog.gd` | **新建** | 目录浏览弹窗（Browse 添加 + Remove 删除 + Enable 开关），读写 ProjectSettings |
+| `test_phase3_2_cross_file.gd` | 不变 | 通过桥接函数 `save_config`/`enable_scan` 继续工作 |
+| `test_phase3_3_graph.gd` | 不变 | 同上 |
 
 ## 八、验收标准
 

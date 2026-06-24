@@ -8,7 +8,7 @@ const SETTING_ENABLED := "gdscript_util/scan/enabled"
 const SETTING_INCLUDE := "gdscript_util/scan/include"
 const SETTING_EXCLUDE := "gdscript_util/scan/exclude"
 
-const DEFAULT_EXCLUDE := PackedStringArray("res://addons", "res://.godot", "res://.git")
+static var DEFAULT_EXCLUDE: PackedStringArray = PackedStringArray(["res://addons", "res://.godot", "res://.git"])
 
 static func is_enabled() -> bool:
 	return ProjectSettings.get_setting(SETTING_ENABLED, false)
@@ -20,6 +20,25 @@ static func get_include_dirs() -> Array:
 static func get_exclude_dirs() -> Array:
 	var arr: PackedStringArray = ProjectSettings.get_setting(SETTING_EXCLUDE, DEFAULT_EXCLUDE)
 	return Array(arr)
+
+# 兼容旧 API：save_config(dirs, exclude) — 桥接到 ProjectSettings
+static func save_config(p_include: Array, p_exclude: Array = []) -> void:
+	var inc := PackedStringArray()
+	for entry in p_include:
+		var path = entry.get("path", "") if entry is Dictionary else str(entry)
+		if path != "":
+			inc.append(path)
+	var exc := PackedStringArray()
+	for entry in p_exclude:
+		var path = entry.get("path", "") if entry is Dictionary else str(entry)
+		if path != "":
+			exc.append(path)
+	ProjectSettings.set_setting(SETTING_INCLUDE, inc)
+	ProjectSettings.set_setting(SETTING_EXCLUDE, exc)
+
+# 兼容旧 API：enable_scan() — 桥接到 ProjectSettings
+static func enable_scan() -> void:
+	ProjectSettings.set_setting(SETTING_ENABLED, true)
 
 # 迁移旧格式（Array<Dictionary> → PackedStringArray）
 static func migrate_if_needed() -> void:
@@ -36,5 +55,10 @@ static func migrate_if_needed() -> void:
 	# exclude_dirs → exclude
 	var old_exclude = ProjectSettings.get_setting("gdscript_util/scan/exclude_dirs", null)
 	if old_exclude != null and old_exclude is Array and old_exclude.size() > 0:
-		ProjectSettings.set_setting(SETTING_EXCLUDE, PackedStringArray(old_exclude))
+		var new_arr := PackedStringArray()
+		for entry in old_exclude:
+			var path = entry.get("path", "") if entry is Dictionary else str(entry)
+			if path != "":
+				new_arr.append(path)
+		ProjectSettings.set_setting(SETTING_EXCLUDE, new_arr)
 		ProjectSettings.set_setting("gdscript_util/scan/exclude_dirs", null)

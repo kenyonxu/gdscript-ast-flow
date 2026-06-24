@@ -7,15 +7,14 @@ var _l10n: GDSL10n = null
 
 
 func _enter_tree():
-	add_tool_menu_item("GDScript Analysis – Parse Current", _on_parse_current)
+	add_tool_submenu_item("GDScript AST Flow", _make_tool_submenu())
 	# Phase 3: 编辑器面板（含 resource_saved 自动分析，由 bootstrap 统一管理）
 	# 注意: 不再在 plugin.gd 单独连接 resource_saved，避免与 bootstrap 双重触发
 	_l10n = GDSL10n.new()
 	_l10n.setup()
 	_phase3_bootstrap = GDSEditorBootstrap.new()
 	_phase3_bootstrap.setup(self, _l10n)
-	# 注册扫描配置到 Project Settings
-	_register_scan_settings()
+	# 扫描配置不再注册到 Project Settings（用工具菜单打开可视化编辑器）
 	print("[GDScriptUtil v3.0] Plugin loaded — Phase 3: Editor Integration")
 
 
@@ -24,9 +23,20 @@ func _exit_tree():
 	if _phase3_bootstrap:
 		_phase3_bootstrap.teardown()
 		_phase3_bootstrap = null
-	remove_tool_menu_item("GDScript Analysis – Parse Current")
+	remove_tool_menu_item("GDScript AST Flow")
 	analysis_cache.clear()
 	print("[GDScriptUtil v3.0] Plugin unloaded")
+
+func _make_tool_submenu() -> PopupMenu:
+	var menu = PopupMenu.new()
+	menu.add_item("Parse Current", 0)
+	menu.add_item("Scan Settings...", 1)
+	menu.id_pressed.connect(func(id: int):
+		match id:
+			0: _on_parse_current()
+			1: _on_scan_settings()
+	)
+	return menu
 
 
 func _on_parse_current():
@@ -143,6 +153,14 @@ func _call_type_to_string(p_type: int) -> String:
 		_: return "[?]"
 
 
+func _on_scan_settings() -> void:
+	var dialog = GDSScanSettingsDialog.new()
+	EditorInterface.get_base_control().add_child(dialog)
+	dialog.confirmed.connect(dialog.queue_free)
+	dialog.canceled.connect(dialog.queue_free)
+	dialog.popup_centered()
+
+
 # Phase 3.3: 主屏 tab
 func _has_main_screen() -> bool:
 	return true
@@ -156,23 +174,6 @@ func _make_visible(p_visible: bool) -> void:
 
 func _get_plugin_icon() -> Texture2D:
 	return null  # 用默认图标
-
-
-func _register_scan_settings() -> void:
-	# enabled
-	if not ProjectSettings.has_setting("gdscript_util/scan/enabled"):
-		ProjectSettings.set_setting("gdscript_util/scan/enabled", false)
-	ProjectSettings.set_initial_value("gdscript_util/scan/enabled", false)
-
-	# include (PackedStringArray)
-	if not ProjectSettings.has_setting("gdscript_util/scan/include"):
-		ProjectSettings.set_setting("gdscript_util/scan/include", PackedStringArray())
-	ProjectSettings.set_initial_value("gdscript_util/scan/include", PackedStringArray())
-
-	# exclude (PackedStringArray)
-	if not ProjectSettings.has_setting("gdscript_util/scan/exclude"):
-		ProjectSettings.set_setting("gdscript_util/scan/exclude", PackedStringArray("res://addons"))
-	ProjectSettings.set_initial_value("gdscript_util/scan/exclude", PackedStringArray("res://addons"))
 
 
 # Phase 3: Bridge 使用的静态分析函数

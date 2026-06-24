@@ -1,6 +1,13 @@
 # 插件本地化方案 设计规范
 
-> 日期: 2026-06-23 | 状态: 设计中 | 依赖: 全部功能阶段 (已完成)
+> 日期: 2026-06-23 | 修订: 2026-06-24 | 状态: 已完成 ✅ | 依赖: 全部功能阶段 (已完成)
+
+## 修订历史
+
+| 日期 | 变更 |
+|------|------|
+| 2026-06-23 | 初版：基于 TranslationServer + CSV 的本地化方案 |
+| 2026-06-24 | **实现修正**：Godot 4.7 无 `translation.message` 属性，改用 `TranslationDomain` 系统（`get_or_add_domain()` + `domain.add_translation()` + `domain.translate()`）。CSV 导入 `compress=0` 避免 `OptimizedTranslation`。`msg.scan_off_hint` 改为引导用户点击 "Scan Settings" 按钮。 |
 
 ## 一、目标
 
@@ -60,49 +67,49 @@ addons/gdscript_util/
 
 ### 4.1 GDSL10n 辅助类
 
+> **实现修正 (2026-06-24)**：Godot 4.7 中 `Translation` 没有 `message` 属性。改用 `TranslationServer.get_or_add_domain()` → `TranslationDomain` 系统。`TranslationDomain.add_translation()` + `domain.translate()` 替代旧 API。
+
 ```gdscript
 # addons/gdscript_util/editor/gds_l10n.gd
+# 基于 Godot 4.7 TranslationDomain 系统
 class_name GDSL10n
 extends RefCounted
 
 const DOMAIN := "gdscript_util"
 const LOCALES_DIR := "res://addons/gdscript_util/locales/"
 
-static var _instance: GDSL10n = null
-
-static func get_instance() -> GDSL10n:
-	if _instance == null:
-		_instance = GDSL10n.new()
-		_instance.setup()
-	return _instance
+var _domain: TranslationDomain = null
+var _loaded := false
 
 func setup() -> void:
-	# 扫描 locales/ 目录，加载所有 .translation 资源到自定义域
+	if _loaded:
+		return
+	_domain = TranslationServer.get_or_add_domain(DOMAIN)
 	var dir = DirAccess.open(LOCALES_DIR)
 	if dir == null:
+		push_warning("[GDSL10n] Cannot open locales dir: " + LOCALES_DIR)
 		return
 	dir.list_dir_begin()
 	var file = dir.get_next()
 	while file != "":
 		if file.ends_with(".translation"):
-			var path = LOCALES_DIR + file
-			var translation = load(path) as Translation
+			var translation = load(LOCALES_DIR + file) as Translation
 			if translation:
-				translation.message = DOMAIN  # 设置域名
-				TranslationServer.add_translation(translation)
+				_domain.add_translation(translation)
 		file = dir.get_next()
 	dir.list_dir_end()
+	_loaded = true
 
 func t(p_key: String) -> String:
-	# 用自定义域翻译；翻译不存在则返回 key 本身
-	var result = TranslationServer.translate(p_key, DOMAIN)
-	return result if result != "" and result != p_key else p_key
-
-func cleanup() -> void:
-	# 插件卸载时移除翻译（避免残留）
-	# Godot 4 无直接 remove_translation，靠域消息过滤
-	pass
+	if not _loaded:
+		return p_key
+	var result = _domain.translate(p_key)
+	if result == null or result == "" or result == p_key:
+		return p_key
+	return result
 ```
+
+> **注意**：CSV 导入必须设 `compress=0`（在 `.csv.import` 文件中）。`compress=1` 生成 `OptimizedTranslation`，其属性不可写且与 `TranslationDomain` 系统兼容性差。
 
 ### 4.2 CSV 格式
 
@@ -161,8 +168,9 @@ keys,zh_CN
 var _l10n: GDSL10n = null
 
 func _enter_tree():
-	_l10n = GDSL10n.get_instance()
-	# 传递给 bootstrap
+	_l10n = GDSL10n.new()
+	_l10n.setup()
+	_phase3_bootstrap = GDSEditorBootstrap.new()
 	_phase3_bootstrap.setup(self, _l10n)
 ```
 
@@ -217,4 +225,5 @@ _tab_bar.add_tab(_l10n.t("tab.call_graph"))
 | CSV → .translation 编译需 Godot 编辑器 | .import 文件配置好，编辑器启动自动编译 |
 | 翻译覆盖不全（先做框架） | P0 核心路径先做，P1/P2 逐步覆盖 |
 | `t()` 调用散落各文件 | 统一通过 `_l10n` 实例访问，不全局 |
-| Godot 4.7 TranslationServer API 差异 | 确认 `translate(message, domain)` 签名 |
+| Godot 4.7 TranslationServer API 差异 | ✅ 已确认：`Translation` 无 `message` 属性，改用 `TranslationDomain` 系统（`get_or_add_domain()` + `add_translation()` + `translate()`） |
+| CSV 导入 compress=1 生成 OptimizedTranslation | ✅ 已修复：设 `compress=0`，生成普通 `Translation`，属性可写 |

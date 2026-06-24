@@ -1,10 +1,10 @@
-# 扫描设置迁移到 Project Settings 实现计划
+# 扫描设置实现计划
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **修订: 2026-06-24** — 方向修正：Project Settings 仅静默存储，可视化弹窗重建。见 spec 修订历史。
 
-**Goal:** 扫描配置从自定义弹窗迁移到 Godot Project Settings 对话框，简化数据模型为 PackedStringArray。
+**Goal:** 扫描配置简化数据模型为 PackedStringArray，提供目录浏览 UI。
 
-**Architecture:** plugin.gd 注册属性 → GDSScanConfig 改用 PackedStringArray → 删除 GDSScanSettingsDialog → Project panel 去掉 Settings 按钮 → 迁移旧格式。
+**Architecture:** plugin.gd 工具子菜单 → GDSScanSettingsDialog 浏览目录 → ProjectSettings 静默存储 → GDSScanConfig 读取 → ProjectAnalyzer 扫描。
 
 **Tech Stack:** Godot 4.7, GDScript, ProjectSettings API
 
@@ -218,14 +218,16 @@ git commit -m "chore: delete GDSScanSettingsDialog (replaced by native Project S
 
 ---
 
-## 完成检查清单
+## 完成检查清单（2026-06-24 修订）
 
-- [ ] plugin.gd — _register_scan_settings
-- [ ] gds_scan_config.gd — PackedStringArray API + migrate_if_needed
-- [ ] gds_project_analyzer.gd — scan_project 全部递归
-- [ ] gds_project_panel.gd — 删除 Settings 按钮
-- [ ] gds_scan_settings_dialog.gd — 删除
-- [ ] bootstrap — 调 migrate_if_needed
-- [ ] Project Settings 显示三项配置
-- [ ] 旧格式自动迁移
-- [ ] 单文件回归通过
+- [x] plugin.gd — 工具子菜单 `GDScript AST Flow`（不注册到 Project Settings 对话框）
+- [x] gds_scan_config.gd — PackedStringArray API + migrate_if_needed + save_config/enable_scan 桥接
+- [x] gds_project_analyzer.gd — scan_project 全部递归
+- [x] gds_project_panel.gd — 加 "Scan Settings" 按钮
+- [x] gds_scan_settings_dialog.gd — **重建**：目录浏览弹窗（Browse + Remove + Enable）
+- [x] bootstrap — 调 migrate_if_needed
+- [x] ~~Project Settings 显示三项配置~~ → 隐藏，用可视化弹窗代替
+- [x] 旧格式自动迁移
+- [x] 单文件回归通过
+- [x] PackedStringArray 构造器修复（`PackedStringArray(String)` 不存在 → `PackedStringArray([String])`）
+- [x] 测试兼容（`save_config`/`enable_scan` 桥接函数）

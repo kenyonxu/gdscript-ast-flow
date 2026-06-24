@@ -17,7 +17,7 @@ keys,en
 "graph.signal","Signal"
 "msg.scan_on","Project scan: ON — analyzing..."
 "msg.scan_off","Project scan is OFF"
-"msg.scan_off_hint","Configure in Project Settings → GDScript Util → Scan."
+"msg.scan_off_hint","Click \"Scan Settings\" to browse and add directories."
 "msg.no_script","No script open"
 "msg.empty_script","Empty script"
 "msg.parse_error","Parse error: %s"
