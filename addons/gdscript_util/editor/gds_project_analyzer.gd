@@ -10,14 +10,13 @@ func scan_project() -> Array:
 	var includes = GDSScanConfig.get_include_dirs()
 	var excludes = GDSScanConfig.get_exclude_dirs()
 	var list: Array = []
-	for entry in includes:
-		var path: String = entry.get("path", "")
-		var recursive: bool = entry.get("recursive", true)
+	for path in includes:
 		if path != "":
-			_scan_dir(path, list, excludes, recursive)
+			_scan_dir(path, list, excludes)
 	return list
 
-func _scan_dir(p_dir: String, p_list: Array, p_excludes: Array, p_recursive: bool) -> void:
+# 全部递归（去掉 recursive 参数）
+func _scan_dir(p_dir: String, p_list: Array, p_excludes: Array) -> void:
 	var da = DirAccess.open(p_dir)
 	if da == null:
 		return
@@ -32,36 +31,19 @@ func _scan_dir(p_dir: String, p_list: Array, p_excludes: Array, p_recursive: boo
 			name = da.get_next()
 			continue
 		if da.current_is_dir():
-			if p_recursive:
-				_scan_dir(full, p_list, p_excludes, true)
+			_scan_dir(full, p_list, p_excludes)
 		elif name.ends_with(".gd"):
 			p_list.append(full)
 		name = da.get_next()
 	da.list_dir_end()
 
-# include（更具体）覆盖 exclude（更宽泛）
+# 精简版排除检查 — 匹配任何 exclude 即排除（简化自旧版 include-override 逻辑）
 func _is_excluded(p_path: String, p_excludes: Array) -> bool:
-	var excluded := false
 	for excl in p_excludes:
 		if p_path == excl or p_path.begins_with(excl + "/"):
-			excluded = true
-			break
-	if not excluded:
-		return false
-	# 检查是否有更深的 include 覆盖
-	var includes = GDSScanConfig.get_include_dirs()
-	for entry in includes:
-		var inc_path: String = entry.get("path", "")
-		if inc_path == "" or inc_path == "res://":
-			continue  # 最浅的不算显式覆盖
-		if p_path == inc_path or p_path.begins_with(inc_path + "/"):
-			# include 比 exclude 深 → 覆盖
-			# 但确认没有更深的 exclude 仍排除
-			for excl in p_excludes:
-				if excl.length() > inc_path.length() and p_path.begins_with(excl + "/"):
-					return true  # 更深的 exclude 优先
-			return false  # include 覆盖生效
-	return true  # 排除且无 include 覆盖
+			return true
+	return false
+
 
 # 单文件管道 — 直接读源码（不 load）
 func _analyze_file(p_path: String) -> GDScriptAnalysisResult:
