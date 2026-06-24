@@ -27,7 +27,8 @@ keys,en
 "tab.project","Project"
 "btn.rebuild","Rebuild Project"
 "btn.relayout","Re-layout"
-"btn.settings","Settings"
+"btn.export_json","Export JSON"
+"dialog.export_title","Export Code Graph"
 "label.min_degree","Min degree:"
 "label.scope","Scope:"
 "label.graph","Graph:"
@@ -36,17 +37,19 @@ keys,en
 "graph.call","Call"
 "graph.signal","Signal"
 "msg.scan_on","Project scan: ON — analyzing..."
-"msg.scan_off","Project scan: OFF. Configure in Project Settings."
-"msg.scan_off_hint","Project scan is OFF"
-"msg.scan_off_hint2","Enable in Project Settings > GDScript Util > Scan"
+"msg.scan_off","Project scan is OFF"
+"msg.scan_off_hint","Configure in Project Settings → GDScript Util → Scan."
 "msg.no_script","No script open"
 "msg.empty_script","Empty script"
 "msg.parse_error","Parse error: %s"
-"legend.emit","emit"
-"legend.connect","connect"
-"legend.emit_connect","emit+connect"
-"legend.entry","Entry function"
-"legend.hub","Hub (degree≥5)"
+"msg.export_ok","Export OK: %s"
+"msg.export_fail","Export failed: %s"
+"msg.export_no_data","No data to export"
+"legend.emit","■ emit"
+"legend.connect","■ connect"
+"legend.emit_connect","■ emit+connect"
+"legend.entry","▶ Entry function"
+"legend.hub","● Hub (degree≥5)"
 "legend.high_coupling","High coupling file"
 "node.refs","ref"
 "node.functions","functions"
@@ -64,7 +67,8 @@ keys,zh_CN
 "tab.project","项目"
 "btn.rebuild","重新扫描"
 "btn.relayout","重新布局"
-"btn.settings","设置"
+"btn.export_json","导出 JSON"
+"dialog.export_title","导出代码图"
 "label.min_degree","最小度数:"
 "label.scope","范围:"
 "label.graph","图表:"
@@ -73,17 +77,19 @@ keys,zh_CN
 "graph.call","调用"
 "graph.signal","信号"
 "msg.scan_on","项目扫描: 开启 — 分析中..."
-"msg.scan_off","项目扫描: 关闭。在项目设置中配置。"
-"msg.scan_off_hint","项目扫描: 关闭"
-"msg.scan_off_hint2","在 项目设置 > GDScript Util > Scan 中启用"
+"msg.scan_off","项目扫描: 关闭"
+"msg.scan_off_hint","在 项目设置 > GDScript Util > Scan 中配置"
 "msg.no_script","没有打开的脚本"
 "msg.empty_script","空脚本"
 "msg.parse_error","解析错误: %s"
-"legend.emit","发射"
-"legend.connect","连接"
-"legend.emit_connect","发射+连接"
-"legend.entry","入口函数"
-"legend.hub","枢纽(度≥5)"
+"msg.export_ok","导出成功: %s"
+"msg.export_fail","导出失败: %s"
+"msg.export_no_data","没有可导出的数据"
+"legend.emit","■ 发射"
+"legend.connect","■ 连接"
+"legend.emit_connect","■ 发射+连接"
+"legend.entry","▶ 入口函数"
+"legend.hub","● 枢纽(度≥5)"
 "legend.high_coupling","高耦合文件"
 "node.refs","引用"
 "node.functions","函数"
@@ -218,8 +224,10 @@ _tab_bar.add_tab(_l10n.t("tab.call_graph"))
 
 ```gdscript
 _rebuild_btn.text = _l10n.t("btn.rebuild")
+_export_btn.text = _l10n.t("btn.export_json")
 # 禁用态:
-item.set_text(0, _l10n.t("msg.scan_off_hint"))
+item.set_text(0, _l10n.t("msg.scan_off"))
+item.set_tooltip(0, _l10n.t("msg.scan_off_hint"))
 ```
 
 - [ ] **Step 3: summary 面板状态文字**
@@ -233,11 +241,11 @@ git commit -m "feat: bottom panels — P0 strings localized (tabs/buttons/messag
 
 ---
 
-## Task 5: 主屏图视图字符串替换（P0-P1）
+## Task 5: 主屏图视图 + 导出对话框字符串替换（P0-P2）
 
 **Files:** Modify: `addons/gdscript_util/editor/gds_graph_main_screen.gd`
 
-- [ ] **Step 1: toolbar + legend 替换**
+- [ ] **Step 1: toolbar + legend 替换 (P0-P1)**
 
 ```gdscript
 scope_box.add_item(_l10n.t("scope.current_file"), 0)
@@ -247,7 +255,21 @@ relayout.text = _l10n.t("btn.relayout")
 _add_legend_chip(_legend, _l10n.t("legend.emit"), Color.RED)
 ```
 
-- [ ] **Step 2: 提交**
+- [ ] **Step 2: 导出按钮 + 对话框 (P0)**
+
+```gdscript
+_export_btn.text = _l10n.t("btn.export_json")
+# FileDialog 窗口标题
+_export_dialog.title = _l10n.t("dialog.export_title")
+# 导出结果日志
+push_message(_l10n.t("msg.export_ok") % path)
+push_error(_l10n.t("msg.export_fail") % error)
+push_warning(_l10n.t("msg.export_no_data"))
+```
+
+- [ ] **Step 3: graph 节点副文本 (P2)** — 节点 tooltip/副标签字符串（ref/functions/signals）改用 `_l10n.t()`
+
+- [ ] **Step 4: 提交**
 
 ```bash
 git add addons/gdscript_util/editor/gds_graph_main_screen.gd
@@ -262,6 +284,7 @@ git commit -m "feat: graph main screen — toolbar + legend strings localized"
 - [ ] **Step 2: 编辑器设中文** — Editor Settings → Language → 简体中文 → 重启 → 确认 P0 字符串中文
 - [ ] **Step 3: 无翻译的 key** — 确认显示 key 本身（不崩溃/不空白）
 - [ ] **Step 4: Phase 1-3 回归** — 功能不受影响
+- [ ] **Step 5: CodeGraph JSON 导出回归** — 切中文后 UI 为中文，但导出 JSON 中的 key（函数名/节点名）不受语言影响，仍为原始标识符
 
 ---
 
