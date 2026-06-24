@@ -1,0 +1,70 @@
+# GDScript AST Flow
+
+[![MIT License](https://img.shields.io/badge/license-MIT-green)](LICENSE.txt)
+
+A Godot 4.7 GDScript AST parser + logic flow analysis tool. Integrated as an EditorPlugin, supporting signal connection tracing, method call graphs, variable def-use chain analysis, and cross-file reference tracking.
+
+**Authors**: v3.4 original by あるる / きのもと 結衣 @arlez80 · v2.0 rewrite by kenyonxu
+
+---
+
+## Features
+
+### Three-Phase Analysis Pipeline
+
+```
+.gd source → [GDScriptTokenizer] → Token stream → [GDScriptParser] → AST → [GDScriptSymbolResolver] → AnalysisResult
+```
+
+### Analysis Capabilities
+
+- **Call Graph** — 7 call pattern detection (self/super/external/connect/signal_connect/lambda/emit)
+- **Signal Flow** — Full tracing: signal declaration → emit sites → connect sites
+- **Def-Use Chain** — Variable define/read/write tracking
+- **Cross-File Analysis** — Resolve cross-file method calls and signal connections via class_name
+- **Graph Visualization** — Interactive GraphEdit-based call/signal graphs with hub highlighting, degree filtering, and jump-to-definition
+- **JSON Export** — Structured CodeGraph JSON consumable by AI agents
+
+### Editor Integration
+
+- Bottom panel: Summary / Call Graph / Signal Flow / Def-Use / Project tabs
+- Main screen "Analysis" tab: Scope × Graph switching + degree filter + legend + auto-layout
+- Tool menu: `GDScript AST Flow → Parse Current / Scan Settings...`
+- Auto re-analysis on resource save
+
+---
+
+## Quick Start
+
+### Installation
+
+1. Copy `addons/gdscript_util/` into your Godot project's `addons/` directory
+2. Open **Project → Project Settings → Plugins**, enable **GDScript Util**
+
+### First Analysis
+
+1. Open any `.gd` script
+2. Menu **Project → Tools → GDScript AST Flow → Parse Current**
+3. Check the bottom panel Summary / Call Graph tabs
+
+### Project Scan
+
+1. Menu **Project → Tools → GDScript AST Flow → Scan Settings...**
+2. Check **Enable Project Scan**, Browse to add directories to scan
+3. Click **Save**, then switch to Project Tab and click **Rebuild Project**
+4. Explore cross-file call relationships and signal flows
+
+---
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [User Guide](addons/gdscript_util/docs/user_guide_en.md) | Installation, single-file analysis, project scan, graph navigation, export |
+| [Developer Guide](addons/gdscript_util/docs/dev_guide_en.md) | API reference, integration patterns, as infrastructure for other plugins |
+
+---
+
+## License
+
+MIT License · See [LICENSE.txt](LICENSE.txt)
