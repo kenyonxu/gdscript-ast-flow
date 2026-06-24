@@ -280,6 +280,10 @@ class PreloadNode:
     extends ASTNode
     var path: String = ""
 
+# ---- Phase 3.4: f-string 结构化节点 ----
+class FormattedStringNode:
+    extends ASTNode
+    var segments: Array = []  # of {"type":"text", "value":String} 或 {"type":"expr", "node":ExpressionNode}
 
 # ---- Phase 3: namespace / trait ----
 class NamespaceNode:
