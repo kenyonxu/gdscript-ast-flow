@@ -8,7 +8,7 @@
 
 A Godot 4.7 GDScript AST parser + logic flow analysis tool. Integrated as an EditorPlugin, supporting signal connection tracing, method call graphs, variable def-use chain analysis, and cross-file reference tracking.
 
-**Authors**: v3.4 original by あるる / きのもと 結衣 @arlez80 · v2.0 rewrite by kenyonxu
+**Authors**: Original by あるる / きのもと 結衣 @arlez80 (Godot 3.x bytecode parser) · This version by kenyonxu (Godot 4.7 AST rewrite)
 
 ---
 
