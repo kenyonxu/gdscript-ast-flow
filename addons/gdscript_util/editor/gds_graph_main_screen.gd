@@ -66,6 +66,11 @@ func _build_ui() -> void:
 	thresh_box.value = 0
 	thresh_box.value_changed.connect(func(v): _min_degree = v; _rebuild())
 	toolbar.add_child(thresh_box)
+	# Export JSON 按钮
+	var export_btn = Button.new()
+	export_btn.text = "Export JSON"
+	export_btn.pressed.connect(_on_export)
+	toolbar.add_child(export_btn)
 	# 图例（按当前视图动态填充，见 _refresh_legend）
 	_legend = HBoxContainer.new()
 	add_child(_legend)
@@ -185,3 +190,26 @@ func _center_view() -> void:
 		var screen_center = center_graph * _graph_edit.zoom
 		var vp = _graph_edit.get_viewport_rect().size
 		_graph_edit.set_scroll_offset(screen_center - vp / 2.0)
+
+func _on_export() -> void:
+	var dialog = FileDialog.new()
+	dialog.title = "Export Code Graph"
+	dialog.file_mode = FileDialog.FILE_MODE_SAVE_FILE
+	dialog.add_filter("*.json", "JSON")
+	dialog.access = FileDialog.ACCESS_FILESYSTEM
+	dialog.current_file = "codegraph.json"
+	EditorInterface.get_base_control().add_child(dialog)
+	dialog.file_selected.connect(_on_export_path)
+	dialog.canceled.connect(dialog.queue_free)
+	dialog.popup_centered()
+
+func _on_export_path(p_path: String) -> void:
+	var result = _bridge.get_project_result()
+	if result and result.files.size() > 0:
+		var err = result.export_json(p_path)
+		if err == OK:
+			print("[GDScriptUtil] Code graph exported to: %s" % p_path)
+		else:
+			push_warning("[GDScriptUtil] Export failed: error %d" % err)
+	else:
+		push_warning("[GDScriptUtil] No project data to export. Enable scan first.")
