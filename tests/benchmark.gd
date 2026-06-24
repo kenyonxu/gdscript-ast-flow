@@ -10,10 +10,10 @@ func _run():
 	print("=== GDScript Analysis Pipeline Benchmark ===\n")
 	var files := [
 		"res://samples/analysis_demo.gd",
-		"res://addons/gdscript_util/gds_tokenizer.gd",
-		"res://addons/gdscript_util/gds_parser.gd",
-		"res://addons/gdscript_util/gds_symbol_resolver.gd",
-		"res://addons/gdscript_util/editor/gds_project_analyzer.gd",
+		"res://addons/gdscript_ast/gds_tokenizer.gd",
+		"res://addons/gdscript_ast/gds_parser.gd",
+		"res://addons/gdscript_ast/gds_symbol_resolver.gd",
+		"res://addons/gdscript_ast/editor/gds_project_analyzer.gd",
 	]
 	for path in files:
 		_bench_file(path)

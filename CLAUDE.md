@@ -18,7 +18,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 项目结构
 
 ```
-addons/gdscript_util/
+addons/gdscript_ast/
 ├── plugin.cfg                   # 插件配置 (v2.0.0)
 ├── plugin.gd                    # EditorPlugin 入口 (class_name: GDScriptUtil)
 ├── gds_bc_parser.gd             # [legacy] 3.4 字节码解析器 (class_name: GDScriptByteCodeParser)
