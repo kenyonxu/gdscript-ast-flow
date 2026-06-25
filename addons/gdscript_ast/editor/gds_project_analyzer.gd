@@ -283,8 +283,8 @@ func _resolve_script_path(p_script_path: String, p_project: GDScriptProjectResul
 		return p_script_path
 
 	# 3. uid / 值匹配兜底
-	for class_name in p_project.class_registry:
-		var fp = p_project.class_registry[class_name]
+	for cls_name in p_project.class_registry:
+		var fp = p_project.class_registry[cls_name]
 		if fp == p_script_path:
 			return fp
 
