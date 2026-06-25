@@ -130,6 +130,8 @@ func _parse_header(p_header: String, p_section: SectionData) -> int:
 	return kind
 
 func _parse_key_value_pairs(p_text: String) -> Dictionary:
+	# 按空格分隔逐对解析 key=value
+	# value 读到下一空格为止，然后去掉两端空格和引号
 	var result: Dictionary = {}
 	var i: int = 0
 	var len: int = p_text.length()
@@ -150,33 +152,20 @@ func _parse_key_value_pairs(p_text: String) -> Dictionary:
 		while i < len and p_text[i] == ' ':
 			i += 1
 		if i >= len:
+			result[key] = ""
 			break
 
-		var value: String = ""
-		if p_text[i] == '"':
+		# 读 raw value（到下一个空格），再去掉两端引号
+		var val_start: int = i
+		while i < len and p_text[i] != ' ':
 			i += 1
-			while i < len:
-				if p_text[i] == '\\' and i + 1 < len:
-					if p_text[i + 1] == '"':
-						value += '"'
-						i += 2
-						continue
-					elif p_text[i + 1] == '\\':
-						value += '\\'
-						i += 2
-						continue
-				elif p_text[i] == '"':
-					break
-				value += p_text[i]
-				i += 1
-			i += 1
-		else:
-			var val_start: int = i
-			while i < len and p_text[i] != ' ':
-				i += 1
-			value = p_text.substr(val_start, i - val_start)
+		var raw: String = p_text.substr(val_start, i - val_start)
 
-		result[key] = value
+		raw = raw.strip_edges()
+		if raw.begins_with('"') and raw.ends_with('"') and raw.length() >= 2:
+			raw = raw.substr(1, raw.length() - 2)
+
+		result[key] = raw
 
 	return result
 

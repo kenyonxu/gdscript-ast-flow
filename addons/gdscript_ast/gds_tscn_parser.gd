@@ -165,6 +165,9 @@ func _parse_header(p_header: String, p_section: SectionData) -> int:
 	return kind
 
 func _parse_key_value_pairs(p_text: String) -> Dictionary:
+	# 按空格分隔逐对解析 key=value
+	# value 读到下一空格为止，然后去掉两端空格和引号
+	# 比逐字符转义解析更简洁，且 = 在 value 中不会截断（直接读到空格为止）
 	var result: Dictionary = {}
 	var i: int = 0
 	var len: int = p_text.length()
@@ -176,7 +179,7 @@ func _parse_key_value_pairs(p_text: String) -> Dictionary:
 		if i >= len:
 			break
 
-		# 读取 key
+		# 读取 key（到第一个 =）
 		var key_start: int = i
 		while i < len and p_text[i] != '=':
 			i += 1
@@ -184,43 +187,28 @@ func _parse_key_value_pairs(p_text: String) -> Dictionary:
 
 		# 跳过 =
 		if i < len:
-			i += 1  # skip '='
+			i += 1
 
 		# 跳过空白
 		while i < len and p_text[i] == ' ':
 			i += 1
 
 		if i >= len:
+			result[key] = ""
 			break
 
-		# 读取 value（引号包围或裸值）
-		var value: String = ""
-		if p_text[i] == '"':
-			i += 1  # skip opening "
-			while i < len:
-				if p_text[i] == '\\' and i + 1 < len:
-					# 转义字符
-					if p_text[i + 1] == '"':
-						value += '"'
-						i += 2
-						continue
-					elif p_text[i + 1] == '\\':
-						value += '\\'
-						i += 2
-						continue
-				elif p_text[i] == '"':
-					break
-				value += p_text[i]
-				i += 1
-			i += 1  # skip closing "
-		else:
-			# 裸值：读到空格或结尾
-			var val_start: int = i
-			while i < len and p_text[i] != ' ':
-				i += 1
-			value = p_text.substr(val_start, i - val_start)
+		# 读取 raw value（到下一个空白，保留引号包围）
+		var val_start: int = i
+		while i < len and p_text[i] != ' ':
+			i += 1
+		var raw: String = p_text.substr(val_start, i - val_start)
 
-		result[key] = value
+		# 去掉两端空白和引号
+		raw = raw.strip_edges()
+		if raw.begins_with('"') and raw.ends_with('"') and raw.length() >= 2:
+			raw = raw.substr(1, raw.length() - 2)
+
+		result[key] = raw
 
 	return result
 
