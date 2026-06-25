@@ -233,7 +233,7 @@ func _parse_properties(p_section: SectionData) -> Dictionary:
 	var props: Dictionary = {}
 	for line in p_section.properties:
 		var kv = _parse_property_line(line)
-		if kv != null:
+		if kv != null and kv.size() >= 2:
 			props[kv[0]] = kv[1]
 	return props
 
@@ -254,8 +254,8 @@ func _parse_property_line(p_line: String) -> Array:
 func _inline_common_types(p_data: GDSSceneResourceResult.SubResourceData) -> void:
 	for key in p_data.properties:
 		var raw: String = p_data.properties[key]
-		# 跳过资源引用字面量——str_to_var 会误触发 ResourceLoader.load
-		if raw.begins_with("SubResource(") or raw.begins_with("ExtResource("):
+		# 含资源引用（含 Array 包裹的 [SubResource(...)]）就跳过——str_to_var 会误触发 ResourceLoader.load
+		if raw.find("SubResource(") != -1 or raw.find("ExtResource(") != -1:
 			continue
 		var parsed = str_to_var(raw)
 		if parsed != null:
