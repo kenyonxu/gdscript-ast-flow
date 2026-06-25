@@ -1,4 +1,4 @@
-# addons/gdscript_util/gds_scene_resource_result.gd
+# addons/gdscript_ast/gds_scene_resource_result.gd
 # 场景 (.tscn) / 资源 (.tres) 解析结果容器
 # 包含所有数据模型类
 

@@ -43,7 +43,7 @@ static func enable_scan() -> void:
 # 迁移旧格式（Array<Dictionary> → PackedStringArray）
 static func migrate_if_needed() -> void:
 	# include_dirs → include
-	var old_include = ProjectSettings.get_setting("gdscript_util/scan/include_dirs", null)
+	var old_include = ProjectSettings.get_setting("gdscript_ast/scan/include_dirs", null)
 	if old_include != null and old_include is Array and old_include.size() > 0:
 		var new_arr := PackedStringArray()
 		for entry in old_include:
@@ -51,9 +51,9 @@ static func migrate_if_needed() -> void:
 			if path != "":
 				new_arr.append(path)
 		ProjectSettings.set_setting(SETTING_INCLUDE, new_arr)
-		ProjectSettings.set_setting("gdscript_util/scan/include_dirs", null)
+		ProjectSettings.set_setting("gdscript_ast/scan/include_dirs", null)
 	# exclude_dirs → exclude
-	var old_exclude = ProjectSettings.get_setting("gdscript_util/scan/exclude_dirs", null)
+	var old_exclude = ProjectSettings.get_setting("gdscript_ast/scan/exclude_dirs", null)
 	if old_exclude != null and old_exclude is Array and old_exclude.size() > 0:
 		var new_arr := PackedStringArray()
 		for entry in old_exclude:
@@ -61,4 +61,4 @@ static func migrate_if_needed() -> void:
 			if path != "":
 				new_arr.append(path)
 		ProjectSettings.set_setting(SETTING_EXCLUDE, new_arr)
-		ProjectSettings.set_setting("gdscript_util/scan/exclude_dirs", null)
+		ProjectSettings.set_setting("gdscript_ast/scan/exclude_dirs", null)

@@ -1,4 +1,4 @@
-# addons/gdscript_util/gds_tres_parser.gd
+# addons/gdscript_ast/gds_tres_parser.gd
 # .tres 资源文件解析器
 # 比 .tscn 简单得多：无节点树、无信号连接、无 editable 节
 # 结构：[gd_resource] + [ext_resource]* + [sub_resource]* + [resource]

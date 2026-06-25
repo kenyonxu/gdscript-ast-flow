@@ -1,4 +1,4 @@
-# addons/gdscript_util/gds_tscn_parser.gd
+# addons/gdscript_ast/gds_tscn_parser.gd
 # .tscn 场景文件解析器 — 两遍扫描
 # 第一遍: 收集节 + ExtResource/SubResource 索引
 # 第二遍: node + connection + editable 语义解析

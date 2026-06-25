@@ -32,7 +32,7 @@ project/assembly_name="gdscript-ast-flow"
 
 enabled=PackedStringArray("res://addons/gdscript_ast/plugin.cfg", "res://addons/godot_mcp_editor/plugin.cfg", "res://addons/godot_mcp_runtime/plugin.cfg")
 
-[gdscript_util]
+[gdscript_ast]
 
 scan/enabled=true
 scan/include=PackedStringArray("res://samples")
