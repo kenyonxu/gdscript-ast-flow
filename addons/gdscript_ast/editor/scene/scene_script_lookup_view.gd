@@ -101,7 +101,7 @@ func rebuild() -> void:
 		_current_script_index[s] = item_idx
 		item_idx += 1
 
-func _on_script_selected() -> void:
+func _on_script_selected(_idx: int) -> void:
 	var selected = _script_list.get_selected_items()
 	if selected.is_empty():
 		return
@@ -123,7 +123,7 @@ func _on_script_selected() -> void:
 		var mount_text = m.scene + "  →  " + m.node
 		_mount_list.add_item(mount_text)
 
-func _on_mount_selected() -> void:
+func _on_mount_selected(_idx: int) -> void:
 	var selected = _mount_list.get_selected_items()
 	if selected.is_empty():
 		return

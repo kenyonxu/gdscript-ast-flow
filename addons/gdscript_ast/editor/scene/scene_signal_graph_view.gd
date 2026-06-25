@@ -183,7 +183,7 @@ func rebuild() -> void:
 
 	_graph_edit.set_graph(ges_nodes, ges_edges)
 
-func _on_filter_changed(_new_text: String) -> void:
+func _on_filter_changed() -> void:
 	rebuild()
 
 func _on_graph_node_selected(p_node) -> void:
