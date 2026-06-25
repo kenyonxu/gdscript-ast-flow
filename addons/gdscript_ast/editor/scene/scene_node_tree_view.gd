@@ -85,7 +85,7 @@ func rebuild() -> void:
 			_scene_list.set_item_custom_fg_color(idx, Color.RED)
 			_scene_list.set_item_tooltip(idx, "\n".join(scene.errors))
 
-func _on_scene_selected() -> void:
+func _on_scene_selected(_idx: int) -> void:
 	var selected = _scene_list.get_selected_items()
 	if selected.is_empty():
 		return
