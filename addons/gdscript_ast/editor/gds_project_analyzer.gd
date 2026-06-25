@@ -47,10 +47,23 @@ func _scan_dir(p_dir: String, p_list: Array, p_excludes: Array) -> void:
 
 # 精简版排除检查 — 匹配任何 exclude 即排除
 func _is_excluded(p_path: String, p_excludes: Array) -> bool:
+	# Include 优先：找最具体的 include 和 exclude 前缀，更长（更深）的赢。
+	# 支持 exclude 父目录同时 include 子目录（如 exclude res://addons + include res://addons/my_plugin）。
+	var includes = GDSScanConfig.get_include_dirs()
+	var best_inc = ""
+	for inc in includes:
+		if p_path == inc or p_path.begins_with(inc + "/"):
+			if inc.length() > best_inc.length():
+				best_inc = inc
+	var best_exc = ""
 	for excl in p_excludes:
 		if p_path == excl or p_path.begins_with(excl + "/"):
-			return true
-	return false
+			if excl.length() > best_exc.length():
+				best_exc = excl
+	# include 更具体（>=，同长 include 赢）则不排除；否则按 exclude
+	if best_inc != "" and best_inc.length() >= best_exc.length():
+		return false
+	return best_exc != ""
 
 
 # ---- Chunk A2: uid 映射收集 ----
