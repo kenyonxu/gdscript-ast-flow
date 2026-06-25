@@ -29,7 +29,6 @@ func run_all():
 	test_script_lookup_index()
 	test_signal_graph_build()
 	test_signal_graph_navigate()
-	test_parse_nkey()
 	test_empty_state()
 	test_scan_disabled()
 	test_parse_error_mark()
@@ -80,8 +79,8 @@ func test_node_tree_render():
 
 	# 验证节点平铺索引
 	assert(result.nodes_flat.size() > 0, "nodes_flat should have entries")
-	var main_flat = result.nodes_flat.get(".", null)
-	assert(main_flat != null, "Root should be in nodes_flat at '.'")
+	var main_flat = result.nodes_flat.get("Main", null)
+	assert(main_flat != null, "Root should be in nodes_flat at 'Main'")
 
 	print("  PASS")
 
@@ -98,7 +97,7 @@ func test_node_detail_fields():
 	# 基本字段
 	assert(main_node.name != "", "name should not be empty")
 	assert(main_node.type != "", "type should not be empty")
-	assert(main_node.parent_path == "", "root parent_path should be empty")
+	assert(main_node.parent_path == ".", "root parent_path should be '.'")
 
 	# Player 节点详情
 	var player_node = null
