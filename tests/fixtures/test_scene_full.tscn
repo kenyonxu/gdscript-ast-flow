@@ -18,24 +18,24 @@ script = ExtResource("1_script")
 position = Vector2(100, 200)
 collision_layer = 1
 
-[node name="CollisionShape" type="CollisionShape2D" parent="Player"]
+[node name="CollisionShape" type="CollisionShape2D" parent="Main/Player"]
 shape = SubResource("1_shape")
 disabled = false
 
-[node name="Sprite" type="Sprite2D" parent="Player"]
+[node name="Sprite" type="Sprite2D" parent="Main/Player"]
 texture = ExtResource("2_tex")
 position = Vector2(0, -16)
 
 [node name="UI" type="CanvasLayer" parent="Main"]
 
-[node name="HealthBar" type="ProgressBar" parent="UI"]
+[node name="HealthBar" type="ProgressBar" parent="Main/UI"]
 max_value = 100
 value = 75
 
-[node name="HUD" type="Node" parent="UI"]
+[node name="HUD" type="Node" parent="Main/UI"]
 script = ExtResource("1_script")
 
-[node name="Button" type="Button" parent="UI/HUD"]
+[node name="Button" type="Button" parent="Main/UI/HUD"]
 text = "Click Me"
 
 [node name="Camera" type="Camera2D" parent="Main"]
@@ -46,7 +46,7 @@ current = true
 [sub_resource type="RectangleShape2D" id="3_shape"]
 size = Vector2(64, 64)
 
-[node name="NPCShape" type="CollisionShape2D" parent="NPC"]
+[node name="NPCShape" type="CollisionShape2D" parent="Main/NPC"]
 shape = SubResource("3_shape")
 
 [node name="SubScene" type="Node" parent="Main"]
@@ -54,12 +54,12 @@ script = ExtResource("1_script")
 
 [node name="ContainerA" type="Node" parent="Main"]
 
-[node name="Icon" type="Sprite2D" parent="ContainerA"]
+[node name="Icon" type="Sprite2D" parent="Main/ContainerA"]
 texture = ExtResource("2_tex")
 
 [node name="ContainerB" type="Node" parent="Main"]
 
-[node name="Icon" type="Sprite2D" parent="ContainerB"]
+[node name="Icon" type="Sprite2D" parent="Main/ContainerB"]
 texture = ExtResource("2_tex")
 
 [connection signal="pressed" from="Main/UI/HUD/Button" to="." method="_on_button_pressed"]

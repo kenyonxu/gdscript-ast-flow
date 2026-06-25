@@ -8,3 +8,6 @@
 
 codegraph.json
 graphify-out/cache/
+
+# Claude Code 项目级 MCP 配置（含本机 Godot 绝对路径，不入库）
+.mcp.json
