@@ -510,17 +510,17 @@ func _parse_binds_value(p_value: String) -> Array:
 						break
 
 	# 3. 最简 fallback：找第一对 [...] 深度感知
-	var depth = 0
-	var start = -1
+	var fdepth = 0
+	var fstart = -1
 	for i in range(p_value.length()):
 		if p_value[i] == '[':
-			if depth == 0:
-				start = i
-			depth += 1
+			if fdepth == 0:
+				fstart = i
+			fdepth += 1
 		elif p_value[i] == ']':
-			depth -= 1
-			if depth == 0 and start != -1:
-				var arr_str = p_value.substr(start, i - start + 1)
+			fdepth -= 1
+			if fdepth == 0 and fstart != -1:
+				var arr_str = p_value.substr(fstart, i - fstart + 1)
 				parsed = str_to_var(arr_str)
 				if parsed is Array:
 					return parsed
