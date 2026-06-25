@@ -78,7 +78,7 @@ AI: 查 CodeGraph JSON
 |---|----|------|
 | 15 | **嵌套场景实例化追踪** | `PackedScene` 类型子场景（`ExtResource` 指向另一个 `.tscn`）的递归展开 |
 | 16 | **资源属性类型推断** | `Vector2(100, 200)` → `{type: "Vector2", x: 100, y: 200}` 结构化解析 |
-| 17 | **编辑器集成——场景树面板** | 底部面板新增 "Scenes" tab，可视化节点树 + 脚本关联 |
+| 17 | **编辑器集成——场景主屏模式** | 主屏新增「场景」mode（3 视角：节点树 / 脚本反查 / 信号图），原"底部面板 Scenes tab"方案已废弃。已独立成 spec：[scene-main-screen-design](2026-06-25-scene-main-screen-design.md) |
 
 ### 不做（明确边界）
 
