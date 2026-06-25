@@ -64,7 +64,7 @@ func _run_pipeline(p_file_path: String) -> GDScriptAnalysisResult:
 	var ast = parser.parse(tokens)
 
 	if parser.error != "":
-		print("[D] PARSE ERROR: %s" % parser.error)
+		print("[D] PARSE ERROR %s: %s" % [p_file_path, parser.error])
 		return null
 
 	# Phase 2: symbol resolution
