@@ -450,7 +450,7 @@ func _resolve_ref_in_value(p_key: String, p_value: String, p_node: GDSSceneResou
 func _resolve_ext_resource_ref(p_value: String) -> GDSSceneResourceResult.ExtResourceInfo:
 	# 匹配 ExtResource("id") 格式
 	if p_value.begins_with("ExtResource(") and p_value.ends_with(")"):
-		var inner = p_value.substr(13, p_value.length() - 14)  # 去掉 ExtResource(" 和 ")
+		var inner = p_value.substr(13, p_value.length() - 15)  # 去掉 ExtResource(" 和 ")
 		inner = inner.strip_edges()
 		inner = inner.trim_prefix('"').trim_suffix('"')
 		if _ext_resources.has(inner):
@@ -460,7 +460,7 @@ func _resolve_ext_resource_ref(p_value: String) -> GDSSceneResourceResult.ExtRes
 func _resolve_sub_resource_ref(p_value: String) -> GDSSceneResourceResult.SubResourceData:
 	# 匹配 SubResource("id") 格式
 	if p_value.begins_with("SubResource(") and p_value.ends_with(")"):
-		var inner = p_value.substr(13, p_value.length() - 14)  # 去掉 SubResource(" 和 ")
+		var inner = p_value.substr(13, p_value.length() - 15)  # 去掉 SubResource(" 和 ")
 		inner = inner.strip_edges()
 		inner = inner.trim_prefix('"').trim_suffix('"')
 		if _sub_resources.has(inner):

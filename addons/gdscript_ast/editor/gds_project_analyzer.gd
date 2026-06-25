@@ -271,22 +271,22 @@ func _find_node_in_scene(p_scene: GDSSceneResourceResult, p_node_path: String) -
 	return null
 
 
-# 解析脚本路径：class_name 匹配 → 直接路径匹配
+# 解析脚本路径：class_name → 路径 → uid（SPEC 优先级）
 func _resolve_script_path(p_script_path: String, p_project: GDScriptProjectResult) -> String:
-	# 直接路径匹配
-	if p_project.files.has(p_script_path):
-		return p_script_path
-
-	# 通过 class_registry 查找
-	for class_name in p_project.class_registry:
-		var file_path = p_project.class_registry[class_name]
-		if file_path == p_script_path:
-			return file_path
-
-	# 尝试将脚本文件名与 class_name 匹配
+	# 1. class_name 优先匹配
 	var script_name = p_script_path.get_file().trim_suffix(".gd")
 	if p_project.class_registry.has(script_name):
 		return p_project.class_registry[script_name]
+
+	# 2. 直接路径匹配
+	if p_project.files.has(p_script_path):
+		return p_script_path
+
+	# 3. uid / 值匹配兜底
+	for class_name in p_project.class_registry:
+		var fp = p_project.class_registry[class_name]
+		if fp == p_script_path:
+			return fp
 
 	return ""
 
