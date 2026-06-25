@@ -16,6 +16,9 @@ var resources: Dictionary = {}        # String(path) → GDSSceneResourceResult
 var script_associations: Array = []   # of Dictionary {scene, node, script, script_class}
 var scene_signal_connections: Array = []  # of Dictionary {signal, from_scene, from_node, ...}
 
+# uid→path 映射（由扫描阶段从 .uid 文件收集）
+var uid_map: Dictionary = {}  # String(uid_str) → String(res_path)
+
 # 查询: 谁跨文件调用了 p_class.p_method
 func get_callers_across_files(p_class: String, p_method: String) -> Array:
 	var result: Array = []

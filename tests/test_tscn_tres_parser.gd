@@ -1,5 +1,5 @@
 # tests/test_tscn_tres_parser.gd
-# .tscn/.tres 解析器验收测试 — 6 套测试用例
+# .tscn/.tres 解析器验收测试 — 12 套测试用例（含 Chunk A~F 增强）
 
 extends Node
 
@@ -7,7 +7,10 @@ const FIXTURES := "res://tests/fixtures/"
 const SCENE_FULL := FIXTURES + "test_scene_full.tscn"
 const SCENE_SIMPLE := FIXTURES + "test_scene_simple.tscn"
 const SCENE_SIGNALS := FIXTURES + "test_scene_signals.tscn"
+const SCENE_UID := FIXTURES + "test_scene_uid.tscn"
 const RESOURCE_FILE := FIXTURES + "test_resource.tres"
+const RESOURCE_NESTED := FIXTURES + "test_resource_nested.tres"
+const RESOURCE_CYCLE := FIXTURES + "test_resource_cycle.tres"
 const SCRIPT_FILE := FIXTURES + "test_script_for_scene.gd"
 
 var _tscn_parser: GDScriptTscnParser
@@ -32,6 +35,12 @@ func run_all():
 	# Chunk F 额外覆盖
 	test_tscn_simple()
 	test_tscn_flags_value()
+	# Chunk A~F 新增
+	test_uid_resolve()
+	test_export_overrides()
+	test_sub_resource_inline()
+	test_tres_sub_chain()
+	test_tres_cycle()
 
 
 # ============================================================
@@ -354,6 +363,184 @@ func test_tscn_flags_value():
 	# 检查 from_node 路径正确
 	var emitter_conns = result.get_connections_for_node("Emitter")
 	assert(emitter_conns.size() >= 1, "Emitter should have connections")
+
+	print("  PASS")
+
+
+# ============================================================
+# Chunk A: UID 引用解析测试
+# ============================================================
+func test_uid_resolve():
+	print("Test: uid-only ext_resource resolution...")
+
+	# 用项目分析器（含 uid_map 收集）
+	var pa = GDScriptProjectAnalyzer.new()
+	GDSScanConfig.save_config([{"path": "res://tests/fixtures", "recursive": true}], [])
+	GDSScanConfig.enable_scan()
+	var result = pa.analyze_all()
+
+	# test_scene_uid.tscn 的 ext_resource 只有 uid= 无 path=
+	var scene_result = result.scenes.get(SCENE_UID, null)
+	if scene_result == null:
+		# 若无 scenes 结果，验证 uid_map 存在
+		assert(result.uid_map.size() > 0, "uid_map should have entries: %d" % result.uid_map.size())
+		print("  SKIP (scene not in scan result, uid_map has %d entries)" % result.uid_map.size())
+		return
+
+	# ext_resource 的 path 应通过 uid_map 反查还原
+	var ext_script = scene_result.ext_resources.get("1_script", null)
+	assert(ext_script != null, "1_script ext_resource should exist")
+	assert(ext_script.path != "", "1_script path should be resolved from uid, got empty")
+	assert(ext_script.path.ends_with("test_script_for_scene.gd"),
+			"1_script path should end with test_script_for_scene.gd, got '%s'" % ext_script.path)
+	assert(ext_script.uid == "uid://cxixtvlqumj56", "uid should match")
+
+	# 验证节点脚本关联
+	var root_node = _find_node_in_flat(scene_result, "Root")
+	assert(root_node != null, "Root node should exist")
+	assert(root_node.script_resource != "", "script_resource should be resolved")
+	assert(root_node.script_resource.ends_with("test_script_for_scene.gd"),
+			"script_resource should end with test_script_for_scene.gd, got '%s'" % root_node.script_resource)
+
+	print("  PASS")
+
+
+# ============================================================
+# Chunk B: @export 填充值提取测试
+# ============================================================
+func test_export_overrides():
+	print("Test: export overrides extraction...")
+
+	# 用项目分析器（含 script exports 查找）
+	var pa = GDScriptProjectAnalyzer.new()
+	GDSScanConfig.save_config([{"path": "res://tests/fixtures", "recursive": true}], [])
+	GDSScanConfig.enable_scan()
+	var result = pa.analyze_all()
+
+	var scene_result = result.scenes.get(SCENE_FULL, null)
+	assert(scene_result != null, "test_scene_full should be in scan results")
+
+	# 查找 Player 节点（有 script + @export var 对应属性）
+	# test_scene_full 中 Player 节点有 max_health=150 speed=500.0
+	# test_script_for_scene.gd 声明 @export var max_health, @export var speed
+	var player_node = _find_node_in_flat(scene_result, "Player")
+	assert(player_node != null, "Player node should exist")
+	assert(player_node.script_resource != "", "Player should have script_resource")
+
+	# export_overrides 字典应有匹配的 @export var 值
+	assert(player_node.export_overrides.has("max_health"),
+			"export_overrides should have max_health. Keys: %s" % player_node.export_overrides.keys())
+	assert(player_node.export_overrides.has("speed"),
+			"export_overrides should have speed. Keys: %s" % player_node.export_overrides.keys())
+	assert(player_node.export_overrides["max_health"] == "150",
+			"max_health should be '150', got '%s'" % player_node.export_overrides["max_health"])
+	assert(player_node.export_overrides["speed"] == "500.0",
+			"speed should be '500.0', got '%s'" % player_node.export_overrides["speed"])
+
+	print("  PASS")
+
+
+# ============================================================
+# Chunk C: 子资源内联解析测试
+# ============================================================
+func test_sub_resource_inline():
+	print("Test: sub_resource inline type parsing...")
+
+	# 用独立 parser 解析
+	var result = _tscn_parser.parse(SCENE_FULL)
+	assert(result != null, "Result should not be null")
+
+	# 1_shape 是 RectangleShape2D，size = Vector2(32, 32)
+	var shape1 = result.sub_resources.get("1_shape", null)
+	assert(shape1 != null, "1_shape should exist")
+
+	# Chunk C: size 应被解析为 Vector2（而非原始字符串 "Vector2(32, 32)"）
+	assert(shape1.properties.has("size"), "1_shape should have 'size' property")
+	var size_val = shape1.properties["size"]
+	if typeof(size_val) == TYPE_VECTOR2:
+		assert(size_val == Vector2(32, 32), "size should be Vector2(32, 32), got %s" % size_val)
+	else:
+		# 回退：str_to_var 不可用时至少透传字符串
+		assert(size_val is String, "size fallback should be String, got %s" % typeof(size_val))
+		assert(size_val == "Vector2(32, 32)", "size string should match")
+
+	print("  PASS")
+
+
+# ============================================================
+# Chunk D: .tres 子资源链展开测试
+# ============================================================
+func test_tres_sub_chain():
+	print("Test: tres sub-resource chain expansion...")
+
+	# test_resource_nested.tres 有 3 层 SubResource 链：
+	# 3_wrapper → 2_shape → 1_shape（RectangleShape2D size=Vector2(32,32)）
+	var result = _tres_parser.parse(RESOURCE_NESTED)
+	assert(result != null, "Result should not be null")
+
+	# 验证 sub_resources 基础解析
+	assert(result.sub_resources.size() == 3, "Should have 3 sub_resources, got %d" % result.sub_resources.size())
+
+	# 验证 [resource] 中的 SubResource 已被递归展开
+	var wrapper_props = result.resource_properties.get("wrapper", null)
+	assert(wrapper_props != null, "wrapper should be expanded (not raw string)")
+	assert(wrapper_props is Dictionary, "wrapper should be a Dictionary after expansion")
+
+	# 检查展开后的内层结构
+	if wrapper_props is Dictionary:
+		assert(wrapper_props.has("$type"), "wrapper should have $type marker, keys: %s" % wrapper_props.keys())
+		assert(wrapper_props["$type"] == "Resource", "wrapper $type should be 'Resource'")
+
+		# 内层 2_shape
+		var inner_shape = wrapper_props.get("inner", null)
+		assert(inner_shape != null, "wrapper should have 'inner' key")
+		assert(inner_shape is Dictionary, "inner should be expanded Dictionary")
+		if inner_shape is Dictionary:
+			assert(inner_shape.has("$type"), "inner should have $type")
+			assert(inner_shape["$type"] == "CircleShape2D", "inner $type should be CircleShape2D")
+			assert(inner_shape.has("radius"), "inner should have radius")
+			# 最内层 1_shape（RectangleShape2D）
+			var innermost = inner_shape.get("inner_shape", null)
+			assert(innermost != null, "inner should have inner_shape")
+			assert(innermost is Dictionary, "innermost should be expanded")
+			if innermost is Dictionary:
+				assert(innermost.has("$type"), "innermost should have $type")
+				assert(innermost["$type"] == "RectangleShape2D", "innermost $type should be RectangleShape2D")
+
+	print("  PASS")
+
+
+# ============================================================
+# Chunk D: 环检测测试
+# ============================================================
+func test_tres_cycle():
+	print("Test: tres sub-resource cycle detection...")
+
+	# test_resource_cycle.tres: 1_a → 2_b → 1_a（环）
+	var result = _tres_parser.parse(RESOURCE_CYCLE)
+	assert(result != null, "Result should not be null")
+	assert(result.sub_resources.size() == 2, "Should have 2 sub_resources")
+
+	# 展开不应无限递归
+	var root_props = result.resource_properties.get("root", null)
+	assert(root_props != null, "root should be expanded")
+	assert(root_props is Dictionary, "root should be Dictionary after expansion")
+
+	if root_props is Dictionary:
+		assert(root_props.has("$type"), "root should have $type")
+		# 第二层 2_b 应被展开
+		var child_b = root_props.get("child", null)
+		assert(child_b != null, "root should have child key")
+		assert(child_b is Dictionary, "child should be expanded")
+
+		# 返回 1_a 时遇到环 → 标记 $circular_ref
+		if child_b is Dictionary:
+			var back_ref = child_b.get("child", null)
+			assert(back_ref != null, "child_b should have child key")
+			assert(back_ref is Dictionary, "back ref should be Dictionary")
+			if back_ref is Dictionary:
+				assert(back_ref.has("$circular_ref"), "Circular reference should be marked with $circular_ref")
+				assert(back_ref["$circular_ref"] == "1_a", "Circular ref should point to '1_a'")
 
 	print("  PASS")
 

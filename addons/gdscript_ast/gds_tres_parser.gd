@@ -33,6 +33,9 @@ var error: String = ""
 var _ext_resources: Dictionary = {}  # String(id) → ExtResourceInfo
 var _sub_resources: Dictionary = {}  # String(id) → SubResourceData
 
+# Chunk A: uid 映射
+var _uid_map: Dictionary = {}  # String(uid_str) → String(res_path)
+
 const SECTION_KIND_MAP := {
 	"gd_resource": SectionKind.GD_RESOURCE,
 	"ext_resource": SectionKind.EXT_RESOURCE,
@@ -42,6 +45,9 @@ const SECTION_KIND_MAP := {
 
 
 # ---- 公开 API ----
+
+func set_uid_map(p_map: Dictionary) -> void:
+	_uid_map = p_map
 
 func parse(p_path: String) -> GDSSceneResourceResult:
 	file_path = p_path
@@ -191,6 +197,10 @@ func _parse_semantics(p_sections: Array) -> GDSSceneResourceResult:
 			SectionKind.RESOURCE:
 				result.resource_properties = _parse_properties(s)
 
+	# Chunk D1: 展开 [resource] 中的 SubResource 引用链
+	if result.resource_properties.size() > 0 and result.sub_resources.size() > 0:
+		result.resource_properties = _expand_sub_resources(result.resource_properties, result.sub_resources)
+
 	return result
 
 func _parse_ext_resource(p_section: SectionData) -> GDSSceneResourceResult.ExtResourceInfo:
@@ -200,6 +210,9 @@ func _parse_ext_resource(p_section: SectionData) -> GDSSceneResourceResult.ExtRe
 	info.type = params.get("type", "")
 	info.path = params.get("path", "")
 	info.uid = params.get("uid", "")
+	# Chunk A2: path 为空且 uid 非空时从 _uid_map 反查
+	if info.path == "" and info.uid != "" and _uid_map.has(info.uid):
+		info.path = _uid_map[info.uid]
 	if info.id.is_empty():
 		return null
 	return info
@@ -212,6 +225,8 @@ func _parse_sub_resource(p_section: SectionData) -> GDSSceneResourceResult.SubRe
 	if data.id.is_empty():
 		return null
 	data.properties = _parse_properties(p_section)
+	# Chunk C1: 常用类型结构化
+	_inline_common_types(data)
 	return data
 
 func _parse_properties(p_section: SectionData) -> Dictionary:
@@ -232,3 +247,45 @@ func _parse_property_line(p_line: String) -> Array:
 	if key.is_empty():
 		return []
 	return [key, value]
+
+
+# ---- Chunk C1: 常用类型结构化（与 tscn 解析器共享逻辑） ----
+
+func _inline_common_types(p_data: GDSSceneResourceResult.SubResourceData) -> void:
+	for key in p_data.properties:
+		var raw: String = p_data.properties[key]
+		var parsed = str_to_var(raw)
+		if parsed != null:
+			p_data.properties[key] = parsed
+
+
+# ---- Chunk D1: .tres SubResource 引用链展开 ----
+
+func _expand_sub_resources(p_props: Dictionary, p_sub_resources: Dictionary) -> Dictionary:
+	# 递归展开 SubResource("id") 引用，含环检测
+	var result: Dictionary = {}
+	for key in p_props:
+		result[key] = _expand_value(p_props[key], p_sub_resources, {})
+	return result
+
+func _expand_value(p_value, p_sub_resources: Dictionary, p_visited: Dictionary):
+	# 如果是 SubResource("id") 引用，递归展开
+	if p_value is String and p_value.begins_with("SubResource(") and p_value.ends_with(")"):
+		var inner = p_value.substr(13, p_value.length() - 15)
+		inner = inner.strip_edges().trim_prefix('"').trim_suffix('"')
+
+		# 环检测：如果 visited 中有此 id，标记环引用
+		if p_visited.has(inner):
+			return {"$circular_ref": inner}
+
+		var sub = p_sub_resources.get(inner, null)
+		if sub != null:
+			p_visited[inner] = true
+			var expanded: Dictionary = {}
+			expanded["$type"] = sub.type
+			for sk in sub.properties:
+				expanded[sk] = _expand_value(sub.properties[sk], p_sub_resources, p_visited)
+			p_visited.erase(inner)
+			return expanded
+
+	return p_value

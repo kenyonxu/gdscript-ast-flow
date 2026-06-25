@@ -1,0 +1,10 @@
+[gd_resource type="Resource" load_steps=3 format=3 uid="uid://test_resource_cycle"]
+
+[sub_resource type="Resource" id="1_a"]
+child = SubResource("2_b")
+
+[sub_resource type="Resource" id="2_b"]
+child = SubResource("1_a")
+
+[resource]
+root = SubResource("1_a")

@@ -17,6 +17,8 @@ script = ExtResource("1_script")
 script = ExtResource("1_script")
 position = Vector2(100, 200)
 collision_layer = 1
+max_health = 150
+speed = 500.0
 
 [node name="CollisionShape" type="CollisionShape2D" parent="Main/Player"]
 shape = SubResource("1_shape")

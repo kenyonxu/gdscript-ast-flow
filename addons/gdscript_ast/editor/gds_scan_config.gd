@@ -8,6 +8,10 @@ const SETTING_ENABLED := "gdscript_ast/scan/enabled"
 const SETTING_INCLUDE := "gdscript_ast/scan/include"
 const SETTING_EXCLUDE := "gdscript_ast/scan/exclude"
 
+# Chunk E1: .tscn/.tres 扫描开关
+const SETTING_SCAN_SCENES := "gdscript_ast/scan/scenes"
+const SETTING_SCAN_RESOURCES := "gdscript_ast/scan/resources"
+
 static var DEFAULT_EXCLUDE: PackedStringArray = PackedStringArray(["res://addons", "res://.godot", "res://.git"])
 
 static func is_enabled() -> bool:
@@ -20,6 +24,13 @@ static func get_include_dirs() -> Array:
 static func get_exclude_dirs() -> Array:
 	var arr: PackedStringArray = ProjectSettings.get_setting(SETTING_EXCLUDE, DEFAULT_EXCLUDE)
 	return Array(arr)
+
+# Chunk E1: .tscn/.tres 扫描开关
+static func is_scan_scenes_enabled() -> bool:
+	return ProjectSettings.get_setting(SETTING_SCAN_SCENES, true)
+
+static func is_scan_resources_enabled() -> bool:
+	return ProjectSettings.get_setting(SETTING_SCAN_RESOURCES, true)
 
 # 兼容旧 API：save_config(dirs, exclude) — 桥接到 ProjectSettings
 static func save_config(p_include: Array, p_exclude: Array = []) -> void:

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" load_steps=4 format=3 uid="uid://test_resource_nested"]
+
+[ext_resource type="Script" path="res://tests/fixtures/test_script_for_scene.gd" id="1_script"]
+
+[sub_resource type="RectangleShape2D" id="1_shape"]
+size = Vector2(32, 32)
+
+[sub_resource type="CircleShape2D" id="2_shape"]
+radius = 10.0
+inner_shape = SubResource("1_shape")
+
+[sub_resource type="Resource" id="3_wrapper"]
+inner = SubResource("2_shape")
+
+[resource]
+script = ExtResource("1_script")
+wrapper = SubResource("3_wrapper")

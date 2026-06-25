@@ -5,6 +5,9 @@
 class_name GDScriptProjectAnalyzer
 extends RefCounted
 
+# Chunk A2: uid_map 缓存，由 analyze_all 初始化
+var _uid_map: Dictionary = {}  # String(uid_str) → String(res_path)
+
 # 按配置扫描 — 读 GDSScanConfig 的 include/exclude 目录
 func scan_project() -> Array:
 	var includes = GDSScanConfig.get_include_dirs()
@@ -33,8 +36,11 @@ func _scan_dir(p_dir: String, p_list: Array, p_excludes: Array) -> void:
 			continue
 		if da.current_is_dir():
 			_scan_dir(full, p_list, p_excludes)
-		elif name.ends_with(".gd") or name.ends_with(".tscn") or name.ends_with(".tres"):
-			p_list.append(full)
+		else:
+			var is_scene = name.ends_with(".tscn")
+			var is_resource = name.ends_with(".tres")
+			if name.ends_with(".gd") or (is_scene and GDSScanConfig.is_scan_scenes_enabled()) or (is_resource and GDSScanConfig.is_scan_resources_enabled()):
+				p_list.append(full)
 		name = da.get_next()
 	da.list_dir_end()
 
@@ -45,6 +51,45 @@ func _is_excluded(p_path: String, p_excludes: Array) -> bool:
 		if p_path == excl or p_path.begins_with(excl + "/"):
 			return true
 	return false
+
+
+# ---- Chunk A2: uid 映射收集 ----
+
+func _collect_uid_map() -> Dictionary:
+	# 扫描配置覆盖的目录下所有 .uid 文件，建 {uid_string → res_path} 映射
+	var m: Dictionary = {}
+	var includes = GDSScanConfig.get_include_dirs()
+	var excludes = GDSScanConfig.get_exclude_dirs()
+	for base in includes:
+		if base == "":
+			continue
+		_scan_uid_in_dir(base, m, excludes)
+	return m
+
+func _scan_uid_in_dir(p_dir: String, p_map: Dictionary, p_excludes: Array) -> void:
+	var da = DirAccess.open(p_dir)
+	if da == null:
+		return
+	da.list_dir_begin()
+	var name = da.get_next()
+	while name != "":
+		if name in [".", ".."]:
+			name = da.get_next()
+			continue
+		var full = p_dir.path_join(name)
+		if _is_excluded(full, p_excludes):
+			name = da.get_next()
+			continue
+		if da.current_is_dir():
+			_scan_uid_in_dir(full, p_map, p_excludes)
+		elif name.ends_with(".uid"):
+			# .uid 文件内容就是 uid 字符串（如 "uid://cxixtvlqumj56"）
+			var uid_str = FileAccess.get_file_as_string(full).strip_edges()
+			# 去掉 .uid 后缀即对应资源路径
+			var res_path = full.trim_suffix(".uid")
+			p_map[uid_str] = res_path
+		name = da.get_next()
+	da.list_dir_end()
 
 
 # ---- 单文件管道 ----
@@ -70,8 +115,10 @@ func _analyze_gd_file(p_path: String) -> GDScriptAnalysisResult:
 
 
 # 分析 .tscn 场景文件（Chunk D3）
-func _analyze_scene_file(p_path: String) -> GDSSceneResourceResult:
+func _analyze_scene_file(p_path: String, p_script_results: Dictionary = {}) -> GDSSceneResourceResult:
 	var parser = GDScriptTscnParser.new()
+	parser.set_uid_map(_uid_map)
+	parser.set_script_analysis_results(p_script_results)
 	var result = parser.parse(p_path)
 	if parser.error != "":
 		push_warning("[ProjectAnalyzer] Tscn parse error in %s: %s" % [p_path, parser.error])
@@ -81,10 +128,22 @@ func _analyze_scene_file(p_path: String) -> GDSSceneResourceResult:
 # 分析 .tres 资源文件（Chunk D3）
 func _analyze_resource_file(p_path: String) -> GDSSceneResourceResult:
 	var parser = GDScriptTresParser.new()
+	parser.set_uid_map(_uid_map)
 	var result = parser.parse(p_path)
 	if parser.error != "":
 		push_warning("[ProjectAnalyzer] Tres parse error in %s: %s" % [p_path, parser.error])
 	return result
+
+
+# 通用单文件分析调度（按后缀路由到对应分析器）
+func _analyze_file(p_path: String):
+	if p_path.ends_with(".gd"):
+		return _analyze_gd_file(p_path)
+	elif p_path.ends_with(".tscn"):
+		return _analyze_scene_file(p_path)
+	elif p_path.ends_with(".tres"):
+		return _analyze_resource_file(p_path)
+	return null
 
 
 # ---- 全量分析 ----
@@ -92,21 +151,29 @@ func _analyze_resource_file(p_path: String) -> GDSSceneResourceResult:
 func analyze_all() -> GDScriptProjectResult:
 	var result = GDScriptProjectResult.new()
 	result.root_path = "res://"
+
+	# Chunk A2: 收集 uid 映射
+	_uid_map = _collect_uid_map()
+	result.uid_map = _uid_map
+
 	var paths = scan_project()
 	for path in paths:
 		if path.ends_with(".gd"):
 			var file_result = _analyze_gd_file(path)
 			if file_result != null:
 				result.files[path] = file_result
-		elif path.ends_with(".tscn"):
-			var scene_result = _analyze_scene_file(path)
+	_build_class_registry(result)
+
+	# 第二遍：分析 .tscn（此时 files 已满，可查 script exports）
+	for path in paths:
+		if path.ends_with(".tscn"):
+			var scene_result = _analyze_scene_file(path, result.files)
 			if scene_result != null:
 				result.scenes[path] = scene_result
 		elif path.ends_with(".tres"):
 			var res_result = _analyze_resource_file(path)
 			if res_result != null:
 				result.resources[path] = res_result
-	_build_class_registry(result)
 	return result
 
 
@@ -282,11 +349,14 @@ func _resolve_script_path(p_script_path: String, p_project: GDScriptProjectResul
 	if p_project.files.has(p_script_path):
 		return p_script_path
 
-	# 3. uid / 值匹配兜底
-	for cls_name in p_project.class_registry:
-		var fp = p_project.class_registry[cls_name]
-		if fp == p_script_path:
-			return fp
+	# 3. Chunk A3: uid 匹配 — 查 uid_map
+	if p_script_path in p_project.uid_map:
+		return p_project.uid_map[p_script_path]
+	# 也尝试提取 uid 字符串前缀匹配
+	if p_script_path.begins_with("uid://"):
+		var resolved = p_project.uid_map.get(p_script_path, "")
+		if resolved != "":
+			return resolved
 
 	return ""
 

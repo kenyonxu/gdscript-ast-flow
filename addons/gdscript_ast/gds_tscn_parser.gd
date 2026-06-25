@@ -41,6 +41,12 @@ var _editable_paths: Array = []  # of String
 var _scene_uid: String = ""
 var _load_steps: int = 0
 
+# Chunk A: uid 映射（由 analyzer 传入）
+var _uid_map: Dictionary = {}  # String(uid_str) → String(res_path)
+
+# Chunk B: 脚本分析结果（由 analyzer 传入，用于 @export 匹配）
+var _script_analysis_results: Dictionary = {}  # String(path) → GDScriptAnalysisResult
+
 # 节常量
 const SECTION_KIND_MAP := {
 	"gd_scene": SectionKind.GD_SCENE,
@@ -89,6 +95,15 @@ func parse_text(p_text: String, p_virtual_path: String) -> GDSSceneResourceResul
 	# 第二遍：语义解析
 	var result = _parse_semantics(sections)
 	return result
+
+
+# ---- 外部数据注入 ----
+
+func set_uid_map(p_map: Dictionary) -> void:
+	_uid_map = p_map
+
+func set_script_analysis_results(p_results: Dictionary) -> void:
+	_script_analysis_results = p_results
 
 
 # ---- 内部: 重置状态 ----
@@ -280,6 +295,9 @@ func _parse_ext_resource(p_section: SectionData) -> void:
 	info.type = params.get("type", "")
 	info.path = params.get("path", "")
 	info.uid = params.get("uid", "")
+	# Chunk A2: path 为空且 uid 非空时从 _uid_map 反查
+	if info.path == "" and info.uid != "" and _uid_map.has(info.uid):
+		info.path = _uid_map[info.uid]
 	if info.id != "":
 		_ext_resources[info.id] = info
 
@@ -290,6 +308,8 @@ func _parse_sub_resource(p_section: SectionData) -> void:
 	data.type = params.get("type", "")
 	if data.id != "":
 		data.properties = _parse_key_value_props(p_section)
+		# Chunk C1: 常用类型结构化
+		_inline_common_types(data)
 		_sub_resources[data.id] = data
 
 
@@ -324,6 +344,15 @@ func _parse_node(p_section: SectionData) -> void:
 					node.script_resource = ref.path
 			# 普通 ExtResource / SubResource 引用
 			_resolve_ref_in_value(key, value, node)
+
+	# Chunk B1: @export 填充值提取
+	# 节点 script_resource 非空时，取脚本 AnalysisResult 的 @export var 声明列表，
+	# 节点属性行中匹配这些变量名 → node.export_overrides[var_name] = value
+	if node.script_resource != "":
+		var export_names = _get_script_exports(node.script_resource)
+		for key in node.properties:
+			if key in export_names:
+				node.export_overrides[key] = node.properties[key]
 
 	# 用 parent_path + "/" + name 做键，避免重名节点丢失
 	var node_key = node_name if node.parent_path in [".", ""] else node.parent_path + "/" + node_name
@@ -434,6 +463,27 @@ func _parse_key_value_props(p_section: SectionData) -> Dictionary:
 		if kv.size() >= 2:
 			props[kv[0]] = kv[1]
 	return props
+
+func _inline_common_types(p_data: GDSSceneResourceResult.SubResourceData) -> void:
+	# Chunk C1: 对 sub_resource 属性做常用类型结构化（Vector2/Color/Rect2/NodePath 等）
+	for key in p_data.properties:
+		var raw: String = p_data.properties[key]
+		# str_to_var 可以解析 Vector2(1,2)、Color(1,1,1) 等 Godot 内置类型字面量
+		var parsed = str_to_var(raw)
+		if parsed != null:
+			p_data.properties[key] = parsed
+
+func _get_script_exports(p_script_path: String) -> Array:
+	# Chunk B1: 从脚本分析结果中提取 @export var 的变量名列表
+	var result = _script_analysis_results.get(p_script_path, null)
+	if result == null or result.symbol_table == null:
+		return []
+	var exports: Array = []
+	for sym_name in result.symbol_table.symbols:
+		var sym = result.symbol_table.symbols[sym_name]
+		if sym.is_exported:
+			exports.append(sym.name)
+	return exports
 
 func _resolve_ref_in_value(p_key: String, p_value: String, p_node: GDSSceneResourceResult.SceneNodeData) -> void:
 	# 检查是否是 ExtResource("id")
