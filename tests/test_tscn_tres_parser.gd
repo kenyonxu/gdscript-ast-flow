@@ -65,14 +65,19 @@ func test_tscn_full():
 	assert(result.sub_resources.has("2_shape"), "Should have 2_shape")
 	assert(result.sub_resources.has("3_shape"), "Should have 3_shape")
 
-	# node 节 — 检查根节点
-	assert(result.root_nodes.size() >= 1, "Should have at least 1 root node")
-	var main_node = _find_root_by_name(result, "Main")
-	assert(main_node != null, "Main node should exist")
+	# node 节 — 单根节点设计
+	assert(result.root_nodes.size() == 1, "Should have exactly 1 root node, got %d" % result.root_nodes.size())
+	var main_node = result.root_nodes[0]
+	assert(main_node.name == "Main", "Root node should be named Main")
 	assert(main_node.type == "Node", "Main type should be Node")
 
-	var player_node = _find_root_by_name(result, "Player")
-	assert(player_node != null, "Player should be a root node (parent='.')")
+	# Player 是 Main 的子节点
+	var player_node = null
+	for child in main_node.children:
+		if child.name == "Player":
+			player_node = child
+			break
+	assert(player_node != null, "Player should be a child of Main")
 	assert(player_node.type == "CharacterBody2D", "Player type mismatch")
 
 	# 子节点
@@ -83,7 +88,24 @@ func test_tscn_full():
 
 	# [editable] 节
 	assert(result.editable_paths.size() >= 1, "Should have editable paths")
-	assert(result.editable_paths.has("SubScene"), "Editable should include SubScene")
+	assert(result.editable_paths.has("Main/SubScene"), "Editable should include Main/SubScene")
+
+	# 验证重名节点（两个 Icon 在不同父节点下）
+	var container_a = null
+	var container_b = null
+	for child in main_node.children:
+		if child.name == "ContainerA":
+			container_a = child
+		elif child.name == "ContainerB":
+			container_b = child
+	assert(container_a != null, "ContainerA should exist")
+	assert(container_b != null, "ContainerB should exist")
+	assert(container_a.children.size() == 1, "ContainerA should have 1 child, got %d" % container_a.children.size())
+	assert(container_b.children.size() == 1, "ContainerB should have 1 child, got %d" % container_b.children.size())
+	assert(container_a.children[0].name == "Icon", "ContainerA child should be Icon")
+	assert(container_b.children[0].name == "Icon", "ContainerB child should be Icon")
+	# 两个 Icon 是不同的节点对象（重名不丢失）
+	assert(container_a.children[0] != container_b.children[0], "Two Icon nodes should be different objects")
 
 	print("  PASS")
 
@@ -151,7 +173,7 @@ func test_signals():
 	assert(pressed_conns.size() >= 1, "Should have pressed signal connection")
 	var pressed = pressed_conns[0]
 	assert(pressed.signal_name == "pressed", "Signal name should be pressed")
-	assert(pressed.from_node == "UI/HUD/Button", "from_node mismatch")
+	assert(pressed.from_node == "Main/UI/HUD/Button", "from_node mismatch")
 	assert(pressed.method == "_on_button_pressed", "method mismatch")
 	assert(pressed.flags == 0, "pressed flags should be 0")
 

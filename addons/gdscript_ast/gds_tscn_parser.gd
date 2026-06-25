@@ -35,7 +35,7 @@ var error: String = ""
 # ---- 内部状态 ----
 var _ext_resources: Dictionary = {}  # String(id) → ExtResourceInfo
 var _sub_resources: Dictionary = {}  # String(id) → SubResourceData
-var _nodes: Dictionary = {}  # String(name) → SceneNodeData（临时构建用）
+var _nodes: Dictionary = {}  # String(full_path) → SceneNodeData（临时构建用）
 var _connections: Array = []  # of SignalConnectionData
 var _editable_paths: Array = []  # of String
 var _scene_uid: String = ""
@@ -337,7 +337,9 @@ func _parse_node(p_section: SectionData) -> void:
 			# 普通 ExtResource / SubResource 引用
 			_resolve_ref_in_value(key, value, node)
 
-	_nodes[node_name] = node
+	# 用 parent_path + "/" + name 做键，避免重名节点丢失
+	var node_key = node_name if node.parent_path in [".", ""] else node.parent_path + "/" + node_name
+	_nodes[node_key] = node
 
 func _parse_connection(p_section: SectionData) -> void:
 	var params = p_section.header_params
@@ -400,94 +402,28 @@ func get_flag_names(p_flags: int) -> Array:
 # ---- Chunk B5: 节点树重建 ----
 
 func _build_node_tree(p_result: GDSSceneResourceResult) -> void:
-	# 第一步：计算每个节点的完整路径
-	# 使用临时字典存储 name → (node, full_path) 映射
-	var name_to_node: Dictionary = {}  # String(name) → SceneNodeData
-	var name_to_path: Dictionary = {}  # String(name) → String(full_path)
+	# _nodes 的 key 已经是 full_path（parent_path + "/" + name）
+	# 直接填充 nodes_flat 和建立父子关系
 
-	# 先计算所有根节点（parent == "."）
-	for node_name in _nodes:
-		var node: GDSSceneResourceResult.SceneNodeData = _nodes[node_name]
-		name_to_node[node_name] = node
-		if node.parent_path == ".":
-			name_to_path[node_name] = node_name
-		else:
-			# 延迟计算：等根节点路径确定后再算
-			name_to_path[node_name] = ""
+	# 第一步：填充平铺索引
+	for key in _nodes:
+		p_result.nodes_flat[key] = _nodes[key]
 
-	# 递归解决 full_path（最多 256 层深度防循环）
-	var max_iter: int = _nodes.size() * 2
-	var iter: int = 0
-	var resolved: bool = false
-	while not resolved and iter < max_iter:
-		resolved = true
-		for node_name in name_to_node:
-			if name_to_path[node_name] != "":
-				continue
-			var node: GDSSceneResourceResult.SceneNodeData = name_to_node[node_name]
-			if name_to_path.has(node.parent_path):
-				var parent_full: String = name_to_path[node.parent_path]
-				if parent_full != "":
-					name_to_path[node_name] = parent_full + "/" + node_name
-				else:
-					resolved = false
-			else:
-				# parent_path 可能包含多层如 "Parent/Grandparent"
-				var parts = node.parent_path.split("/")
-				var parent_name = parts[-1]  # 最后一节是直接父节点名... 其实不对，parent_path 是完整的路径
-				# 以 "/" 分割的完整路径——需要用完整路径索引父节点
-				if name_to_path.has(parent_name) and name_to_path[parent_name] != "":
-					name_to_path[node_name] = name_to_path[parent_name] + "/" + node_name
-				else:
-					resolved = false
-		iter += 1
+	# 第二步：构建 root_nodes 和 children 树
+	for key in _nodes:
+		var node: GDSSceneResourceResult.SceneNodeData = _nodes[key]
 
-	# 对于仍未解析的节点，使用 parent_path/name 作为 fallback
-	for node_name in name_to_node:
-		if name_to_path[node_name] == "":
-			var node: GDSSceneResourceResult.SceneNodeData = name_to_node[node_name]
-			name_to_path[node_name] = node.parent_path.trim_prefix("./") + "/" + node_name
-
-	# 第二步：填充 p_result.nodes_flat
-	for node_name in name_to_node:
-		var full_path: String = name_to_path[node_name]
-		var node: GDSSceneResourceResult.SceneNodeData = name_to_node[node_name]
-		# 深拷贝节点（避免外部对 _nodes 的引用影响）
-		p_result.nodes_flat[full_path] = node
-
-	# 第三步：构建 root_nodes 和 children 树
-	for node_name in name_to_node:
-		var node: GDSSceneResourceResult.SceneNodeData = name_to_node[node_name]
-
-		if node.parent_path == ".":
+		if node.parent_path in [".", ""]:
 			# 根节点
 			p_result.root_nodes.append(node)
 		else:
-			# 找到父节点
-			# 尝试按 full_path 查找（通用）
-			var parent_path_full: String = name_to_path.get(node.parent_path, "")
-			if parent_path_full != "":
-				# parent 字段指向另一个节点的名字
-				var parent_node = p_result.nodes_flat.get(parent_path_full, null)
-				if parent_node != null:
-					parent_node.children.append(node)
-					continue
-
-			# 尝试按 parent_path 直接作为名字查找
-			var parent_node = name_to_node.get(node.parent_path, null)
-			if parent_node != null:
-				parent_node.children.append(node)
-				continue
-
-			# parent_path 可能是多级路径
-			var parent_full_candidate = node.parent_path
-			var candidate = p_result.nodes_flat.get(parent_full_candidate, null)
-			if candidate != null:
-				candidate.children.append(node)
-				continue
-
-			# 如果所有查找都失败，作为根节点处理
-			p_result.root_nodes.append(node)
+			# parent_path 即是父节点的完整路径键
+			var parent = _nodes.get(node.parent_path, null)
+			if parent != null:
+				parent.children.append(node)
+			else:
+				# 父节点未找到时作为根节点处理
+				p_result.root_nodes.append(node)
 
 
 # ---- 内部: 属性/值解析工具 ----
