@@ -614,8 +614,8 @@ func _parse_suite() -> GDScriptToken.SuiteNode:
 		return suite  # pass (空函数体)
 
 	while _peek() and _peek().type not in [GDScriptToken.Type.DEDENT, GDScriptToken.Type.TK_EOF]:
-		# 跳过前导分号（空语句）（Chunk C2）
-		while _match(GDScriptToken.Type.SEMICOLON):
+		# 跳过前导 NEWLINE 和分号（空语句/空行）（Chunk C2）
+		while _match(GDScriptToken.Type.NEWLINE) or _match(GDScriptToken.Type.SEMICOLON):
 			pass
 		if _peek() and _peek().type in [GDScriptToken.Type.DEDENT, GDScriptToken.Type.TK_EOF]:
 			break
@@ -628,9 +628,8 @@ func _parse_suite() -> GDScriptToken.SuiteNode:
 			# 否则本循环会无限自旋（编辑器保存时锁死的根因）
 			_set_error("非预期的语句令牌: %s" % _peek().get_name())
 			_advance()
-		# 每个语句后跳过 NEWLINE 或分号（Chunk C2）
-		_match(GDScriptToken.Type.NEWLINE)
-		while _match(GDScriptToken.Type.SEMICOLON):
+		# 每个语句后跳过 NEWLINE 和分号的任意组合（含 ;\n、\n;、;;）（Chunk C2）
+		while _match(GDScriptToken.Type.NEWLINE) or _match(GDScriptToken.Type.SEMICOLON):
 			pass
 
 	_expect(GDScriptToken.Type.DEDENT)
