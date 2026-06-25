@@ -16,6 +16,9 @@ var _signal_view: GDSSignalGraphView = null
 var _project_view: GDSProjectGraphView = null
 var _min_degree: int = 0
 var _legend: HBoxContainer = null
+# Chunk A: 场景 mode
+var _scene_main_screen: Control = null
+var _code_toolbar: HBoxContainer = null
 
 func setup(p_bridge: GDSAnalysisBridge, p_l10n: GDSL10n = null) -> void:
 	_bridge = p_bridge
@@ -41,38 +44,48 @@ func _build_ui() -> void:
 	var toolbar = HBoxContainer.new()
 	toolbar.size_flags_horizontal = SIZE_EXPAND_FILL
 	add_child(toolbar)
+	# ——— Mode 切换（代码分析 / 场景）———
+	var mode_box = OptionButton.new()
+	mode_box.add_item(_l10n.t("mode.code_analysis"), 0)
+	mode_box.add_item(_l10n.t("mode.scene"), 1)
+	mode_box.item_selected.connect(_on_mode_changed)
+	toolbar.add_child(mode_box)
+	# ——— 代码分析专用 toolbar（方便 mode 切换时整体显隐）———
+	_code_toolbar = HBoxContainer.new()
+	_code_toolbar.size_flags_horizontal = SIZE_EXPAND_FILL
+	toolbar.add_child(_code_toolbar)
 	# Scope 切换
 	var scope_box = OptionButton.new()
 	scope_box.add_item(_l10n.t("scope.current_file"), 0)
 	scope_box.add_item(_l10n.t("scope.project"), 1)
 	scope_box.item_selected.connect(func(i): _scope = i; _rebuild())
-	toolbar.add_child(scope_box)
+	_code_toolbar.add_child(scope_box)
 	# Graph 类型切换
 	var kind_box = OptionButton.new()
 	kind_box.add_item(_l10n.t("graph.call"), 0)
 	kind_box.add_item(_l10n.t("graph.signal"), 1)
 	kind_box.item_selected.connect(func(i): _graph_kind = i; _rebuild())
-	toolbar.add_child(kind_box)
+	_code_toolbar.add_child(kind_box)
 	# Re-layout
 	var relayout = Button.new()
 	relayout.text = _l10n.t("btn.relayout")
 	relayout.pressed.connect(_on_relayout)
-	toolbar.add_child(relayout)
+	_code_toolbar.add_child(relayout)
 	# Min-degree 筛选
 	var thresh_label = Label.new()
 	thresh_label.text = _l10n.t("label.min_degree")
-	toolbar.add_child(thresh_label)
+	_code_toolbar.add_child(thresh_label)
 	var thresh_box = SpinBox.new()
 	thresh_box.min_value = 0
 	thresh_box.max_value = 20
 	thresh_box.value = 0
 	thresh_box.value_changed.connect(func(v): _min_degree = v; _rebuild())
-	toolbar.add_child(thresh_box)
+	_code_toolbar.add_child(thresh_box)
 	# Export JSON 按钮
 	var export_btn = Button.new()
 	export_btn.text = _l10n.t("btn.export_json")
 	export_btn.pressed.connect(_on_export)
-	toolbar.add_child(export_btn)
+	_code_toolbar.add_child(export_btn)
 	# 图例（按当前视图动态填充，见 _refresh_legend）
 	_legend = HBoxContainer.new()
 	add_child(_legend)
@@ -121,6 +134,28 @@ func _refresh_legend() -> void:
 
 func _on_data_changed(_arg = null) -> void:
 	_rebuild()
+
+# ——— 场景 mode 切换 ———
+func _on_mode_changed(i: int) -> void:
+	var code_mode := (i == 0)
+	# 代码分析控件
+	if _code_toolbar:
+		_code_toolbar.visible = code_mode
+	if _legend:
+		_legend.visible = code_mode
+	if _graph_edit:
+		_graph_edit.visible = code_mode
+	# 场景控件
+	if i == 1:
+		if _scene_main_screen == null:
+			_scene_main_screen = preload("res://addons/gdscript_ast/editor/scene/gds_scene_main_screen.gd").new()
+			_scene_main_screen.setup(_bridge, _l10n)
+			add_child(_scene_main_screen)
+		_scene_main_screen.visible = true
+		_scene_main_screen.rebuild_active()
+	else:
+		if _scene_main_screen:
+			_scene_main_screen.visible = false
 
 func _rebuild() -> void:
 	# set_graph 内部已做清空（remove_child + clear_connections），此处无需重复
