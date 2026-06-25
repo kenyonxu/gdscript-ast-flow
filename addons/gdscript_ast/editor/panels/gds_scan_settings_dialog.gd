@@ -154,6 +154,8 @@ func _on_save() -> void:
 	ProjectSettings.set_setting(GDSScanConfig.SETTING_SCAN_SCENES, _scenes_check.button_pressed)
 	ProjectSettings.set_setting(GDSScanConfig.SETTING_SCAN_RESOURCES, _resources_check.button_pressed)
 
+	ProjectSettings.save()  # 持久化到 project.godot（否则重启丢失）
+
 	if _enabled_check.button_pressed:
 		print("[GDScriptUtil] Project scan enabled with %d include, %d exclude dirs." % [inc_arr.size(), exc_arr.size()])
 	else:
