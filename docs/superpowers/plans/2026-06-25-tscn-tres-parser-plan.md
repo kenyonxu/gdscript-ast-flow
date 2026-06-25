@@ -106,8 +106,20 @@
 ### Task F1: 测试 fixtures
 `test_scene_full.tscn`（6种节全覆盖 + script关联 + signals + editable）、`test_resource.tres`、`test_script_for_scene.gd`
 
-### Task F2: 测试用例（6 套）
-test_tscn_full / test_script_assoc / test_signals / test_tres / test_json_schema / test_script_attach
+### Task F2: 测试用例（8 套）
+test_tscn_full / test_script_assoc / test_signals / test_tres / test_json_schema / test_script_attach / test_tscn_simple / test_tscn_flags_value
+
+---
+
+## Chunk G: 稳定轮（PLAN 之后的 review fix）
+
+代码实现完成后的一轮 review，5 个修复（git log 可查）：
+
+- **C1** (`fd93467`): `_build_node_tree` 用 `parent_path + '/' + name` 做键，消除重名节点丢失
+- **I1** (`e12ca96`): header `key=value` 解析改为读值到空格再 strip 引号，避免 `=` 截断
+- **I2** (`3d2bcf9`): `_parse_binds_value` 用括号深度感知 + `str_to_var` 替换逗号分割
+- **M1+M6** (`569bdb7`): `substr` 精度 + `_resolve_script_path` 优先级
+- **作用域** (`6dbce67`): `_parse_binds_value` fallback 作用域避免变量名冲突
 
 ---
 

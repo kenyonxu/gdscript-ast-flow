@@ -1,6 +1,13 @@
 # .tscn / .tres 场景与资源文件解析器 设计规范
 
-> 日期: 2026-06-25 | 状态: 设计中 | 依赖: CodeGraph JSON 导出 (已完成 ✅)、跨文件分析 Phase 3.2 (已完成 ✅)
+> 日期: 2026-06-25 | 状态: 已实现 ✅ | 依赖: CodeGraph JSON 导出 (已完成 ✅)、跨文件分析 Phase 3.2 (已完成 ✅)
+
+## 修订历史
+
+| 日期 | 变更 |
+|------|------|
+| 2026-06-25 | 初版（事后补：代码已先于文档完成 Chunk A–F + 稳定轮）|
+| 2026-06-25 | 文档↔代码对齐：删 SubResourceData.refs；JSON 示例 uid→scene_uid、删 node_tree；§5.2 签名同步为 (p_project)；typed Array 加全局说明 |
 
 ## 一、动机
 
@@ -201,6 +208,8 @@ ExtResource("1_script")
 
 ## 四、架构设计
 
+> **实现注**：下文类图中的 `Array[T]` 为示意。GDScript inner class 不支持以同文件 inner class 作 typed array 元素，实际代码用弱类型 `Array`（注释标明元素类型）。数据模型字段以 `gds_scene_resource_result.gd` 实际代码为准。
+
 ### 4.1 新增文件
 
 ```
@@ -326,7 +335,6 @@ class SubResourceData:
     var id: String = ""
     var type: String = ""
     var properties: Dictionary = {}  # 完整属性键值对
-    var refs: Dictionary = {}        # 对其他 SubResource 的引用
 
 # 信号连接数据
 class SignalConnectionData:
@@ -390,9 +398,11 @@ func parse(p_path: String) -> GDSSceneResourceResult
 ```gdscript
 # GDScriptProjectAnalyzer 新增私有方法
 
+# 注：Codex 实现时改为接收整个 project（需访问 class_registry/files），
+# 见 plan D4「Codex 判断标记」。下文逻辑注释中的 scene/resource 结果
+# 通过 p_project.scenes / p_project.resources 访问。
 func _integrate_scene_resources(
-    p_scene_results: Dictionary,    # String(path) → GDSSceneResourceResult
-    p_resource_results: Dictionary  # String(path) → GDSSceneResourceResult
+    p_project: GDScriptProjectResult
 ) -> void:
     # 1. 建立 script_associations
     #    对每个 scene_result，遍历所有节点：
@@ -450,28 +460,11 @@ UI 节点 → 关联脚本 → AnalysisResult 有 _on_health_changed() 方法？
   "scenes": {
     "res://scenes/player.tscn": {
       "file_type": "TSCN",
-      "uid": "uid://player_scene_001",
+      "scene_uid": "uid://player_scene_001",
       "load_steps": 5,
       "root_nodes": [...],
-      "node_tree": {                    // 按 parent 引用的完整树
-        "name": "Player",
-        "type": "CharacterBody2D",
-        "script": "res://player.gd",    // 关联脚本路径
-        "script_class": "Player",       // 若脚本有 class_name 则填充
-        "export_overrides": {           // @export 槽填充值（P1）
-          "max_health": 100,
-          "speed": 400.0
-        },
-        "children": [
-          {
-            "name": "Sprite",
-            "type": "Sprite2D",
-            "properties": {
-              "texture": "ExtResource(\"2_tex\") → res://assets/player.png"
-            }
-          }
-        ]
-      },
+      // 注：节点树通过 root_nodes 内 children 递归表达，无独立 node_tree 字段；
+      // script_class 不在节点 to_dict 中，仅在顶层 script_associations 里输出
       "signal_connections": [
         {
           "signal": "pressed",
