@@ -468,6 +468,9 @@ func _inline_common_types(p_data: GDSSceneResourceResult.SubResourceData) -> voi
 	# Chunk C1: 对 sub_resource 属性做常用类型结构化（Vector2/Color/Rect2/NodePath 等）
 	for key in p_data.properties:
 		var raw: String = p_data.properties[key]
+		# 跳过资源引用字面量——str_to_var 会误触发 ResourceLoader.load
+		if raw.begins_with("SubResource(") or raw.begins_with("ExtResource("):
+			continue
 		# str_to_var 可以解析 Vector2(1,2)、Color(1,1,1) 等 Godot 内置类型字面量
 		var parsed = str_to_var(raw)
 		if parsed != null:

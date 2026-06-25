@@ -429,9 +429,9 @@ func test_export_overrides():
 
 	# export_overrides 字典应有匹配的 @export var 值
 	assert(player_node.export_overrides.has("max_health"),
-			"export_overrides should have max_health. Keys: %s" % player_node.export_overrides.keys())
+			"export_overrides should have max_health. Keys: %s" % [player_node.export_overrides.keys()])
 	assert(player_node.export_overrides.has("speed"),
-			"export_overrides should have speed. Keys: %s" % player_node.export_overrides.keys())
+			"export_overrides should have speed. Keys: %s" % [player_node.export_overrides.keys()])
 	assert(player_node.export_overrides["max_health"] == "150",
 			"max_health should be '150', got '%s'" % player_node.export_overrides["max_health"])
 	assert(player_node.export_overrides["speed"] == "500.0",
@@ -488,7 +488,7 @@ func test_tres_sub_chain():
 
 	# 检查展开后的内层结构
 	if wrapper_props is Dictionary:
-		assert(wrapper_props.has("$type"), "wrapper should have $type marker, keys: %s" % wrapper_props.keys())
+		assert(wrapper_props.has("$type"), "wrapper should have $type marker, keys: %s" % [wrapper_props.keys()])
 		assert(wrapper_props["$type"] == "Resource", "wrapper $type should be 'Resource'")
 
 		# 内层 2_shape

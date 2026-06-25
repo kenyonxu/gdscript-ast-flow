@@ -254,6 +254,9 @@ func _parse_property_line(p_line: String) -> Array:
 func _inline_common_types(p_data: GDSSceneResourceResult.SubResourceData) -> void:
 	for key in p_data.properties:
 		var raw: String = p_data.properties[key]
+		# 跳过资源引用字面量——str_to_var 会误触发 ResourceLoader.load
+		if raw.begins_with("SubResource(") or raw.begins_with("ExtResource("):
+			continue
 		var parsed = str_to_var(raw)
 		if parsed != null:
 			p_data.properties[key] = parsed
