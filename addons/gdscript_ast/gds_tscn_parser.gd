@@ -481,31 +481,49 @@ func _parse_groups_value(p_value: String) -> Array:
 	return groups
 
 func _parse_binds_value(p_value: String) -> Array:
-	# 解析 binds=Array[Type]([...]) 格式
-	# 查找最内层的 [...] 内容
-	var bracket_start = p_value.find("[")
-	var bracket_end = p_value.rfind("]")
-	if bracket_start == -1 or bracket_end == -1 or bracket_end <= bracket_start:
-		return []
-	var inner = p_value.substr(bracket_start + 1, bracket_end - bracket_start - 1)
-	if inner.is_empty():
-		return []
+	# 解析 binds=Array[Type]([...]) 或 binds=[...] 格式
+	# 括号深度感知提取，再用 str_to_var 解析
 
-	# 简单的逗号分割（不考虑嵌套，因为 binds 值通常是简单类型）
-	var items: Array = []
-	var parts = inner.split(",")
-	for part in parts:
-		var item_str = part.strip_edges()
-		if item_str != "":
-			# 尝试解析为数字
-			if item_str.is_valid_int():
-				items.append(int(item_str))
-			elif item_str.is_valid_float():
-				items.append(float(item_str))
-			elif item_str == "true" or item_str == "false":
-				items.append(item_str == "true")
-			else:
-				# 去掉引号，作为字符串保存
-				item_str = item_str.trim_prefix('"').trim_suffix('"')
-				items.append(item_str)
-	return items
+	# 1. 先尝试 str_to_var 整体解析（处理 Array[Type]([...]) 和 [...]）
+	var parsed = str_to_var(p_value)
+	if parsed is Array:
+		return parsed
+
+	# 2. 找 (...)，提取内层 [...]（括号深度感知）
+	var paren = p_value.find("(")
+	if paren != -1:
+		var depth = 0
+		var start = -1
+		for i in range(paren + 1, p_value.length()):
+			match p_value[i]:
+				'[':
+					if depth == 0:
+						start = i
+					depth += 1
+				']':
+					depth -= 1
+					if depth == 0 and start != -1:
+						var arr_str = p_value.substr(start, i - start + 1)
+						parsed = str_to_var(arr_str)
+						if parsed is Array:
+							return parsed
+						break
+
+	# 3. 最简 fallback：找第一对 [...] 深度感知
+	var depth = 0
+	var start = -1
+	for i in range(p_value.length()):
+		if p_value[i] == '[':
+			if depth == 0:
+				start = i
+			depth += 1
+		elif p_value[i] == ']':
+			depth -= 1
+			if depth == 0 and start != -1:
+				var arr_str = p_value.substr(start, i - start + 1)
+				parsed = str_to_var(arr_str)
+				if parsed is Array:
+					return parsed
+				break
+
+	return []
