@@ -60,6 +60,12 @@ docs/superpowers/
 3. 通过编辑器 工具菜单 → "GDScript Analysis – Parse Current" 触发分析
 4. 运行 `tests/test_parser.gd` 场景验证 10 个验收测试
 
+## GDScript 编码注意事项
+
+- **关键字勿作标识符**：GDScript 关键字不可作变量名或参数名，编辑器会报错。常见关键字：`class_name`、`extends`、`signal`、`func`、`var`、`const`、`enum`、`if`、`else`、`elif`、`for`、`while`、`return`、`match`、`pass`、`break`、`continue`、`and`、`or`、`not`、`in`、`is`、`as`、`self`、`super`、`static`、`await`、`preload`、`tool`、`breakpoint`。
+  - 典型坑：遍历 class_registry 时 `for class_name in ...` → `class_name` 是关键字，编辑器报错；改 `for cls_name in ...`（见 commit `79461fe`，`addons/gdscript_ast/editor/gds_project_analyzer.gd::_resolve_script_path`）
+  - 解析 `.tscn`/`.tres` header 时，`class_name`/`extends` 等作为**字符串键**使用是安全的（`params.get("class_name")`），但作变量名不行
+
 ## 语言
 
 所有与用户的交互及代码注释应使用**中文**。
