@@ -331,7 +331,7 @@ func _parse_node(p_section: SectionData) -> void:
 	var node = GDSSceneResourceResult.SceneNodeData.new()
 	node.name = node_name
 	node.type = params.get("type", "")
-	node.parent_path = params.get("parent", ".")
+	node.parent_path = params.get("parent", "")  # 无 parent → ""（真根）；parent="." → 根的子
 	# Chunk A2: 提取 instance=ExtResource("id") 头参数
 	if params.has("instance"):
 		var ref = _resolve_ext_resource_ref(params["instance"])
@@ -442,9 +442,19 @@ func _build_node_tree(p_result: GDSSceneResourceResult) -> void:
 	for key in _nodes:
 		var node: GDSSceneResourceResult.SceneNodeData = _nodes[key]
 
-		if node.parent_path in [".", ""]:
-			# 根节点
+		if node.parent_path == "":
+			# 真根（无 parent 字段）
 			p_result.root_nodes.append(node)
+		elif node.parent_path == ".":
+			# 根的子（parent="."）→ 挂真根（root_nodes 中第一个真根）
+			var attached = false
+			for r in p_result.root_nodes:
+				if r.parent_path == "":
+					r.children.append(node)
+					attached = true
+					break
+			if not attached:
+				p_result.root_nodes.append(node)
 		else:
 			# parent_path 即是父节点的完整路径键
 			var parent = _nodes.get(node.parent_path, null)
