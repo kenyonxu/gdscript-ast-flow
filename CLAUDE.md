@@ -19,23 +19,38 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```
 addons/gdscript_ast/
-├── plugin.cfg                   # 插件配置 (v2.0.0)
+├── plugin.cfg                   # 插件配置 (v2.1.0)
 ├── plugin.gd                    # EditorPlugin 入口 (class_name: GDScriptUtil)
-├── gds_bc_parser.gd             # [legacy] 3.4 字节码解析器 (class_name: GDScriptByteCodeParser)
-├── gds_ast_parser.gd            # [legacy] 3.4 AST 解析器 (class_name: GDScriptASTParser)
-├── gds_ast_nodes.gd             # [plan] Token.Type 枚举 + AST 节点类定义
-├── gds_tokenizer.gd             # [plan] 词法分析器 (class_name: GDScriptTokenizer)
-├── gds_parser.gd                # [plan] 语法分析器 (class_name: GDScriptParser)
-├── gds_symbol_resolver.gd       # [plan] 符号解析器 (class_name: GDScriptSymbolResolver)
-├── gds_analysis_result.gd       # [plan] 结果容器 (class_name: GDScriptAnalysisResult)
+├── gds_ast_nodes.gd             # Token.Type 枚举 + AST 节点类
+├── gds_tokenizer.gd             # 词法分析器
+├── gds_parser.gd                # 语法分析器（递归下降，含表达式后缀 + 错误恢复）
+├── gds_symbol_resolver.gd       # 符号解析器
+├── gds_analysis_result.gd       # 单文件分析结果
+├── gds_tscn_parser.gd           # .tscn 场景解析器（含 instance 子场景展开）
+├── gds_tres_parser.gd           # .tres 资源解析器
+├── gds_scene_resource_result.gd # 场景/资源数据模型 + 结果容器
+├── gds_project_result.gd        # 项目级结果（scenes/resources/cross_file 边 + CodeGraph JSON）
+├── gds_cross_file_edge.gd       # 跨文件边（CALL/SIGNAL_CONNECT/SCRIPT_ATTACH 等）
+├── editor/
+│   ├── gds_project_analyzer.gd  # 项目级分析器（扫描 + 集成 + uid_map + include 优先 exclude）
+│   ├── gds_analysis_bridge.gd   # 分析桥（单文件实时 + 项目批量）
+│   ├── gds_editor_bootstrap.gd  # 插件启动编排（底部面板 + 主屏 + 焦点跟随）
+│   ├── gds_graph_main_screen.gd # 主屏（代码分析 Scope×Graph + 场景 mode 切换）
+│   ├── gds_scan_config.gd       # 扫描配置（ProjectSettings 持久化 + include/exclude）
+│   ├── gds_l10n.gd              # 本地化（中英）
+│   ├── graphs/                  # GraphEdit 渲染（节点 + 虚拟化 + 布局）
+│   ├── panels/                  # 底部面板（Summary/Call/Signal/DefUse/Project + ScanSettings 对话框）
+│   └── scene/                   # 场景可视化（v2.1 新增）
+│       ├── gds_scene_main_screen.gd    # 场景模式容器（3 视角 + 联动）
+│       ├── scene_node_tree_view.gd     # 节点树视角
+│       ├── scene_script_lookup_view.gd # 脚本反查视角
+│       └── scene_signal_graph_view.gd  # 信号图视角
 └── tests/
-    └── test_parser.gd           # [plan] Phase 1 验收测试
+    └── test_*.gd                # 多套验收测试（parser/symbol/cross_file/graph/tscn_tres/scene_main_screen/parser_syntax）
 
 docs/superpowers/
-├── specs/
-│   └── 2026-06-20-godot47-gdscript-parser-design.md   # 完整设计规范
-└── plans/
-    └── 2026-06-20-phase1-gdscript-parser.md           # Phase 1 实现计划
+├── specs/                       # 设计规范（parser/tscn_tres/scene_main_screen 等）
+└── plans/                       # 实现计划（对应 spec）
 ```
 
 ## 架构：三阶段管道
@@ -44,9 +59,10 @@ docs/superpowers/
 .gd 源码  →  [GDScriptTokenizer]  →  Token列表  →  [GDScriptParser]  →  AST  →  [GDScriptSymbolResolver]  →  AnalysisResult
 ```
 
-- **Phase 1 (当前目标)**: 完成 Tokenizer + Parser，源码 → AST
-- **Phase 2**: SymbolResolver，AST → 符号表 + 调用图 + 信号图 + DefUseChain
-- **Phase 3**: EditorPlugin 完整集成 + 完整语法 + 性能优化
+- **Phase 1-3**（已完成）：Tokenizer + Parser + SymbolResolver + EditorPlugin 集成 + 跨文件分析 + 图可视化
+- **tscn/tres 解析**（已完成）：.tscn/.tres 解析 + CodeGraph JSON v2 + instance 子场景展开
+- **场景可视化**（v2.1，已完成）：主屏「场景」mode + 三视角（节点树/脚本反查/信号图）+ 视角联动
+- **解析器语法增强**（v2.1，已完成）：表达式后缀 + `%Node` + 分号 + extends 字符串 + true/false + 行续接 + 错误恢复
 
 详细设计参考 `docs/superpowers/specs/2026-06-20-godot47-gdscript-parser-design.md`。
 实现计划参考 `docs/superpowers/plans/2026-06-20-phase1-gdscript-parser.md`。
