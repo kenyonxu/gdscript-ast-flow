@@ -292,6 +292,63 @@ func tf(p_key: String, p_args: Array) -> String  # 翻译 + 格式化
 
 ---
 
+## API 14. 场景/资源解析（v2.1 新增）
+
+### GDScriptTscnParser / GDScriptTresParser
+
+**文件**: `addons/gdscript_ast/gds_tscn_parser.gd` · `gds_tres_parser.gd`
+
+```
+func parse(p_path: String) -> GDSSceneResourceResult
+func set_uid_map(p_map: Dictionary) -> void               # uid:// → res:// 映射（uid-only ext_resource）
+func set_script_analysis_results(p_results: Dictionary) -> void  # @export 提取用
+```
+
+### GDSSceneResourceResult
+
+**文件**: `addons/gdscript_ast/gds_scene_resource_result.gd`
+
+```
+var file_path: String
+var file_type: int            # FileType { TSCN, TRES }
+var root_nodes: Array         # 顶层 SceneNodeData
+var nodes_flat: Dictionary    # NodePath → SceneNodeData
+var signal_connections: Array # SignalConnectionData
+var ext_resources: Dictionary # id → ExtResourceInfo
+var sub_resources: Dictionary # id → SubResourceData
+var script_associations: Array # 关联的 .gd 路径列表
+
+func get_nodes_by_type(p_type) -> Array
+func get_nodes_by_script(p_script_path) -> Array
+func get_connections_for_node(p_node_path) -> Array
+```
+
+### SceneNodeData
+
+```
+var name: String
+var type: String
+var parent_path: String
+var children: Array           # 子 SceneNodeData
+var script_resource: String   # 关联脚本路径
+var instance_resource: String # instance=ExtResource 指向的子场景路径（v2.1）
+var export_overrides: Dictionary  # @export 填充值（v2.1）
+
+func is_instance() -> bool    # 是否为 instance 子场景节点（v2.1）
+```
+
+### GDScriptProjectResult 新增字段（v2.1）
+
+```
+var scenes: Dictionary             # .tscn 路径 → GDSSceneResourceResult
+var resources: Dictionary          # .tres 路径 → GDSSceneResourceResult
+var script_associations: Array     # 场景→脚本关联索引
+var scene_signal_connections: Array # 跨场景信号连接
+var uid_map: Dictionary            # uid:// → res:// 映射
+```
+
+---
+
 # 集成指南
 
 ## Integration 1. 集成概览
