@@ -125,6 +125,48 @@ The main screen "Analysis" Tab provides interactive graph views.
 
 ---
 
+## Scene Visualization (new in v2.1)
+
+Scene mode visualizes `.tscn`/`.tres` file structure — node tree, script lookup, signal connection graph.
+
+### Entering Scene Mode
+
+1. Switch to main screen "Analysis" tab
+2. Top toolbar mode switch: **[Code Analysis | Scene]**
+3. Select "Scene" to enter scene mode (three views)
+
+### Node Tree View
+
+- **Left**: scene list (all scanned `.tscn`)
+- **Center**: node tree of selected scene (expandable/collapsible; nodes with script show 📜, instance nodes show 📦)
+- **Right**: selected node detail (type / script / groups / signal connections)
+- **Click script** → jump to script editor
+- **Instance nodes** auto-expand sub-scene structure (recursive `instance=ExtResource(...)` parsing, inherits type/script + merges child nodes)
+
+### Script Lookup View
+
+- **Left**: script aggregation list (all `.gd` referenced by scenes, sorted by reference count)
+- **Right**: cross-scene mount points of selected script (which scenes' which nodes attach it)
+- **Click mount entry** → jump to node tree view and locate the node
+
+### Signal Graph View
+
+- GraphEdit of node-to-node signal connections (same-scene edges blue, cross-scene orange)
+- **Top dropdown**: select a single scene to view only its connections (or "All Scenes")
+- **Middle-button drag** to pan, scroll wheel to zoom
+- **Double-click node** → jump to node tree view
+- Top search box filters by signal name / node name
+
+### Scan Configuration (scene data source)
+
+Scene data comes from project scan. If scene list is empty:
+1. Menu **Project → Tools → GDScript AST Flow → Scan Settings...**
+2. Check **Enable Project Scan**
+3. include defaults to `res://` (whole project), adjustable in dialog; exclude defaults to `addons`
+4. **include takes priority over exclude** (supports `exclude res://addons` + `include res://addons/some_plugin`)
+
+---
+
 ## 6. CodeGraph JSON Export
 
 Export structured code graph for AI agent or external tool consumption.
