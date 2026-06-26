@@ -35,14 +35,14 @@ func _build_ui() -> void:
 	add_child(toolbar)
 
 	_filter_box = LineEdit.new()
-	_filter_box.placeholder_text = "Filter by signal name or scene..."
+	_filter_box.placeholder_text = _l10n.t("filter.signal_scene")
 	_filter_box.size_flags_horizontal = SIZE_EXPAND_FILL
 	_filter_box.text_changed.connect(_on_filter_changed)
 	toolbar.add_child(_filter_box)
 
 	# Chunk F: 场景筛选下拉
 	_scene_filter = OptionButton.new()
-	_scene_filter.add_item("全部场景", 0)
+	_scene_filter.add_item(_l10n.t("view.all_scenes"), 0)
 	_scene_filter.item_selected.connect(_on_scene_filter_changed)
 	toolbar.add_child(_scene_filter)
 
@@ -125,7 +125,7 @@ func _parse_nkey(nkey: String) -> Dictionary:
 func _populate_scene_filter(proj) -> void:
 	var prev_id = _scene_filter.selected
 	_scene_filter.clear()
-	_scene_filter.add_item("全部场景", 0)
+	_scene_filter.add_item(_l10n.t("view.all_scenes"), 0)
 	var i = 1
 	for spath in proj.scenes:
 		var scene = proj.scenes[spath]

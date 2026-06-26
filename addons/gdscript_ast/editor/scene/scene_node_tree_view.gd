@@ -162,7 +162,7 @@ func _show_detail(node, node_path: String = "") -> void:
 	if node.groups and node.groups.size() > 0:
 		groups_str = ", ".join(node.groups)
 	else:
-		groups_str = "(none)"
+		groups_str = _l10n.t("msg.none")
 	_add_detail_line(_l10n.t("detail.groups") + ": " + groups_str)
 
 	# 分隔
@@ -180,9 +180,9 @@ func _show_detail(node, node_path: String = "") -> void:
 		script_btn.pressed.connect(_on_jump_script.bind(node.script_resource))
 		_detail.add_child(script_btn)
 	elif node.script_resource != "":
-		_add_detail_line(node.script_resource + " (not found)")
+		_add_detail_line(node.script_resource + " " + _l10n.t("msg.not_found"))
 	else:
-		_add_detail_line("(none)")
+		_add_detail_line(_l10n.t("msg.none"))
 
 	# 分隔
 	_add_detail_line("---")
@@ -190,7 +190,7 @@ func _show_detail(node, node_path: String = "") -> void:
 	# Chunk A3: instance 子场景实例标注
 	if node.is_instance():
 		var instance_label = Label.new()
-		instance_label.text = "子场景实例 →"
+		instance_label.text = _l10n.t("detail.instance")
 		_detail.add_child(instance_label)
 
 		if node.instance_resource != "" and ResourceLoader.exists(node.instance_resource):
@@ -200,9 +200,9 @@ func _show_detail(node, node_path: String = "") -> void:
 			instance_btn.pressed.connect(_on_jump_script.bind(node.instance_resource))
 			_detail.add_child(instance_btn)
 		elif node.instance_resource != "":
-			_add_detail_line(node.instance_resource + " (not found)")
+			_add_detail_line(node.instance_resource + " " + _l10n.t("msg.not_found"))
 		else:
-			_add_detail_line("(unknown)")
+			_add_detail_line(_l10n.t("msg.unknown"))
 
 		_add_detail_line("---")
 
@@ -220,7 +220,7 @@ func _show_detail(node, node_path: String = "") -> void:
 				var conn_text = "%s: %s → %s.%s" % [c.signal_name, c.from_node, c.to_node, c.method]
 				_add_detail_line("  " + conn_text)
 		else:
-			_add_detail_line("  (none)")
+			_add_detail_line("  " + _l10n.t("msg.none"))
 
 func _add_detail_line(p_text: String) -> void:
 	var label = Label.new()
