@@ -16,6 +16,7 @@ var _signal_view: GDSSignalGraphView = null
 var _project_view: GDSProjectGraphView = null
 var _min_degree: int = 0
 var _legend: HBoxContainer = null
+var _file_label: Label = null  # 当前文件路径显示
 # Chunk A: 场景 mode
 var _scene_main_screen: Control = null
 var _code_toolbar: HBoxContainer = null
@@ -54,6 +55,12 @@ func _build_ui() -> void:
 	_code_toolbar = HBoxContainer.new()
 	_code_toolbar.size_flags_horizontal = SIZE_EXPAND_FILL
 	toolbar.add_child(_code_toolbar)
+	# 当前文件名显示
+	_file_label = Label.new()
+	_file_label.add_theme_font_size_override("font_size", 12)
+	_file_label.size_flags_horizontal = SIZE_EXPAND_FILL
+	_file_label.clip_text = true
+	_code_toolbar.add_child(_file_label)
 	# Scope 切换
 	var scope_box = OptionButton.new()
 	scope_box.add_item(_l10n.t("scope.current_file"), 0)
@@ -158,8 +165,13 @@ func _on_mode_changed(i: int) -> void:
 			_scene_main_screen.visible = false
 
 func _rebuild() -> void:
-	# set_graph 内部已做清空（remove_child + clear_connections），此处无需重复
-	# 图例按当前视图刷新（只显当前视图真实用到的颜色）
+	# 更新当前文件标签
+	if _file_label:
+		if _scope == 1:
+			_file_label.text = "(" + _l10n.t("scope.project") + ")"
+		else:
+			var cur = _bridge.get_current_result()
+			_file_label.text = cur.file_path if cur else ""
 	_refresh_legend()
 	# 按 Scope × Kind 分发
 	if _scope == 1:
