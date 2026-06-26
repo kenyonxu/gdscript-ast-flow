@@ -51,7 +51,6 @@ func _build_ui() -> void:
 	_graph_edit.size_flags_horizontal = SIZE_EXPAND_FILL
 	_graph_edit.size_flags_vertical = SIZE_EXPAND_FILL
 	_graph_edit.custom_minimum_size = Vector2(800, 500)
-	_graph_edit.pannable = false  # 禁左键平移（光标普通）——改中键平移
 	_graph_edit.node_selected.connect(_on_graph_node_selected)
 	_graph_edit.gui_input.connect(_on_graph_input)
 	add_child(_graph_edit)
