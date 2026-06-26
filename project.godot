@@ -37,8 +37,8 @@ enabled=PackedStringArray("res://addons/gdscript_ast/plugin.cfg", "res://addons/
 scan/enabled=true
 scan/scenes=true
 scan/resources=true
-scan/include=PackedStringArray("res://samples")
-scan/exclude=PackedStringArray("res://addons", "res://.godot", "res://.git", "res://demo")
+scan/include=PackedStringArray("res://demo", "res://samples")
+scan/exclude=PackedStringArray("res://addons")
 
 [physics]
 

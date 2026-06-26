@@ -57,7 +57,7 @@ func _build_ui() -> void:
 	toolbar.add_child(_code_toolbar)
 	# 当前文件名显示
 	_file_label = Label.new()
-	_file_label.add_theme_font_size_override("font_size", 12)
+	_file_label.add_theme_font_size_override("font_size", 18)
 	_file_label.size_flags_horizontal = SIZE_EXPAND_FILL
 	_file_label.clip_text = true
 	_code_toolbar.add_child(_file_label)
