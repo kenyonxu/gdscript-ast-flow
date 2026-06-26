@@ -166,7 +166,7 @@ func _has_main_screen() -> bool:
 	return true
 
 func _get_plugin_name() -> String:
-	return "Analysis"
+	return "Flow Visualizer"
 
 func _make_visible(p_visible: bool) -> void:
 	if _phase3_bootstrap:

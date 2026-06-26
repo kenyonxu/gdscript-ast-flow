@@ -23,7 +23,7 @@ func setup(p_plugin: EditorPlugin, p_l10n: GDSL10n = null) -> void:
 	# 底部面板 — 含 4 个子 tab（Summary / Call Graph / Signal Flow / Def-Use）
 	_main_panel = GDSAnalysisMainPanel.new()
 	_main_panel.setup(_bridge, _l10n)
-	_plugin.add_control_to_bottom_panel(_main_panel, "GDScript Analysis")
+	_plugin.add_control_to_bottom_panel(_main_panel, "Flow Analysis")
 
 	_plugin.resource_saved.connect(_on_resource_saved)
 
