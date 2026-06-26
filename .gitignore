@@ -10,7 +10,14 @@ codegraph.json
 graphify-out/cache/
 
 # Claude Code 项目级 MCP 配置（含本机 Godot 绝对路径，不入库）
+.claude
 .mcp.json
 
 # brainstorming visual companion mockups（本地临时）
 .superpowers/
+docs/superpowers/
+
+# others
+.swarm/
+.vscode
+ruvector.db
