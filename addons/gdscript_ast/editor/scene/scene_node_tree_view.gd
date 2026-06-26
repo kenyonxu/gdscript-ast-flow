@@ -29,42 +29,59 @@ func _build_ui() -> void:
 	hsplit.size_flags_vertical = SIZE_EXPAND_FILL
 	add_child(hsplit)
 
-	# 左侧: 场景列表
-	var left_panel = VBoxContainer.new()
-	left_panel.size_flags_horizontal = SIZE_EXPAND_FILL
-	left_panel.size_flags_vertical = SIZE_EXPAND_FILL
-	left_panel.custom_minimum_size = Vector2(200, 0)
-	hsplit.add_child(left_panel)
-
+	# 左侧: 场景列表（底色 1）
+	var left_box = VBoxContainer.new()
 	var left_label = Label.new()
 	left_label.text = _l10n.t("scope.project")
-	left_panel.add_child(left_label)
-
+	left_box.add_child(left_label)
 	_scene_list = ItemList.new()
 	_scene_list.size_flags_horizontal = SIZE_EXPAND_FILL
 	_scene_list.size_flags_vertical = SIZE_EXPAND_FILL
 	_scene_list.item_selected.connect(_on_scene_selected)
-	left_panel.add_child(_scene_list)
+	left_box.add_child(_scene_list)
+	var left_panel = _make_bordered_panel(left_box, Color(0.13, 0.13, 0.16))
+	left_panel.custom_minimum_size = Vector2(200, 0)
+	hsplit.add_child(left_panel)
 
-	# 中间: Tree
-	var center_panel = VBoxContainer.new()
-	center_panel.size_flags_horizontal = SIZE_EXPAND_FILL
-	center_panel.size_flags_vertical = SIZE_EXPAND_FILL
-	hsplit.add_child(center_panel)
-
+	# 中间: Tree（底色 2，略深作主视区）
 	_tree = Tree.new()
 	_tree.size_flags_horizontal = SIZE_EXPAND_FILL
 	_tree.size_flags_vertical = SIZE_EXPAND_FILL
 	_tree.columns = 1
 	_tree.item_selected.connect(_on_tree_node_selected)
-	center_panel.add_child(_tree)
+	var center_panel = _make_bordered_panel(_tree, Color(0.10, 0.10, 0.12))
+	hsplit.add_child(center_panel)
 
-	# 右侧: 节点详情
+	# 右侧: 节点详情（底色 3，略蓝）
 	_detail = VBoxContainer.new()
-	_detail.size_flags_horizontal = SIZE_EXPAND_FILL
-	_detail.size_flags_vertical = SIZE_EXPAND_FILL
-	_detail.custom_minimum_size = Vector2(250, 0)
-	hsplit.add_child(_detail)
+	var right_panel = _make_bordered_panel(_detail, Color(0.13, 0.14, 0.17))
+	right_panel.custom_minimum_size = Vector2(250, 0)
+	hsplit.add_child(right_panel)
+
+
+# 带边框+底色的 PanelContainer（区域视觉分块）
+func _make_bordered_panel(p_content: Control, p_bg: Color) -> PanelContainer:
+	var panel = PanelContainer.new()
+	var style = StyleBoxFlat.new()
+	style.bg_color = p_bg
+	style.border_width_left = 1
+	style.border_width_top = 1
+	style.border_width_right = 1
+	style.border_width_bottom = 1
+	style.border_color = Color(0.30, 0.30, 0.35)
+	style.corner_radius_top_left = 4
+	style.corner_radius_top_right = 4
+	style.corner_radius_bottom_left = 4
+	style.corner_radius_bottom_right = 4
+	style.content_margin_left = 6
+	style.content_margin_right = 6
+	style.content_margin_top = 4
+	style.content_margin_bottom = 4
+	panel.add_theme_stylebox_override("panel", style)
+	panel.size_flags_horizontal = SIZE_EXPAND_FILL
+	panel.size_flags_vertical = SIZE_EXPAND_FILL
+	panel.add_child(p_content)
+	return panel
 
 func rebuild() -> void:
 	_scene_list.clear()

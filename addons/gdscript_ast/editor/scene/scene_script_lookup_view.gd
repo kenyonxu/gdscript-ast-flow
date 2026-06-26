@@ -29,37 +29,56 @@ func _build_ui() -> void:
 	hsplit.size_flags_vertical = SIZE_EXPAND_FILL
 	add_child(hsplit)
 
-	# 左侧: 脚本列表
-	var left_panel = VBoxContainer.new()
-	left_panel.size_flags_horizontal = SIZE_EXPAND_FILL
-	left_panel.size_flags_vertical = SIZE_EXPAND_FILL
-	left_panel.custom_minimum_size = Vector2(250, 0)
-	hsplit.add_child(left_panel)
-
+	# 左侧: 脚本列表（底色 1）
+	var left_box = VBoxContainer.new()
 	var left_label = Label.new()
 	left_label.text = _l10n.t("lookup.script")
-	left_panel.add_child(left_label)
-
+	left_box.add_child(left_label)
 	_script_list = ItemList.new()
 	_script_list.size_flags_horizontal = SIZE_EXPAND_FILL
 	_script_list.size_flags_vertical = SIZE_EXPAND_FILL
 	_script_list.item_selected.connect(_on_script_selected)
-	left_panel.add_child(_script_list)
+	left_box.add_child(_script_list)
+	var left_panel = _make_bordered_panel(left_box, Color(0.13, 0.13, 0.16))
+	left_panel.custom_minimum_size = Vector2(250, 0)
+	hsplit.add_child(left_panel)
 
-	# 右侧: 挂载点列表
-	var right_panel = VBoxContainer.new()
-	right_panel.size_flags_horizontal = SIZE_EXPAND_FILL
-	right_panel.size_flags_vertical = SIZE_EXPAND_FILL
-	hsplit.add_child(right_panel)
-
+	# 右侧: 挂载点列表（底色 2，略蓝）
+	var right_box = VBoxContainer.new()
 	_mount_label = Label.new()
-	right_panel.add_child(_mount_label)
-
+	right_box.add_child(_mount_label)
 	_mount_list = ItemList.new()
 	_mount_list.size_flags_horizontal = SIZE_EXPAND_FILL
 	_mount_list.size_flags_vertical = SIZE_EXPAND_FILL
 	_mount_list.item_selected.connect(_on_mount_selected)
-	right_panel.add_child(_mount_list)
+	right_box.add_child(_mount_list)
+	var right_panel = _make_bordered_panel(right_box, Color(0.13, 0.14, 0.17))
+	hsplit.add_child(right_panel)
+
+
+# 带边框+底色的 PanelContainer（区域视觉分块）
+func _make_bordered_panel(p_content: Control, p_bg: Color) -> PanelContainer:
+	var panel = PanelContainer.new()
+	var style = StyleBoxFlat.new()
+	style.bg_color = p_bg
+	style.border_width_left = 1
+	style.border_width_top = 1
+	style.border_width_right = 1
+	style.border_width_bottom = 1
+	style.border_color = Color(0.30, 0.30, 0.35)
+	style.corner_radius_top_left = 4
+	style.corner_radius_top_right = 4
+	style.corner_radius_bottom_left = 4
+	style.corner_radius_bottom_right = 4
+	style.content_margin_left = 6
+	style.content_margin_right = 6
+	style.content_margin_top = 4
+	style.content_margin_bottom = 4
+	panel.add_theme_stylebox_override("panel", style)
+	panel.size_flags_horizontal = SIZE_EXPAND_FILL
+	panel.size_flags_vertical = SIZE_EXPAND_FILL
+	panel.add_child(p_content)
+	return panel
 
 # 聚合: script_associations → {script → [{scene, node}]}
 func _build_index(script_associations: Array) -> Dictionary:
