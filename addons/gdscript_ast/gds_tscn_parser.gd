@@ -47,6 +47,9 @@ var _uid_map: Dictionary = {}  # String(uid_str) → String(res_path)
 # Chunk B: 脚本分析结果（由 analyzer 传入，用于 @export 匹配）
 var _script_analysis_results: Dictionary = {}  # String(path) → GDScriptAnalysisResult
 
+# Chunk B: 跨 parser 共享的 instance visited set（防环用）
+var _shared_visited: Dictionary = {}
+
 # 节常量
 const SECTION_KIND_MAP := {
 	"gd_scene": SectionKind.GD_SCENE,
@@ -116,6 +119,7 @@ func _reset_state():
 	_editable_paths.clear()
 	_scene_uid = ""
 	_load_steps = 0
+	_shared_visited.clear()
 
 
 # ---- 内部: 读取节（Chunk B1/B2） ----
@@ -279,6 +283,9 @@ func _parse_semantics(p_sections: Array) -> GDSSceneResourceResult:
 	# 重建节点树（Chunk B5）
 	_build_node_tree(result)
 
+	# Chunk B1: instance 子场景递归展开
+	_expand_instances(result)
+
 	return result
 
 
@@ -325,6 +332,11 @@ func _parse_node(p_section: SectionData) -> void:
 	node.name = node_name
 	node.type = params.get("type", "")
 	node.parent_path = params.get("parent", ".")
+	# Chunk A2: 提取 instance=ExtResource("id") 头参数
+	if params.has("instance"):
+		var ref = _resolve_ext_resource_ref(params["instance"])
+		if ref != null and ref.type == "PackedScene":
+			node.instance_resource = ref.path
 
 	# 解析 groups（可选）
 	if params.has("groups"):
@@ -580,3 +592,155 @@ func _parse_binds_value(p_value: String) -> Array:
 				break
 
 	return []
+
+# ---- Chunk B/C: instance 子场景展开 + 覆盖节点合并 ----
+
+func _expand_instances(p_result: GDSSceneResourceResult) -> void:
+	var visited: Dictionary = _shared_visited.duplicate()  # 从共享 visited 继承
+	var expanded: Dictionary = {}  # full_path → true 防子场景内重复展开
+	for root in p_result.root_nodes:
+		_expand_node_recursive(root, p_result, visited, expanded, "")
+	_reattach_orphans(p_result)
+	_finalize_tree(p_result)
+
+func _expand_node_recursive(p_node, p_result, p_visited: Dictionary, p_expanded: Dictionary, p_parent_path: String) -> void:
+	var full_path = (p_parent_path + "/" + p_node.name) if p_parent_path != "" else p_node.name
+	if p_node.is_instance() and not p_expanded.has(full_path):
+		p_expanded[full_path] = true
+		_expand_one(p_node, p_result, p_visited, full_path)
+	for child in p_node.children:
+		_expand_node_recursive(child, p_result, p_visited, p_expanded, full_path)
+
+func _expand_one(p_node, p_result, p_visited: Dictionary, p_instance_path: String) -> void:
+	# 环检测
+	if p_visited.has(p_node.instance_resource):
+		p_node.properties["_circular_instance"] = p_node.instance_resource
+		return
+	# 深度兜底
+	if p_visited.size() >= 16:
+		return
+	p_visited[p_node.instance_resource] = true
+
+	# 递归 parse 子场景
+	var sub_parser = GDScriptTscnParser.new()
+	sub_parser.set_uid_map(_uid_map)
+	sub_parser._shared_visited = p_visited
+	var sub_result = sub_parser.parse(p_node.instance_resource)
+	if sub_result == null or sub_result.root_nodes.is_empty():
+		return
+
+	# instance 节点继承子场景根的 type/script
+	var sub_root = sub_result.root_nodes[0]
+	if p_node.type == "":
+		p_node.type = sub_root.type
+	if p_node.script_resource == "":
+		p_node.script_resource = sub_root.script_resource
+
+	# 子场景根的 children → instance 节点的 children
+	p_node.children = sub_root.children
+
+	# 合并子场景 flat 节点（含递归展开子场景内的 instance）
+	_merge_sub_flat(p_node, p_result, sub_result, p_instance_path, p_visited)
+
+	# 重挂覆盖节点（展开后 parent 路径可能已存在）
+func _merge_sub_flat(p_instance_node, p_result, p_sub_result, p_instance_path: String, p_visited: Dictionary) -> void:
+	var sub_root = p_sub_result.root_nodes[0]
+	var sub_root_name = sub_root.name
+
+	for sub_key in p_sub_result.nodes_flat:
+		var sub_node = p_sub_result.nodes_flat[sub_key]
+
+		# 跳过子场景根节点（已被 instance 节点吸收）
+		if sub_key == sub_root_name:
+			continue
+
+		# 替换 key 中的 sub_root_name 前缀为 instance_path
+		var new_key = sub_key
+		if new_key.begins_with(sub_root_name + "/"):
+			new_key = p_instance_path + new_key.substr(sub_root_name.length())
+		elif new_key == sub_root_name:
+			new_key = p_instance_path
+
+		# 替换 parent_path 中的 sub_root_name 前缀
+		var orig_parent = sub_node.parent_path
+		if orig_parent == sub_root_name:
+			sub_node.parent_path = p_instance_path
+		elif orig_parent.begins_with(sub_root_name + "/"):
+			sub_node.parent_path = p_instance_path + orig_parent.substr(sub_root_name.length())
+		elif orig_parent in [".", ""]:
+			sub_node.parent_path = p_instance_path
+
+		# 合并进本场景的 flat 索引
+		p_result.nodes_flat[new_key] = sub_node
+
+
+func _reattach_orphans(p_result: GDSSceneResourceResult) -> void:
+	# 重挂因父节点在子场景中而散落在 root_nodes 的覆盖节点
+	var remaining_roots: Array = []
+	for node in p_result.root_nodes:
+		if node.parent_path in [".", ""]:
+			remaining_roots.append(node)
+			continue
+
+		# 直接查找父节点
+		var parent = p_result.nodes_flat.get(node.parent_path, null)
+		if parent == null:
+			# 尝试在展开的 instance 树中搜索
+			parent = _find_parent_in_expanded(p_result, node.parent_path)
+
+		if parent != null:
+			# 更新 flat key：删除旧 key，以新 parent_path 重建
+			var old_key = node.parent_path + "/" + node.name
+			if p_result.nodes_flat.has(old_key):
+				p_result.nodes_flat.erase(old_key)
+			node.parent_path = parent.parent_path + "/" + parent.name if parent.parent_path not in [".", ""] else parent.name
+			var new_key = node.parent_path + "/" + node.name
+			p_result.nodes_flat[new_key] = node
+			parent.children.append(node)
+		else:
+			remaining_roots.append(node)
+
+	p_result.root_nodes = remaining_roots
+
+func _find_parent_in_expanded(p_result: GDSSceneResourceResult, p_parent_path: String):
+	# 直接匹配
+	if p_result.nodes_flat.has(p_parent_path):
+		return p_result.nodes_flat[p_parent_path]
+
+	# 尝试以 instance 节点的路径为前缀匹配
+	for key in p_result.nodes_flat:
+		var node = p_result.nodes_flat[key]
+		if node.is_instance():
+			var prefixed = key + "/" + p_parent_path
+			if p_result.nodes_flat.has(prefixed):
+				return p_result.nodes_flat[prefixed]
+
+	return null
+
+func _finalize_tree(p_result: GDSSceneResourceResult) -> void:
+	# 步骤 1: 如果有 instance 根节点，将 parent="." 的其他非 instance 节点作为其子节点
+	var instance_root: GDSSceneResourceResult.SceneNodeData = null
+	for node in p_result.root_nodes:
+		if node.is_instance():
+			instance_root = node
+			break
+	if instance_root == null:
+		return
+
+	var final_roots: Array = []
+	for node in p_result.root_nodes:
+		if node == instance_root:
+			final_roots.append(node)
+		elif node.parent_path in [".", ""] and not node.is_instance():
+			# 挂到 instance 根节点下
+			instance_root.children.append(node)
+			# 更新 flat key
+			var old_key = node.name
+			if p_result.nodes_flat.has(old_key):
+				p_result.nodes_flat.erase(old_key)
+			node.parent_path = instance_root.name
+			var new_key = node.parent_path + "/" + node.name
+			p_result.nodes_flat[new_key] = node
+		else:
+			final_roots.append(node)
+	p_result.root_nodes = final_roots

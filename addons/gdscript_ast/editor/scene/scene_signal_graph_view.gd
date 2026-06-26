@@ -10,6 +10,8 @@ var _l10n: GDSL10n = null
 var _navigate: Callable = Callable()
 var _graph_edit = null  # GDSVirtualGraphEdit
 var _filter_box: LineEdit = null
+var _scene_filter: OptionButton = null
+var _filter_scene: String = ""  # "" = 全部场景
 # nkey → {scene, node} 映射，供联动导航
 var _nkey_to_nav: Dictionary = {}
 
@@ -35,6 +37,12 @@ func _build_ui() -> void:
 	_filter_box.text_changed.connect(_on_filter_changed)
 	toolbar.add_child(_filter_box)
 
+	# Chunk F: 场景筛选下拉
+	_scene_filter = OptionButton.new()
+	_scene_filter.add_item("全部场景", 0)
+	_scene_filter.item_selected.connect(_on_scene_filter_changed)
+	toolbar.add_child(_scene_filter)
+
 	# GraphEdit
 	_graph_edit = preload("res://addons/gdscript_ast/editor/graphs/gds_virtual_graph_edit.gd").new()
 	_graph_edit.size_flags_horizontal = SIZE_EXPAND_FILL
@@ -49,8 +57,14 @@ func build_logical(proj) -> Dictionary:
 	var nodes: Dictionary = {}  # key "scene/node" → {id, label, ...}
 	var edges: Array = []
 
+	# Chunk F: 场景筛选
+	var filter_all = (_filter_scene == "")
+
 	# 跨场景连接（scene_signal_connections）
 	for c in proj.scene_signal_connections:
+		# 筛选：选具体场景时，只保留该场景参与的跨场景边
+		if not filter_all and c["from_scene"] != _filter_scene and c["to_scene"] != _filter_scene:
+			continue
 		var fk = c["from_scene"] + "/" + c["from_node"]
 		var tk = c["to_scene"] + "/" + c["to_node"]
 		nodes[fk] = _make_node(fk)
@@ -64,6 +78,9 @@ func build_logical(proj) -> Dictionary:
 
 	# 场景内连接（各 scene.signal_connections）
 	for spath in proj.scenes:
+		# 筛选：选具体场景时，只收集该场景的信号
+		if not filter_all and spath != _filter_scene:
+			continue
 		var scene = proj.scenes[spath]
 		for conn in scene.signal_connections:
 			var fk2 = spath + "/" + conn.from_node
@@ -101,11 +118,29 @@ func _parse_nkey(nkey: String) -> Dictionary:
 	result.node = node_name
 	return result
 
+func _populate_scene_filter(proj) -> void:
+	var prev_id = _scene_filter.selected
+	_scene_filter.clear()
+	_scene_filter.add_item("全部场景", 0)
+	var i = 1
+	for spath in proj.scenes:
+		var scene = proj.scenes[spath]
+		if scene and scene.signal_connections.size() > 0:
+			_scene_filter.add_item(spath.get_file(), i)
+			_scene_filter.set_item_metadata(i, spath)
+			i += 1
+	# 恢复之前的选择
+	if prev_id > 0 and _scene_filter.get_item_count() > prev_id:
+		_scene_filter.select(prev_id)
+
 func rebuild() -> void:
 	var proj = _bridge.get_project_result()
 	if proj == null:
 		_graph_edit.set_graph({}, [])
 		return
+
+	# Chunk F: 更新场景筛选下拉
+	_populate_scene_filter(proj)
 
 	var logical = build_logical(proj)
 	# 应用过滤
@@ -184,6 +219,13 @@ func rebuild() -> void:
 	_graph_edit.set_graph(ges_nodes, ges_edges)
 
 func _on_filter_changed() -> void:
+	rebuild()
+
+func _on_scene_filter_changed(p_idx: int) -> void:
+	if p_idx <= 0:
+		_filter_scene = ""
+	else:
+		_filter_scene = _scene_filter.get_item_metadata(p_idx)
 	rebuild()
 
 func _on_graph_node_selected(p_node) -> void:

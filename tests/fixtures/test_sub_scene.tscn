@@ -1,0 +1,5 @@
+[gd_scene load_steps=1 format=3 uid="uid://test_sub_scene"]
+
+[node name="SubRoot" type="Node"]
+[node name="ChildA" type="Node" parent="SubRoot"]
+[node name="ChildB" type="Node" parent="SubRoot"]

@@ -127,6 +127,8 @@ func _add_tree_node(parent: TreeItem, node, parent_path: String) -> void:
 	var label = node.name + " (" + node.type + ")"
 	if node.script_resource != "":
 		label = "📜 " + label
+	if node.is_instance():
+		label = "📦 " + label
 	item.set_text(0, label)
 	var full_path = _node_full_path(node, parent_path)
 	item.set_metadata(0, {"path": full_path, "node": node})
@@ -184,6 +186,25 @@ func _show_detail(node, node_path: String = "") -> void:
 
 	# 分隔
 	_add_detail_line("---")
+
+	# Chunk A3: instance 子场景实例标注
+	if node.is_instance():
+		var instance_label = Label.new()
+		instance_label.text = "子场景实例 →"
+		_detail.add_child(instance_label)
+
+		if node.instance_resource != "" and ResourceLoader.exists(node.instance_resource):
+			var instance_btn = Button.new()
+			instance_btn.text = node.instance_resource
+			instance_btn.flat = true
+			instance_btn.pressed.connect(_on_jump_script.bind(node.instance_resource))
+			_detail.add_child(instance_btn)
+		elif node.instance_resource != "":
+			_add_detail_line(node.instance_resource + " (not found)")
+		else:
+			_add_detail_line("(unknown)")
+
+		_add_detail_line("---")
 
 	# 信号连接
 	var sig_label = Label.new()

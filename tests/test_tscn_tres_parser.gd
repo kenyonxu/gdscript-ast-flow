@@ -1,5 +1,5 @@
 # tests/test_tscn_tres_parser.gd
-# .tscn/.tres 解析器验收测试 — 12 套测试用例（含 Chunk A~F 增强）
+# .tscn/.tres 解析器验收测试 — 15 套测试用例（含 Chunk A~F 增强 + instance 展开）
 
 extends Node
 
@@ -12,6 +12,10 @@ const RESOURCE_FILE := FIXTURES + "test_resource.tres"
 const RESOURCE_NESTED := FIXTURES + "test_resource_nested.tres"
 const RESOURCE_CYCLE := FIXTURES + "test_resource_cycle.tres"
 const SCRIPT_FILE := FIXTURES + "test_script_for_scene.gd"
+
+# Chunk A~D: instance 子场景 fixture
+const SUB_SCENE := FIXTURES + "test_sub_scene.tscn"
+const SCENE_INSTANCE := FIXTURES + "test_scene_instance.tscn"
 
 var _tscn_parser: GDScriptTscnParser
 var _tres_parser: GDScriptTresParser
@@ -41,6 +45,10 @@ func run_all():
 	test_sub_resource_inline()
 	test_tres_sub_chain()
 	test_tres_cycle()
+	# Chunk A~D: instance 子场景展开
+	test_instance_extract()
+	test_instance_expand()
+	test_override_attach()
 
 
 # ============================================================
@@ -541,6 +549,93 @@ func test_tres_cycle():
 			if back_ref is Dictionary:
 				assert(back_ref.has("$circular_ref"), "Circular reference should be marked with $circular_ref")
 				assert(back_ref["$circular_ref"] == "1_a", "Circular ref should point to '1_a'")
+
+	print("  PASS")
+
+
+# ============================================================
+# Chunk A~D: instance 子场景展开测试
+# ============================================================
+func test_instance_extract():
+	print("Test: instance extraction...")
+
+	var result = _tscn_parser.parse(SCENE_INSTANCE)
+	assert(result != null, "Result should not be null")
+	assert(_tscn_parser.error == "", "No parse error: '%s'" % _tscn_parser.error)
+
+	# 验证 instance_resource 提取
+	var root = _find_node_in_flat(result, "InstanceRoot")
+	assert(root != null, "InstanceRoot should exist in flat")
+	assert(root.is_instance(), "InstanceRoot should be an instance")
+	assert(root.instance_resource != "", "instance_resource should not be empty")
+
+	print("  PASS")
+
+
+func test_instance_expand():
+	print("Test: instance expansion...")
+
+	var result = _tscn_parser.parse(SCENE_INSTANCE)
+	assert(result != null, "Result should not be null")
+
+	# InstanceRoot 应继承子场景根的 type
+	var root = null
+	for key in result.nodes_flat:
+		if result.nodes_flat[key].name == "InstanceRoot":
+			root = result.nodes_flat[key]
+			break
+	assert(root != null, "InstanceRoot should exist")
+	# SubRoot 的 type 是 "Node"
+	assert(root.type == "Node", "InstanceRoot type should inherit 'Node' from SubRoot, got '%s'" % root.type)
+
+	# InstanceRoot 的子节点应包含 ChildA 和 ChildB（来自子场景）
+	var has_child_a = false
+	var has_child_b = false
+	for child in root.children:
+		if child.name == "ChildA": has_child_a = true
+		if child.name == "ChildB": has_child_b = true
+	assert(has_child_a, "InstanceRoot should have ChildA from sub-scene")
+	assert(has_child_b, "InstanceRoot should have ChildB from sub-scene")
+
+	# 子场景节点应在 nodes_flat 中以 InstanceRoot 前缀可访问
+	assert(result.nodes_flat.has("InstanceRoot/ChildA"), "ChildA should be at InstanceRoot/ChildA")
+	assert(result.nodes_flat.has("InstanceRoot/ChildB"), "ChildB should be at InstanceRoot/ChildB")
+
+	print("  PASS")
+
+
+func test_override_attach():
+	print("Test: override node attachment...")
+
+	var result = _tscn_parser.parse(SCENE_INSTANCE)
+	assert(result != null, "Result should not be null")
+
+	# ExtraChild (parent=ChildA) 展开后应挂在 InstanceRoot/ChildA 下
+	var child_a = result.nodes_flat.get("InstanceRoot/ChildA", null)
+	assert(child_a != null, "ChildA should exist in expanded tree")
+
+	var extra_child = null
+	for child in child_a.children:
+		if child.name == "ExtraChild":
+			extra_child = child
+			break
+	assert(extra_child != null, "ExtraChild should be a child of ChildA after expansion")
+	assert(extra_child.type == "Node2D", "ExtraChild type should be Node2D, got '%s'" % extra_child.type)
+
+	# 验证 ExtraChild 的 flat 路径
+	assert(result.nodes_flat.has("InstanceRoot/ChildA/ExtraChild"),
+		"ExtraChild should be at InstanceRoot/ChildA/ExtraChild")
+
+	# 验证 DirectChild 作为 InstanceRoot 的直接子节点
+	var instance_root = result.nodes_flat.get("InstanceRoot", null)
+	assert(instance_root != null, "InstanceRoot should exist")
+	var direct_child = null
+	for child in instance_root.children:
+		if child.name == "DirectChild":
+			direct_child = child
+			break
+	assert(direct_child != null, "DirectChild should be a child of InstanceRoot")
+	assert(result.nodes_flat.has("InstanceRoot/DirectChild"), "DirectChild should be at InstanceRoot/DirectChild")
 
 	print("  PASS")
 

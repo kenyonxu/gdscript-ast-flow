@@ -58,9 +58,15 @@ class SceneNodeData:
 	var script_resource: String = ""  # 关联脚本资源路径，解析后填充
 	var export_overrides: Dictionary = {}  # String(变量名) → 填充值（P1）
 
+	# Chunk A: instance 子场景展开
+	var instance_resource: String = ""  # instance=ExtResource(...) 指向的子场景路径
+
 	# ExtResource/SubResource 引用
 	var ext_refs: Dictionary = {}  # String(属性名) → ExtResourceInfo
 	var sub_refs: Dictionary = {}  # String(属性名) → SubResourceData
+
+	func is_instance() -> bool:
+		return instance_resource != ""
 
 	func to_dict() -> Dictionary:
 		var child_arr: Array = []
@@ -80,6 +86,7 @@ class SceneNodeData:
 			"properties": properties,
 			"script": script_resource,
 			"export_overrides": export_overrides,
+			"instance": instance_resource,
 			"ext_refs": ext_refs_dict,
 			"sub_refs": sub_refs_dict,
 			"children": child_arr,
