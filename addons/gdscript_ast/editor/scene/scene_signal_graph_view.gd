@@ -179,7 +179,7 @@ func rebuild() -> void:
 		_nkey_to_nav[nkey] = nav
 
 		# 构造唯一 slug
-		var node_name_slug = "sig_" + info.label.replace("/", "_").replace(".", "_")
+		var node_name_slug = "sig_" + info.label.replace("/", "_").replace(".", "_").replace(":", "_")
 		var slug = node_name_slug
 		var counter = 0
 		while ges_nodes.has(slug):
