@@ -14,6 +14,9 @@ var _scene_filter: OptionButton = null
 var _filter_scene: String = ""  # "" = 全部场景
 # nkey → {scene, node} 映射，供联动导航
 var _nkey_to_nav: Dictionary = {}
+var _last_selected = null  # 最后选中节点（双击跳转用）
+var _panning := false      # 中键平移中
+var _pan_last := Vector2.ZERO
 
 func setup(p_bridge, p_l10n, p_navigate: Callable) -> void:
 	_bridge = p_bridge
@@ -48,7 +51,9 @@ func _build_ui() -> void:
 	_graph_edit.size_flags_horizontal = SIZE_EXPAND_FILL
 	_graph_edit.size_flags_vertical = SIZE_EXPAND_FILL
 	_graph_edit.custom_minimum_size = Vector2(800, 500)
+	_graph_edit.pannable = false  # 禁左键平移（光标普通）——改中键平移
 	_graph_edit.node_selected.connect(_on_graph_node_selected)
+	_graph_edit.gui_input.connect(_on_graph_input)
 	add_child(_graph_edit)
 
 # 合并信号数据 → {nodes, edges} 供 set_graph
@@ -229,14 +234,36 @@ func _on_scene_filter_changed(p_idx: int) -> void:
 	rebuild()
 
 func _on_graph_node_selected(p_node) -> void:
-	if p_node == null or not (p_node is GraphNode):
+	# 单击仅记录选中（不跳）；双击在 _on_graph_input 触发跳转
+	_last_selected = p_node
+
+
+# 双击选中的节点 → 跳节点树视角
+func _navigate_selected() -> void:
+	if _last_selected == null or not (_last_selected is GraphNode):
 		return
-	# 从 title 恢复 nkey（title 即 info.label = nkey）
-	var nkey = str(p_node.title)
+	var nkey = str(_last_selected.title)
 	var nav = _nkey_to_nav.get(nkey, {})
 	if nav.has("scene") and nav.scene != "" and nav.has("node") and nav.node != "":
 		if _navigate.is_valid():
 			_navigate.call(nav.scene, nav.node)
+
+
+# GraphEdit 输入：中键拖动平移 + 左键双击节点跳转
+func _on_graph_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_MIDDLE:
+			if event.pressed:
+				_panning = true
+				_pan_last = event.position
+			else:
+				_panning = false
+		elif event.button_index == MOUSE_BUTTON_LEFT and event.double_click and event.pressed:
+			_navigate_selected()
+	elif event is InputEventMouseMotion and _panning:
+		var diff = (event.position - _pan_last) / _graph_edit.zoom
+		_graph_edit.set_scroll_offset(_graph_edit.scroll_offset - diff)
+		_pan_last = event.position
 
 func focus_node(_scene_path: String, _node_path: String) -> void:
 	# 信号图视角不支持焦点定位（联动目标始终是节点树视角）
