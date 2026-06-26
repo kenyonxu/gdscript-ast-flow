@@ -10,6 +10,15 @@ var class_registry: Dictionary = {}   # String(class_name) → String(file_path)
 var reverse_index: Dictionary = {}    # String(target_file) → Array[source_file]
 var cross_edges: Array = []           # of GDSCrossFileEdge
 
+# Chunk E: 场景/资源分析结果
+var scenes: Dictionary = {}           # String(path) → GDSSceneResourceResult
+var resources: Dictionary = {}        # String(path) → GDSSceneResourceResult
+var script_associations: Array = []   # of Dictionary {scene, node, script, script_class}
+var scene_signal_connections: Array = []  # of Dictionary {signal, from_scene, from_node, ...}
+
+# uid→path 映射（由扫描阶段从 .uid 文件收集）
+var uid_map: Dictionary = {}  # String(uid_str) → String(res_path)
+
 # 查询: 谁跨文件调用了 p_class.p_method
 func get_callers_across_files(p_class: String, p_method: String) -> Array:
 	var result: Array = []
@@ -54,7 +63,7 @@ func to_dict(p_project_name: String = "") -> Dictionary:
 	for edge in cross_edges:
 		cross_arr.append(edge.to_dict())
 	return {
-		"schema_version": 1,
+		"schema_version": 2,
 		"project": p_project_name,
 		"source_path": root_path,
 		"summary": summary,
@@ -62,6 +71,10 @@ func to_dict(p_project_name: String = "") -> Dictionary:
 		"cross_file": cross_arr,
 		"hub_functions": _top_hubs(20),
 		"coupled_files": _top_coupled(20),
+		"scenes": _serialize_scenes(),
+		"resources": _serialize_resources(),
+		"script_associations": script_associations,
+		"scene_signal_connections": scene_signal_connections,
 	}
 
 func export_json(p_path: String, p_project_name: String = "") -> Error:
@@ -90,7 +103,21 @@ func _build_summary() -> Dictionary:
 		"total_signals": sig_count,
 		"total_call_edges": edge_count,
 		"total_cross_file_edges": cross_edges.size(),
+		"scenes_analyzed": scenes.size(),
+		"resources_analyzed": resources.size(),
 	}
+
+func _serialize_scenes() -> Dictionary:
+	var d: Dictionary = {}
+	for path in scenes:
+		d[path] = scenes[path].to_dict()
+	return d
+
+func _serialize_resources() -> Dictionary:
+	var d: Dictionary = {}
+	for path in resources:
+		d[path] = resources[path].to_dict()
+	return d
 
 func _top_hubs(p_limit: int) -> Array:
 	var hubs: Array = []

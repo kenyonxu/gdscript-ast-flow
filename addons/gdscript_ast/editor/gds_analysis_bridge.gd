@@ -64,7 +64,7 @@ func _run_pipeline(p_file_path: String) -> GDScriptAnalysisResult:
 	var ast = parser.parse(tokens)
 
 	if parser.error != "":
-		print("[D] PARSE ERROR: %s" % parser.error)
+		print("[D] PARSE ERROR %s: %s" % [p_file_path, parser.error])
 		return null
 
 	# Phase 2: symbol resolution
@@ -117,23 +117,39 @@ func get_project_result() -> GDScriptProjectResult:
 	return _project_result
 
 # 增量: 重分析单文件 + 重建注册表 + 重解析跨文件边
+# Chunk E2: 扩展支持 .tscn/.tres 文件
 func refresh_file_in_project(p_path: String) -> void:
 	if _project_result == null or _project_analyzer == null:
 		return  # 项目尚未全量分析过，跳过增量
-	var new_result = _project_analyzer._analyze_file(p_path)
-	if new_result == null:
-		return
-	# 检查 class_name 是否变化
-	var old_cn = ""
-	if _project_result.files.has(p_path):
-		old_cn = _project_result.files[p_path].classname_id
-	_project_result.files[p_path] = new_result
-	if new_result.classname_id != old_cn:
-		# class_name 变了 → 重建注册表
-		_project_result.class_registry.clear()
-		_project_analyzer._build_class_registry(_project_result)
-	# 重解析跨文件边（简化: 全量重算 cross_edges，反向索引随之更新）
-	_project_result.cross_edges.clear()
-	_project_result.reverse_index.clear()
-	_project_analyzer.resolve_cross_file(_project_result)
+
+	if p_path.ends_with(".gd"):
+		var new_result = _project_analyzer._analyze_file(p_path)
+		if new_result == null:
+			return
+		# 检查 class_name 是否变化
+		var old_cn = ""
+		if _project_result.files.has(p_path):
+			old_cn = _project_result.files[p_path].classname_id
+		_project_result.files[p_path] = new_result
+		if new_result.classname_id != old_cn:
+			# class_name 变了 → 重建注册表
+			_project_result.class_registry.clear()
+			_project_analyzer._build_class_registry(_project_result)
+		# 重解析跨文件边（简化: 全量重算 cross_edges，反向索引随之更新）
+		_project_result.cross_edges.clear()
+		_project_result.reverse_index.clear()
+		_project_analyzer.resolve_cross_file(_project_result)
+	elif p_path.ends_with(".tscn"):
+		var new_result = _project_analyzer._analyze_scene_file(p_path, _project_result.files)
+		if new_result == null:
+			return
+		_project_result.scenes[p_path] = new_result
+		# 重建场景相关边
+		_project_analyzer._integrate_scene_resources(_project_result)
+	elif p_path.ends_with(".tres"):
+		var new_result = _project_analyzer._analyze_resource_file(p_path)
+		if new_result == null:
+			return
+		_project_result.resources[p_path] = new_result
+
 	project_analysis_completed.emit(_project_result)

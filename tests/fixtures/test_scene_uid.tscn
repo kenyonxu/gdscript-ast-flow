@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+# 无 path= 仅有 uid= 的 ext_resource — 需 uid_map 反查
+[ext_resource type="Script" uid="uid://cxixtvlqumj56" id="1_script"]
+
+[node name="Root" type="Node"]
+script = ExtResource("1_script")

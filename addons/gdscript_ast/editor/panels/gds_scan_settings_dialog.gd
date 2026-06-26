@@ -10,6 +10,10 @@ var _exclude_tree: Tree = null
 var _file_dialog: FileDialog = null
 var _editing_include := true
 
+# Chunk E1: .tscn/.tres 开关
+var _scenes_check: CheckBox = null
+var _resources_check: CheckBox = null
+
 func _ready() -> void:
 	title = "Project Scan Settings"
 	var vbox = VBoxContainer.new()
@@ -21,6 +25,17 @@ func _ready() -> void:
 	_enabled_check.text = "Enable Project Scan"
 	_enabled_check.button_pressed = GDSScanConfig.is_enabled()
 	vbox.add_child(_enabled_check)
+
+	# Chunk E1: .tscn/.tres 扫描开关
+	_scenes_check = CheckBox.new()
+	_scenes_check.text = "Scan .tscn (Scene) files"
+	_scenes_check.button_pressed = GDSScanConfig.is_scan_scenes_enabled()
+	vbox.add_child(_scenes_check)
+
+	_resources_check = CheckBox.new()
+	_resources_check.text = "Scan .tres (Resource) files"
+	_resources_check.button_pressed = GDSScanConfig.is_scan_resources_enabled()
+	vbox.add_child(_resources_check)
 
 	# Include 区
 	vbox.add_child(_make_section_label("Include Directories (scan these):"))
@@ -134,6 +149,12 @@ func _on_save() -> void:
 
 	# Enable
 	ProjectSettings.set_setting(GDSScanConfig.SETTING_ENABLED, _enabled_check.button_pressed)
+
+	# Chunk E1: 保存 .tscn/.tres 扫描开关
+	ProjectSettings.set_setting(GDSScanConfig.SETTING_SCAN_SCENES, _scenes_check.button_pressed)
+	ProjectSettings.set_setting(GDSScanConfig.SETTING_SCAN_RESOURCES, _resources_check.button_pressed)
+
+	ProjectSettings.save()  # 持久化到 project.godot（否则重启丢失）
 
 	if _enabled_check.button_pressed:
 		print("[GDScriptUtil] Project scan enabled with %d include, %d exclude dirs." % [inc_arr.size(), exc_arr.size()])

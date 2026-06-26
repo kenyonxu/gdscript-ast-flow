@@ -6,26 +6,11 @@
 /addons/limboai/
 /demo/
 
-# 导出产物
 codegraph.json
+graphify-out/cache/
 
-# 个人开发环境
-.claude/
+# Claude Code 项目级 MCP 配置（含本机 Godot 绝对路径，不入库）
+.mcp.json
+
+# brainstorming visual companion mockups（本地临时）
 .superpowers/
-.swarm/
-.vscode/
-
-# AI 代理指令（非用户面）
-CLAUDE.md
-
-# 内部开发文档
-docs/superpowers/
-
-# 知识图谱产物
-graphify-out/
-
-# RuFlo 数据
-ruvector.db
-
-# 发布产物
-release/

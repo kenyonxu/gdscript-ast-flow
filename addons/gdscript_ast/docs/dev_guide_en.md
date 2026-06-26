@@ -242,6 +242,63 @@ func tf(p_key: String, p_args: Array) -> String
 
 ---
 
+## API 14. Scene/Resource Parsing (new in v2.1)
+
+### GDScriptTscnParser / GDScriptTresParser
+
+**Files**: `addons/gdscript_ast/gds_tscn_parser.gd` · `gds_tres_parser.gd`
+
+```
+func parse(p_path: String) -> GDSSceneResourceResult
+func set_uid_map(p_map: Dictionary) -> void               # uid:// → res:// mapping (uid-only ext_resource)
+func set_script_analysis_results(p_results: Dictionary) -> void  # for @export extraction
+```
+
+### GDSSceneResourceResult
+
+**File**: `addons/gdscript_ast/gds_scene_resource_result.gd`
+
+```
+var file_path: String
+var file_type: int            # FileType { TSCN, TRES }
+var root_nodes: Array         # top-level SceneNodeData
+var nodes_flat: Dictionary    # NodePath → SceneNodeData
+var signal_connections: Array # SignalConnectionData
+var ext_resources: Dictionary # id → ExtResourceInfo
+var sub_resources: Dictionary # id → SubResourceData
+var script_associations: Array # associated .gd paths
+
+func get_nodes_by_type(p_type) -> Array
+func get_nodes_by_script(p_script_path) -> Array
+func get_connections_for_node(p_node_path) -> Array
+```
+
+### SceneNodeData
+
+```
+var name: String
+var type: String
+var parent_path: String
+var children: Array           # child SceneNodeData
+var script_resource: String   # associated script path
+var instance_resource: String # instance=ExtResource sub-scene path (v2.1)
+var export_overrides: Dictionary  # @export filled values (v2.1)
+
+func is_instance() -> bool    # whether instance sub-scene node (v2.1)
+```
+
+### GDScriptProjectResult new fields (v2.1)
+
+```
+var scenes: Dictionary             # .tscn path → GDSSceneResourceResult
+var resources: Dictionary          # .tres path → GDSSceneResourceResult
+var script_associations: Array     # scene→script association index
+var scene_signal_connections: Array # cross-scene signal connections
+var uid_map: Dictionary            # uid:// → res:// mapping
+```
+
+---
+
 # Integration Guide
 
 ## Integration 1. Overview

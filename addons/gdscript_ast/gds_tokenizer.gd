@@ -144,6 +144,11 @@ func _scan() -> GDScriptToken:
     # 跳过空白
     while _peek() in [" ", "\t", "\r"]:
         _advance()
+    # 行续接：\ + \n → 跳过两字符，续行（不产 NEWLINE，不触发缩进）
+    if _peek() == "\\" and _peek(1) == "\n":
+        _advance()
+        _advance()
+        return null
 
     # 检查缩进 (仅在行首且不在括号内，且非 EOS)
     # indent_stack==[0] 时自动设基线，不产生 INDENT
@@ -266,6 +271,14 @@ func _scan_identifier(p_first: String) -> GDScriptToken:
 
     if KEYWORDS.has(name):
         return _make_token(KEYWORDS[name])
+
+    # true/false/null → LITERAL（bool/null 字面量，非标识符）
+    if name == "true":
+        return _make_token(GDScriptToken.Type.LITERAL, true)
+    if name == "false":
+        return _make_token(GDScriptToken.Type.LITERAL, false)
+    if name == "null":
+        return _make_token(GDScriptToken.Type.LITERAL, null)
 
     if BUILTIN_CONSTS.has(name):
         return _make_token(BUILTIN_CONSTS[name])

@@ -134,9 +134,13 @@ func parse(p_tokens: Array) -> GDScriptToken.ClassNode:
 	while not _header_done:
 		if _peek() and _peek().type == GDScriptToken.Type.EXTENDS:
 			_advance()
-			var id_t = _expect(GDScriptToken.Type.IDENTIFIER, "extends 后需要类名")
-			if id_t:
-				root.extends_id = id_t.literal
+			if _peek() and _peek().type == GDScriptToken.Type.LITERAL:
+				# extends "res://path"（Chunk C3）
+				root.extends_path = _advance().literal
+			else:
+				var id_t = _expect(GDScriptToken.Type.IDENTIFIER, "extends 后需要类名或字符串路径")
+				if id_t:
+					root.extends_id = id_t.literal
 			_match(GDScriptToken.Type.NEWLINE)
 			_skip_newlines()
 		elif _peek() and _peek().type == GDScriptToken.Type.CLASS_NAME:
@@ -154,13 +158,17 @@ func parse(p_tokens: Array) -> GDScriptToken.ClassNode:
 		_skip_newlines()
 		if _peek() and _peek().type == GDScriptToken.Type.TK_EOF:
 			break
+		var consumed_before = pos
 		var member = _parse_class_member()
 		if member != null:
 			root.members.append(member)
 		elif _error_count >= MAX_ERRORS:
 			break
+		elif pos == consumed_before:
+			# 未消费任何 token 却返回 null → 强制推进，避免死循环（Chunk A）
+			_set_error("无法恢复的类成员，跳过 token: %s" % _peek().get_name())
+			_advance()
 		else:
-			# Phase 3: 错误恢复 — 跳过到下一个有效的成员关键字
 			_skip_to_next_member()
 
 	return root
@@ -606,6 +614,12 @@ func _parse_suite() -> GDScriptToken.SuiteNode:
 		return suite  # pass (空函数体)
 
 	while _peek() and _peek().type not in [GDScriptToken.Type.DEDENT, GDScriptToken.Type.TK_EOF]:
+		# 跳过前导 NEWLINE 和分号（空语句/空行）（Chunk C2）
+		while _match(GDScriptToken.Type.NEWLINE) or _match(GDScriptToken.Type.SEMICOLON):
+			pass
+		if _peek() and _peek().type in [GDScriptToken.Type.DEDENT, GDScriptToken.Type.TK_EOF]:
+			break
+
 		var stmt = _parse_statement()
 		if stmt != null:
 			suite.statements.append(stmt)
@@ -614,8 +628,9 @@ func _parse_suite() -> GDScriptToken.SuiteNode:
 			# 否则本循环会无限自旋（编辑器保存时锁死的根因）
 			_set_error("非预期的语句令牌: %s" % _peek().get_name())
 			_advance()
-		# 每个语句后跳过 NEWLINE
-		_match(GDScriptToken.Type.NEWLINE)
+		# 每个语句后跳过 NEWLINE 和分号的任意组合（含 ;\n、\n;、;;）（Chunk C2）
+		while _match(GDScriptToken.Type.NEWLINE) or _match(GDScriptToken.Type.SEMICOLON):
+			pass
 
 	_expect(GDScriptToken.Type.DEDENT)
 	return suite
@@ -663,6 +678,10 @@ func _parse_statement():
 			node.expression = _parse_expression()
 			return node
 
+		GDScriptToken.Type.SEMICOLON:
+			# ; 分号单独出现（Chunk C2）
+			_advance()
+			return null
 		_:
 			# 表达式语句
 			var expr = _parse_expression()
@@ -673,8 +692,10 @@ func _parse_statement():
 			return null
 
 
-func _parse_if() -> GDScriptToken.IfNode:
-	_advance()  # IF token
+func _parse_if(p_is_elif: bool = false) -> GDScriptToken.IfNode:
+	# p_is_elif: true 表示由 elif 调用（已消费 ELIF token），跳过 _advance()
+	if not p_is_elif:
+		_advance()  # IF token
 	var node = GDScriptToken.IfNode.new()
 	node.condition = _parse_expression()
 	_expect(GDScriptToken.Type.COLON)
@@ -683,7 +704,7 @@ func _parse_if() -> GDScriptToken.IfNode:
 	# elif / else
 	if _peek() and _peek().type == GDScriptToken.Type.ELIF:
 		_advance()
-		node.false_branch = _parse_if()
+		node.false_branch = _parse_if(true)  # p_is_elif=true 避免消费条件首 token（Chunk B）
 	elif _peek() and _peek().type == GDScriptToken.Type.ELSE:
 		_advance()
 		_expect(GDScriptToken.Type.COLON)
@@ -1049,6 +1070,20 @@ func _parse_atom():
 				GDScriptToken.Type.CONST_NAN: node.value = NAN
 			return node
 
+
+		GDScriptToken.Type.PERCENT:
+			# %NodeName 场景唯一节点（Chunk C1）
+			_advance()
+			var uname_t = _expect(GDScriptToken.Type.IDENTIFIER, "%% 后需要节点名")
+			var unode = GDScriptToken.SceneUniqueNode.new()
+			if uname_t:
+				unode.name = uname_t.literal
+			return unode
+
+		GDScriptToken.Type.SEMICOLON:
+			# ; 分号单独出现（Chunk C2）
+			_advance()
+			return null
 		_:
 			return null
 

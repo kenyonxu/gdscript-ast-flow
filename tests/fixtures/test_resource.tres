@@ -1,0 +1,17 @@
+[gd_resource type="Resource" load_steps=3 format=3 uid="uid://test_resource"]
+
+[ext_resource type="Script" path="res://tests/fixtures/test_script_for_scene.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://icon.svg" id="2_tex"]
+
+[sub_resource type="RectangleShape2D" id="1_shape"]
+size = Vector2(32, 32)
+
+[sub_resource type="CircleShape2D" id="2_shape"]
+radius = 10.0
+
+[resource]
+script = ExtResource("1_script")
+max_health = 150
+speed = 500.0
+shape = SubResource("1_shape")
+icon = ExtResource("2_tex")

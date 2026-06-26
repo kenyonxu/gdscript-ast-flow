@@ -100,7 +100,8 @@ class AnnotationNode:
 
 class ClassNode:
     extends ASTNode
-    var extends_id: String = ""         # extends 的类路径
+    var extends_id: String = ""         # extends 的类路径（`extends Node`）
+    var extends_path: String = ""       # extends 的字符串路径（`extends "res://path.gd"`）
     var classname_id: String = ""       # class_name 名称
     var is_tool: bool = false           # @tool 注解
     var annotations: Array[AnnotationNode] = []
@@ -306,6 +307,11 @@ class ImplementsNode:
 # (MatchBranchNode 已有 var guard = null，此处不可重复声明)
 class GuardedMatchBranchNode:
     extends MatchBranchNode
+
+# ---- 场景唯一节点 %NodeName ----
+class SceneUniqueNode:
+    extends ASTNode
+    var name: String = ""               # 节点名（不含 % 前缀）
 
 # ---- Phase 3: inline setter/getter ----
 class SetterGetterNode:

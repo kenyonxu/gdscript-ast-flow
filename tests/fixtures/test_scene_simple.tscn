@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://test_simple_scene"]
+
+[ext_resource type="Script" path="res://tests/fixtures/test_script_for_scene.gd" id="1_script"]
+
+[node name="SimpleRoot" type="Node"]
+script = ExtResource("1_script")
+
+[node name="Child" type="Node2D" parent="SimpleRoot"]
+position = Vector2(10, 20)

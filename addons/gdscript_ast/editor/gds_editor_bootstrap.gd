@@ -23,7 +23,7 @@ func setup(p_plugin: EditorPlugin, p_l10n: GDSL10n = null) -> void:
 	# 底部面板 — 含 4 个子 tab（Summary / Call Graph / Signal Flow / Def-Use）
 	_main_panel = GDSAnalysisMainPanel.new()
 	_main_panel.setup(_bridge, _l10n)
-	_plugin.add_control_to_bottom_panel(_main_panel, "GDScript Analysis")
+	_plugin.add_control_to_bottom_panel(_main_panel, "Flow Analysis")
 
 	_plugin.resource_saved.connect(_on_resource_saved)
 
@@ -62,12 +62,15 @@ func teardown() -> void:
 		_graph_main_screen.queue_free()
 
 func _on_resource_saved(resource: Resource) -> void:
-	if resource is GDScript and resource.resource_path.ends_with(".gd"):
-		# 不在 save 回调里同步跑重活（会阻塞编辑器）—— 延迟到下一帧
-		# 连续保存只保留最后一次目标（去抖）
-		_analysis_queued = resource.resource_path
-		if not _is_analyzing:
-			call_deferred("_run_queued_analysis")
+	var path = resource.resource_path
+	# Chunk E2: 扩展支持 .tscn/.tres 增量重分析
+	if not (path.ends_with(".gd") or path.ends_with(".tscn") or path.ends_with(".tres")):
+		return
+	# 不在 save 回调里同步跑重活（会阻塞编辑器）—— 延迟到下一帧
+	# 连续保存只保留最后一次目标（去抖）
+	_analysis_queued = path
+	if not _is_analyzing:
+		call_deferred("_run_queued_analysis")
 
 func _run_queued_analysis() -> void:
 	if _analysis_queued == "":
@@ -75,10 +78,17 @@ func _run_queued_analysis() -> void:
 	_is_analyzing = true
 	var path = _analysis_queued
 	_analysis_queued = ""
-	_bridge.run_analysis(path)
-	# Phase 3.2 增量: 若已有项目结果且扫描开启，重分析该文件 + 重解析跨文件边
-	if GDSScanConfig.is_enabled():
-		_bridge.refresh_file_in_project(path)
+
+	if path.ends_with(".gd"):
+		_bridge.run_analysis(path)
+		# Phase 3.2 增量: 若已有项目结果且扫描开启，重分析该文件 + 重解析跨文件边
+		if GDSScanConfig.is_enabled():
+			_bridge.refresh_file_in_project(path)
+	elif path.ends_with(".tscn") or path.ends_with(".tres"):
+		# Chunk E2: .tscn/.tres 增量—直接刷新项目结果
+		if GDSScanConfig.is_enabled():
+			_bridge.refresh_file_in_project(path)
+
 	_is_analyzing = false
 	# 若期间又有新保存请求，继续处理
 	if _analysis_queued != "":

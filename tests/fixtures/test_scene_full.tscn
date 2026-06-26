@@ -1,0 +1,72 @@
+[gd_scene load_steps=6 format=3 uid="uid://test_full_scene"]
+
+[ext_resource type="Script" path="res://tests/fixtures/test_script_for_scene.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://icon.svg" id="2_tex"]
+[ext_resource type="PackedScene" path="res://tests/fixtures/test_scene_simple.tscn" id="3_subscene"]
+
+[sub_resource type="RectangleShape2D" id="1_shape"]
+size = Vector2(32, 32)
+
+[sub_resource type="CircleShape2D" id="2_shape"]
+radius = 16.0
+
+[node name="Main" type="Node"]
+script = ExtResource("1_script")
+
+[node name="Player" type="CharacterBody2D" parent="Main"]
+script = ExtResource("1_script")
+position = Vector2(100, 200)
+collision_layer = 1
+max_health = 150
+speed = 500.0
+
+[node name="CollisionShape" type="CollisionShape2D" parent="Main/Player"]
+shape = SubResource("1_shape")
+disabled = false
+
+[node name="Sprite" type="Sprite2D" parent="Main/Player"]
+texture = ExtResource("2_tex")
+position = Vector2(0, -16)
+
+[node name="UI" type="CanvasLayer" parent="Main"]
+
+[node name="HealthBar" type="ProgressBar" parent="Main/UI"]
+max_value = 100
+value = 75
+
+[node name="HUD" type="Node" parent="Main/UI"]
+script = ExtResource("1_script")
+
+[node name="Button" type="Button" parent="Main/UI/HUD"]
+text = "Click Me"
+
+[node name="Camera" type="Camera2D" parent="Main"]
+current = true
+
+[node name="NPC" type="Node2D" parent="Main"]
+
+[sub_resource type="RectangleShape2D" id="3_shape"]
+size = Vector2(64, 64)
+
+[node name="NPCShape" type="CollisionShape2D" parent="Main/NPC"]
+shape = SubResource("3_shape")
+
+[node name="SubScene" type="Node" parent="Main"]
+script = ExtResource("1_script")
+
+[node name="ContainerA" type="Node" parent="Main"]
+
+[node name="Icon" type="Sprite2D" parent="Main/ContainerA"]
+texture = ExtResource("2_tex")
+
+[node name="ContainerB" type="Node" parent="Main"]
+
+[node name="Icon" type="Sprite2D" parent="Main/ContainerB"]
+texture = ExtResource("2_tex")
+
+[connection signal="pressed" from="Main/UI/HUD/Button" to="." method="_on_button_pressed"]
+[connection signal="health_changed" from="Main" to="Main/UI/HealthBar" method="_on_health_updated" flags=4]
+[connection signal="health_changed" from="Main/Player" to="Main/UI/HUD" method="_on_health_updated" flags=1 binds=Array[int]([0])]
+[connection signal="died" from="Main" to="Main/UI/HUD" method="_on_button_pressed"]
+
+[editable path="Main/SubScene"]

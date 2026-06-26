@@ -6,7 +6,7 @@
 
 📖 **Docs**：[中文](readme.md) · [用户指南](addons/gdscript_ast/docs/user_guide_cn.md) · [User Guide](addons/gdscript_ast/docs/user_guide_en.md) · [开发者指南](addons/gdscript_ast/docs/dev_guide_cn.md) · [Developer Guide](addons/gdscript_ast/docs/dev_guide_en.md)
 
-A Godot 4.7 GDScript AST parser + logic flow analysis tool. Integrated as an EditorPlugin, supporting signal connection tracing, method call graphs, variable def-use chain analysis, and cross-file reference tracking.
+A Godot 4.7 GDScript AST parser + logic flow analysis tool. Integrated as an EditorPlugin, supporting signal connection tracing, method call graphs, variable def-use chain analysis, cross-file reference tracking, and **scene/resource structure visualization**.
 
 **Authors**: Original by あるる / きのもと 結衣 @arlez80 (Godot 3.x bytecode parser) · This version by kenyonxu (Godot 4.7 AST rewrite)
 
@@ -48,6 +48,13 @@ A Godot 4.7 GDScript AST parser + logic flow analysis tool. Integrated as an Edi
 - **Graph Visualization** — Interactive GraphEdit-based call/signal graphs with hub highlighting, degree filtering, and jump-to-definition
 - **JSON Export** — Structured CodeGraph JSON consumable by AI agents
 
+### Scene Visualization (new in 2.1)
+
+- **Three-view visualization** of `.tscn`/`.tres`: node tree (scene structure + node detail) / script lookup (which scenes use a script) / signal graph (node-to-node signal connections)
+- **Instance sub-scene expansion** — recursively parses `instance=ExtResource(...)`, merges sub-scene node tree (with override nodes + cycle detection)
+- **View linking** — click node in lookup/signal graph → jump to node tree view
+- **Real-world project support** — limboai behavior trees, instantiated scenes, modern Godot syntax (`%Node` / expression suffixes / UID references / line continuation, etc.)
+
 ### Editor Integration
 
 - Bottom panel: Summary / Call Graph / Signal Flow / Def-Use / Project tabs
@@ -83,8 +90,9 @@ A Godot 4.7 GDScript AST parser + logic flow analysis tool. Integrated as an Edi
 
 | Document | Description |
 |----------|-------------|
-| [User Guide](addons/gdscript_ast/docs/user_guide_en.md) | Installation, single-file analysis, project scan, graph navigation, export |
+| [User Guide](addons/gdscript_ast/docs/user_guide_en.md) | Installation, single-file analysis, project scan, graph navigation, export, scene visualization |
 | [Developer Guide](addons/gdscript_ast/docs/dev_guide_en.md) | API reference, integration patterns, as infrastructure for other plugins |
+| [Changelog](CHANGELOG.en.md) | Version changes (Added / Changed / Fixed) |
 
 ---
 

@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://test_instance_scene"]
+
+[ext_resource type="PackedScene" id="1_sub" path="res://tests/fixtures/test_sub_scene.tscn"]
+
+[node name="InstanceRoot" instance=ExtResource("1_sub")]
+[node name="ExtraChild" type="Node2D" parent="ChildA"]
+[node name="DirectChild" type="Node" parent="."]

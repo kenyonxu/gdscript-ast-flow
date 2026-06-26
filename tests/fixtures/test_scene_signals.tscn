@@ -1,0 +1,24 @@
+[gd_scene load_steps=3 format=3 uid="uid://test_signals_scene"]
+
+[ext_resource type="Script" path="res://tests/fixtures/test_script_for_scene.gd" id="1_script"]
+
+[sub_resource type="RectangleShape2D" id="1_shape"]
+size = Vector2(16, 16)
+
+[node name="Root" type="Node"]
+script = ExtResource("1_script")
+
+[node name="Emitter" type="Node" parent="."]
+
+[node name="Receiver" type="Node" parent="."]
+script = ExtResource("1_script")
+
+[node name="Collision" type="CollisionShape2D" parent="Emitter"]
+shape = SubResource("1_shape")
+
+[node name="PassThrough" type="Node" parent="."]
+
+[connection signal="pressed" from="." to="." method="_on_button_pressed"]
+[connection signal="health_changed" from="Emitter" to="Receiver" method="_on_health_updated" flags=1]
+[connection signal="died" from="." to="." method="_on_button_pressed" flags=6]
+[connection signal="health_changed" from="Emitter" to="PassThrough" method="_on_health_updated"]
