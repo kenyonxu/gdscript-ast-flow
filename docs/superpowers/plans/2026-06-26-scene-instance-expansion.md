@@ -2,12 +2,12 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: 使用 superpowers:subagent-driven-development（推荐）或 superpowers:executing-plans 按任务逐个实现。步骤用 `- [ ]` 复选框跟踪。
 
-**Goal:** instance 子场景（`instance=ExtResource(...)`）递归展开 + 节点详情标注，让 instance 化场景（demo `tutorial_*.tscn` instance `agent_base.tscn`）节点树完整显示——子场景节点（HitBox）+ 覆盖节点（LegL）+ instance 节点 type/script 继承。
+**Goal:** instance 子场景（`instance=ExtResource(...)`）递归展开 + 节点详情标注 + 信号图视角场景筛选，让 instance 化场景（demo `tutorial_*.tscn` instance `agent_base.tscn`）节点树完整显示——子场景节点（HitBox）+ 覆盖节点（LegL）+ instance 节点 type/script 继承；信号图支持按场景筛选（Chunk F，独立改进）。
 
 **Architecture:** `SceneNodeData` 加 `instance_resource` 字段；`_parse_node` 提取 `instance=`；`_build_node_tree` 后置 instance 展开（递归 parse 子场景 + 合并 children + 覆盖节点挂载）；详情 UI 标注 instance。
 
 **Tech Stack:** Godot 4.7 GDScript，复用 `GDScriptTscnParser` 递归 + `_uid_map`。
-**SPEC:** [tscn spec P2 #15](../specs/2026-06-25-tscn-tres-parser-spec.md) + 本 plan 新增 A（instance 标注）
+**SPEC:** [tscn spec P2 #15](../specs/2026-06-25-tscn-tres-parser-spec.md) + 本 plan 新增 A（instance 标注）+ Chunk F（信号图筛选）
 **状态:** ✅ PLAN 完成（2026-06-26）
 
 ---
@@ -129,6 +129,41 @@ for path in _nodes:
 ### Task D2: demo 真实验证
 - [ ] 重扫 demo，解析 `tutorial_01_welcome.tscn`：TutorialWelcome type/script 继承 agent_base、children 含 Root/HitBox/Hurtbox（子场景）+ LegL/Body（覆盖）+ BTPlayer（直接）。
 - [ ] 编辑器场景模式选 tutorial_01 → 节点树完整显示。
+
+---
+
+## Chunk F: 信号图视角场景筛选（独立改进，非 instance 相关）
+
+> 信号图视角当前聚合**全项目所有场景**的 `[connection]`，多场景节点堆叠难读（demo 验证：fireball/ninja_star/game 等场景的节点全混在一张图）。加场景筛选下拉，选单个场景只显该场景信号图。
+
+### Task F1: 信号图顶部加场景筛选 OptionButton
+**Files:** Modify `addons/gdscript_ast/editor/scene/scene_signal_graph_view.gd`
+- [ ] 顶部 toolbar 加场景 OptionButton（"全部场景" + 各有连接的 .tscn）：
+```gdscript
+_scene_filter = OptionButton.new()
+_scene_filter.add_item("全部场景", 0)
+var i = 1
+for spath in _scenes_with_connections():  # 从 project_result.scenes 取 signal_connections 非空的
+	_scene_filter.add_item(spath.get_file(), i)
+	_scene_filter.set_item_metadata(i, spath)
+	i += 1
+_scene_filter.item_selected.connect(_on_scene_filter_changed)
+toolbar.add_child(_scene_filter)
+```
+- [ ] `_scenes_with_connections()`：遍历 `bridge.get_project_result().scenes`，收集 `signal_connections.size() > 0` 或在 `scene_signal_connections` 中出现的场景路径。
+
+### Task F2: 按场景过滤 build_logical
+- [ ] `build_logical` 按选中场景过滤：选具体场景时，只收集该场景的 signal_connections（场景内）+ 该场景参与的 scene_signal_connections（跨场景），节点/边只含该场景。
+```gdscript
+# 跨场景边过滤
+if _filter_scene != "" and c.from_scene != _filter_scene and c.to_scene != _filter_scene:
+	continue
+# 场景内边过滤
+if _filter_scene != "" and spath != _filter_scene:
+	continue
+```
+- [ ] 选「全部场景」恢复全项目聚合（现状）。
+- [ ] **测试** `test_signal_graph_scene_filter`：选 fireball.tscn → 信号图只显 fireball 的节点/边（Hitbox→根），无 ninja_star 节点。
 
 ---
 
