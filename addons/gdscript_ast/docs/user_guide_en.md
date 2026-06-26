@@ -93,7 +93,7 @@ Scan all `.gd` files in your project (or specified directories) for cross-file a
 
 ## 5. Graph View Navigation
 
-The main screen "Analysis" Tab provides interactive graph views.
+The main screen "Flow Visualizer" Tab provides interactive graph views.
 
 ### Scope Switching
 
@@ -131,7 +131,7 @@ Scene mode visualizes `.tscn`/`.tres` file structure — node tree, script looku
 
 ### Entering Scene Mode
 
-1. Switch to main screen "Analysis" tab
+1. Switch to main screen "Flow Visualizer" tab
 2. Top toolbar mode switch: **[Code Analysis | Scene]**
 3. Select "Scene" to enter scene mode (three views)
 
@@ -171,7 +171,7 @@ Scene data comes from project scan. If scene list is empty:
 
 Export structured code graph for AI agent or external tool consumption.
 
-1. Open Analysis Tab
+1. Open Flow Visualizer Tab
 2. Ensure project scan is complete (Project panel has data)
 3. Click **Export JSON**, choose save path
 4. Exported JSON includes:

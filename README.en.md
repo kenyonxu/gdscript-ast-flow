@@ -58,7 +58,7 @@ A Godot 4.7 GDScript AST parser + logic flow analysis tool. Integrated as an Edi
 ### Editor Integration
 
 - Bottom panel: Summary / Call Graph / Signal Flow / Def-Use / Project tabs
-- Main screen "Analysis" tab: Scope × Graph switching + degree filter + legend + auto-layout
+- Main screen "Flow Visualizer" tab: Scope × Graph switching + degree filter + legend + auto-layout
 - Tool menu: `GDScript AST Flow → Parse Current / Scan Settings...`
 - Auto re-analysis on resource save
 

@@ -93,7 +93,7 @@
 
 ## 5. 图视图导航
 
-主屏 "Analysis" Tab 提供交互式图视图。
+主屏 "Flow Visualizer" Tab 提供交互式图视图。
 
 ### Scope 切换
 
@@ -131,7 +131,7 @@
 
 ### 进入场景模式
 
-1. 切到主屏 "Analysis" Tab
+1. 切到主屏 "Flow Visualizer" Tab
 2. 顶部 toolbar 切换 mode：**[代码分析 | 场景]**
 3. 选「场景」进入场景模式（三视角）
 
@@ -171,7 +171,7 @@
 
 导出结构化代码图谱供 AI agent 或外部工具消费。
 
-1. 打开 Analysis Tab
+1. 打开 Flow Visualizer Tab
 2. 确保已完成项目扫描（Project 面板有数据）
 3. 点击 **Export JSON**，选择保存路径
 4. 导出 JSON 包含：
