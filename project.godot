@@ -30,14 +30,14 @@ project/assembly_name="gdscript-ast-flow"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/gdscript_ast/plugin.cfg", "res://addons/godot_mcp_editor/plugin.cfg", "res://addons/godot_mcp_runtime/plugin.cfg")
+enabled=PackedStringArray("res://addons/gdscript_ast/plugin.cfg")
 
 [gdscript_ast]
 
 scan/enabled=true
 scan/scenes=true
 scan/resources=true
-scan/include=PackedStringArray("res://demo", "res://samples")
+scan/include=PackedStringArray()
 scan/exclude=PackedStringArray("res://addons")
 
 [physics]
