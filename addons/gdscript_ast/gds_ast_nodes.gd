@@ -88,7 +88,8 @@ class ASTNode:
 # ---- 类型节点 ----
 class TypeNode:
     extends RefCounted
-    var type_name: String = ""          # "int", "Array", "Node" 等
+    var type_name: String = ""          # "int", "Array", "Node" 等；限定类型拼 "A.B.C"
+    var type_path: Array = []           # 限定类型路径 ["A","B"]（size>1 时为限定类型，非限定空）
     var container_element_types: Array[TypeNode] = []  # 泛型参数: Array[int] → [TypeNode("int")]
 
 # ---- 注解节点 ----
@@ -132,6 +133,7 @@ class VariableNode:
     var getter = null                   # FunctionNode or null (内联 getter)
     var is_onready: bool = false
     var is_export: bool = false
+    var is_static: bool = false         # static var（GDScript 4.x）
 
 class SignalNode:
     extends ASTNode

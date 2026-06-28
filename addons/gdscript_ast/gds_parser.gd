@@ -300,8 +300,10 @@ func _parse_class_member():
 				f.is_static = true
 				return f
 			elif _st and _st.type == GDScriptToken.Type.VAR:
-				# static var (GDScript 4.x 静态变量) — 当普通变量解析
-				return _parse_variable([])
+				# static var (GDScript 4.x 静态变量)
+				var _sv = _parse_variable([])
+				_sv.is_static = true
+				return _sv
 			_set_error("static 只能用于函数或变量")
 			return null
 
@@ -603,6 +605,8 @@ func _parse_type() -> GDScriptToken.TypeNode:
 				type_str += "."
 			type_str += str(p)
 		node.type_name = type_str
+		if parts.size() > 1:
+			node.type_path = parts
 
 	# 泛型参数: Array[int], Dictionary[String, int]
 	if _match(GDScriptToken.Type.BRACKET_OPEN):
