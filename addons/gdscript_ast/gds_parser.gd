@@ -294,11 +294,15 @@ func _parse_class_member():
 
 		GDScriptToken.Type.STATIC:
 			_advance()
-			if _peek() and _peek().type == GDScriptToken.Type.FUNC:
+			var _st = _peek()
+			if _st and _st.type == GDScriptToken.Type.FUNC:
 				var f = _parse_function([])
 				f.is_static = true
 				return f
-			_set_error("static 只能用于函数")
+			elif _st and _st.type == GDScriptToken.Type.VAR:
+				# static var (GDScript 4.x 静态变量) — 当普通变量解析
+				return _parse_variable([])
+			_set_error("static 只能用于函数或变量")
 			return null
 
 		_:
@@ -585,7 +589,20 @@ func _parse_type() -> GDScriptToken.TypeNode:
 		_advance()
 		node.type_name = "void"
 	elif _peek() and _peek().type == GDScriptToken.Type.IDENTIFIER:
-		node.type_name = _advance().literal
+		# 限定类型路径: BaseVariable.VariableScope / Node2D 等
+		var parts: Array = [_advance().literal]
+		while _peek() and _peek().type == GDScriptToken.Type.PERIOD:
+			_advance()  # consume PERIOD
+			if _peek() and _peek().type == GDScriptToken.Type.IDENTIFIER:
+				parts.append(_advance().literal)
+			else:
+				break
+		var type_str := ""
+		for p in parts:
+			if type_str != "":
+				type_str += "."
+			type_str += str(p)
+		node.type_name = type_str
 
 	# 泛型参数: Array[int], Dictionary[String, int]
 	if _match(GDScriptToken.Type.BRACKET_OPEN):
@@ -1122,8 +1139,15 @@ func _parse_dictionary():
 
 	while _peek() and _peek().type != GDScriptToken.Type.TK_EOF:
 		var pair = {"key": _parse_expression(), "value": null}
-		_expect(GDScriptToken.Type.COLON, "字典需要 key: value")
-		pair["value"] = _parse_expression()
+		# GDScript 4.x 等号语法 {key = v}: _parse_expression 把 "key = v" 解析成 AssignmentNode → 拆分
+		if pair["key"] is GDScriptToken.AssignmentNode:
+			var assign: GDScriptToken.AssignmentNode = pair["key"]
+			pair["key"] = assign.target
+			pair["value"] = assign.value
+		elif _match(GDScriptToken.Type.COLON):
+			pair["value"] = _parse_expression()
+		else:
+			_set_error("字典需要 key: value 或 key = value")
 		node.pairs.append(pair)
 		if not _match(GDScriptToken.Type.COMMA):
 			break
