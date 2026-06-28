@@ -2,6 +2,19 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/) 风格，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.1.1] - 2026-06-27
+
+### 新增
+- `TypeNode.type_path: Array` — 限定类型路径（如 `["BaseVariable","VariableScope"]`），消费方不再 split type_name
+- `VariableNode.is_static: bool` — static var 标记
+
+### 修复
+- **限定类型 `Class.NestedType`** — `_parse_type` 循环吃 `.` + IDENTIFIER（原单 IDENTIFIER 遇 `.` 失败，fail-soft 丢后续成员）
+- **字典等号语法 `{key = value}`** — `_parse_dictionary` 检测 AssignmentNode 拆分（原 `_parse_expression` 吃掉赋值，期望 COLON 失败）
+- **`static var`** — `_parse_class_member` STATIC 分支加 VAR（原只接受 FUNC）
+
+> 来源：Fuse 项目 codegen 探索（[project-juicy-godot](https://github.com/kenyonxu/project-juicy-godot)）发现的三类 GDScript 4.x 合法语法解析失败。
+
 ## [2.1.0] - 2026-06-26
 
 ### 新增

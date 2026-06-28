@@ -2,6 +2,19 @@
 
 This project follows [Keep a Changelog](https://keepachangelog.com/) style. Version numbers follow [Semantic Versioning](https://semver.org/).
 
+## [2.1.1] - 2026-06-27
+
+### Added
+- `TypeNode.type_path: Array` — qualified type path (e.g. `["BaseVariable","VariableScope"]`), consumers no longer split type_name
+- `VariableNode.is_static: bool` — static var marker
+
+### Fixed
+- **Qualified type `Class.NestedType`** — `_parse_type` loops `.` + IDENTIFIER (was single IDENTIFIER, failed on `.`)
+- **Dictionary equals syntax `{key = value}`** — `_parse_dictionary` detects AssignmentNode and splits (was `_parse_expression` eating assignment, expected COLON)
+- **`static var`** — `_parse_class_member` STATIC branch accepts VAR (was FUNC only)
+
+> Source: Fuse project codegen exploration ([project-juicy-godot](https://github.com/kenyonxu/project-juicy-godot)) — three GDScript 4.x legal syntax failures.
+
 ## [2.1.0] - 2026-06-26
 
 ### Added
