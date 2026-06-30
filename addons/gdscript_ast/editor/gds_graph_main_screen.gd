@@ -237,7 +237,9 @@ func _center_view() -> void:
 		# 公式: scroll = center_graph * zoom - viewport / 2
 		var center_graph = sum / float(count)
 		var screen_center = center_graph * _graph_edit.zoom
-		var vp = _graph_edit.get_viewport_rect().size
+		var vp = _graph_edit.size
+		if vp == Vector2.ZERO:
+			vp = _graph_edit.custom_minimum_size  # 兜底：布局未完成时
 		_graph_edit.set_scroll_offset(screen_center - vp / 2.0)
 
 func _on_export() -> void:
