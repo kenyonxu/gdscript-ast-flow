@@ -99,10 +99,9 @@ func _build_ui() -> void:
 	# 锁定按钮（锁定时点击节点不跳转脚本编辑器）
 	_lock_btn = Button.new()
 	_lock_btn.flat = true
-	_lock_btn.toggle_mode = true
 	_lock_btn.icon = load("res://addons/gdscript_ast/editor/icons/lock_gree.svg")
 	_lock_btn.tooltip_text = "锁定后点击节点不跳转脚本编辑器"
-	_lock_btn.toggled.connect(_on_lock_toggled)
+	_lock_btn.pressed.connect(_on_lock_pressed)
 	_code_toolbar.add_child(_lock_btn)
 	# 图例（按当前视图动态填充，见 _refresh_legend）
 	_legend = HBoxContainer.new()
@@ -225,9 +224,9 @@ func _do_jump(p_node: GDSGraphNode) -> void:
 			EditorInterface.edit_script(script, int(meta["line"]))
 			EditorInterface.set_main_screen_editor("Script")
 
-func _on_lock_toggled(p_pressed: bool) -> void:
-	is_locked = p_pressed
-	if p_pressed:
+func _on_lock_pressed() -> void:
+	is_locked = !is_locked
+	if is_locked:
 		_lock_btn.icon = load("res://addons/gdscript_ast/editor/icons/lock_red.svg")
 	else:
 		_lock_btn.icon = load("res://addons/gdscript_ast/editor/icons/lock_gree.svg")
