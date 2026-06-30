@@ -118,7 +118,7 @@ func _on_function_selected(p_name: String) -> void:
 	# 简单实现：不做额外处理，保持 Tree 已有选择状态
 	pass
 
-func _on_item_rmb(p_mouse_button_index: int) -> void:
+func _on_item_rmb(_p_position: Vector2, p_mouse_button_index: int) -> void:
 	if p_mouse_button_index == MOUSE_BUTTON_RIGHT and _tree.get_selected() != null:
 		_context_menu.popup_on_parent(Rect2(get_global_mouse_position(), Vector2.ZERO))
 
