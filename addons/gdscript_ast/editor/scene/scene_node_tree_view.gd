@@ -177,6 +177,7 @@ func _show_detail(node, node_path: String = "") -> void:
 		var script_btn = Button.new()
 		script_btn.text = node.script_resource
 		script_btn.flat = true
+		script_btn.tooltip_text = _l10n.t("detail.jump_script")
 		script_btn.pressed.connect(_on_jump_script.bind(node.script_resource))
 		_detail.add_child(script_btn)
 	elif node.script_resource != "":
@@ -197,6 +198,7 @@ func _show_detail(node, node_path: String = "") -> void:
 			var instance_btn = Button.new()
 			instance_btn.text = node.instance_resource
 			instance_btn.flat = true
+			instance_btn.tooltip_text = _l10n.t("detail.jump_script")
 			instance_btn.pressed.connect(_on_jump_script.bind(node.instance_resource))
 			_detail.add_child(instance_btn)
 		elif node.instance_resource != "":
