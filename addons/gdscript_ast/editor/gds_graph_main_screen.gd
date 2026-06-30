@@ -37,6 +37,7 @@ func setup(p_bridge: GDSAnalysisBridge, p_l10n: GDSL10n = null) -> void:
 	call_deferred("_rebuild")
 
 func _build_ui() -> void:
+	is_locked = false  # 重置 static var（防止编辑器 reload 残留上次锁定状态）
 	# 主屏铺满编辑器主屏区域：
 	# - PRESET_FULL_RECT (anchors) — 父级是 Control 时生效
 	# - size_flags EXPAND_FILL — 父级是 Container 时生效（编辑器主屏实际是 Container）
