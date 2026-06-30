@@ -210,6 +210,7 @@ func _on_node_selected(p_node: Node) -> void:
 			var script = load(meta["file"])
 			if script != null:
 				EditorInterface.edit_script(script, int(meta["line"]))
+				EditorInterface.set_main_screen_editor("Script")
 	# 关联高亮：淡化非关联节点
 	_highlight_related(p_node)
 

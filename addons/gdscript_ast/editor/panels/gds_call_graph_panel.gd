@@ -151,6 +151,8 @@ func _jump_to_definition(p_func_name: String) -> void:
 	for func_node in result.get_all_functions():
 		if func_node.name == p_func_name:
 			EditorInterface.edit_script(load(result.file_path), func_node.line)
+			EditorInterface.set_main_screen_editor("Script")
+			return
 			return
 
 func _on_search_changed(p_text: String) -> void:
