@@ -241,6 +241,7 @@ func _on_jump_script(path: String) -> void:
 	var scr = load(path)
 	if scr:
 		EditorInterface.edit_script(scr)
+		EditorInterface.set_main_screen_editor("Script")
 
 # 供联动调用：选场景→展开树到 node_path→选中
 func focus_node(scene_path: String, node_path: String) -> void:
