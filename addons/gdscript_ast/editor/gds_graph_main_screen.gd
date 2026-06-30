@@ -114,6 +114,7 @@ func _build_ui() -> void:
 	_graph_edit.custom_minimum_size = Vector2(800, 500)  # 兜底：父容器未布局时也可见
 	_graph_edit.node_selected.connect(_on_node_selected)
 	_graph_edit.node_deselected.connect(_on_node_deselected)
+	_graph_edit.gui_input.connect(_on_graph_double_click)
 	add_child(_graph_edit)
 
 func _add_legend_chip(p_parent: Control, p_text: String, p_color: Color) -> void:
@@ -203,16 +204,26 @@ func _rebuild() -> void:
 func _on_node_selected(p_node: Node) -> void:
 	if not (p_node is GDSGraphNode):
 		return
-	# 锁定时只高亮，不跳转脚本编辑器
-	if not is_locked:
-		var meta = p_node.get_meta("jump", {})
-		if meta.has("file") and meta.has("line") and meta["file"] != "":
-			var script = load(meta["file"])
-			if script != null:
-				EditorInterface.edit_script(script, int(meta["line"]))
-				EditorInterface.set_main_screen_editor("Script")
-	# 关联高亮：淡化非关联节点
+	# 单击只高亮（双击才跳转，见 _on_graph_double_click）
 	_highlight_related(p_node)
+
+# 双击节点 → 跳转脚本编辑器
+func _on_graph_double_click(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.double_click and event.pressed:
+		for c in _graph_edit.get_children():
+			if c is GraphNode and c.selected:
+				_do_jump(c)
+				break
+
+func _do_jump(p_node: GDSGraphNode) -> void:
+	if is_locked:
+		return
+	var meta = p_node.get_meta("jump", {})
+	if meta.has("file") and meta.has("line") and meta["file"] != "":
+		var script = load(meta["file"])
+		if script != null:
+			EditorInterface.edit_script(script, int(meta["line"]))
+			EditorInterface.set_main_screen_editor("Script")
 
 func _on_lock_toggled(p_pressed: bool) -> void:
 	is_locked = p_pressed

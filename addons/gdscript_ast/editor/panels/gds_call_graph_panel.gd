@@ -47,6 +47,7 @@ func _build_ui() -> void:
 	_tree.hide_root = true
 	_tree.columns = 1
 	_tree.select_mode = Tree.SELECT_MULTI  # 多选 — 参考 limboai
+	_tree.allow_rmb_select = true  # 右键选中 + 触发 item_mouse_selected（否则 RMB 无信号）
 	_tree.item_selected.connect(_on_item_selected)
 	# Godot 4.3+ item_mouse_selected 信号传 mouse_button_index
 	_tree.item_mouse_selected.connect(_on_item_rmb)
