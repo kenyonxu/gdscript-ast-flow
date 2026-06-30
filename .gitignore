@@ -15,7 +15,9 @@ graphify-out/cache/
 
 # brainstorming visual companion mockups（本地临时）
 .superpowers/
-docs/superpowers/
+
+# 内部开发文档（spec/plan/探索笔记，非用户面）
+docs/
 
 # others
 .swarm/
