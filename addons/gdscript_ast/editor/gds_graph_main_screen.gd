@@ -17,6 +17,8 @@ var _project_view: GDSProjectGraphView = null
 var _min_degree: int = 0
 var _legend: HBoxContainer = null
 var _file_label: Label = null  # 当前文件路径显示
+var _is_locked: bool = false  # 锁定时点击节点不跳转脚本编辑器
+var _lock_btn: Button = null
 # Chunk A: 场景 mode
 var _scene_main_screen: Control = null
 var _code_toolbar: HBoxContainer = null
@@ -93,6 +95,14 @@ func _build_ui() -> void:
 	export_btn.text = _l10n.t("btn.export_json")
 	export_btn.pressed.connect(_on_export)
 	_code_toolbar.add_child(export_btn)
+	# 锁定按钮（锁定时点击节点不跳转脚本编辑器）
+	_lock_btn = Button.new()
+	_lock_btn.flat = true
+	_lock_btn.toggle_mode = true
+	_lock_btn.icon = load("res://addons/gdscript_ast/editor/icons/lock_gree.svg")
+	_lock_btn.tooltip_text = "锁定后点击节点不跳转脚本编辑器"
+	_lock_btn.toggled.connect(_on_lock_toggled)
+	_code_toolbar.add_child(_lock_btn)
 	# 图例（按当前视图动态填充，见 _refresh_legend）
 	_legend = HBoxContainer.new()
 	add_child(_legend)
@@ -192,14 +202,22 @@ func _rebuild() -> void:
 func _on_node_selected(p_node: Node) -> void:
 	if not (p_node is GDSGraphNode):
 		return
-	# metadata 在 configure 时存（需 view 创建节点时 set_meta）
-	var meta = p_node.get_meta("jump", {})
-	if meta.has("file") and meta.has("line") and meta["file"] != "":
-		var script = load(meta["file"])
-		if script != null:
-			EditorInterface.edit_script(script, int(meta["line"]))
+	# 锁定时只高亮，不跳转脚本编辑器
+	if not _is_locked:
+		var meta = p_node.get_meta("jump", {})
+		if meta.has("file") and meta.has("line") and meta["file"] != "":
+			var script = load(meta["file"])
+			if script != null:
+				EditorInterface.edit_script(script, int(meta["line"]))
 	# 关联高亮：淡化非关联节点
 	_highlight_related(p_node)
+
+func _on_lock_toggled(p_pressed: bool) -> void:
+	_is_locked = p_pressed
+	if p_pressed:
+		_lock_btn.icon = load("res://addons/gdscript_ast/editor/icons/lock_red.svg")
+	else:
+		_lock_btn.icon = load("res://addons/gdscript_ast/editor/icons/lock_gree.svg")
 
 func _on_node_deselected(_p_node: Node) -> void:
 	# 取消选择 → 全部恢复全透明
