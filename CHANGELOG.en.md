@@ -2,6 +2,20 @@
 
 This project follows [Keep a Changelog](https://keepachangelog.com/) style. Version numbers follow [Semantic Versioning](https://semver.org/).
 
+## [2.1.2] - 2026-06-30
+
+### Added
+- **Lock button** (🔒 toolbar toggle) — when locked, double-clicking nodes / right-click jump won't switch to script editor (useful for screen recording/browsing). Green=unlocked, Red=locked
+- Node tree script/instance buttons now show "Jump to Script" tooltip
+
+### Fixed
+- **Double-click to jump**: main screen now requires double-click to jump (was single-click), single-click only highlights
+- **Jump switches tab**: 3 `edit_script` calls now include `set_main_screen_editor("Script")` (Godot 4.7 opened script but didn't switch main screen)
+- **Relayout centering offset**: `_center_view` uses `GraphEdit.size` instead of `viewport_rect.size` (former included toolbar height causing graph to appear bottom-right)
+- **Call Graph right-click menu**: `allow_rmb_select=true` (Godot default false, RMB didn't trigger `item_mouse_selected`)
+- **Signal parameter mismatch**: `_on_item_rmb` now accepts position parameter (`Tree.item_mouse_selected` passes 2 args)
+- **Lock button visual**: removed `toggle_mode` (pressed state grey background obscured icon), using `pressed` signal instead
+
 ## [2.1.1] - 2026-06-27
 
 ### Added

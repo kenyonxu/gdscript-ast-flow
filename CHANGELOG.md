@@ -2,6 +2,20 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/) 风格，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.1.2] - 2026-06-30
+
+### 新增
+- **锁定按钮**（🔒 toolbar toggle）— 锁定后双击节点/右键跳转均不切脚本编辑器（录屏/浏览时用）。绿=解锁，红=锁定
+- 节点树 script/instance 按钮加 tooltip「跳转脚本」
+
+### 修复
+- **双击跳转**：主屏改为双击节点才跳转（原单击就跳），单击只高亮
+- **跳转切 tab**：3 处 `edit_script` 补 `set_main_screen_editor("Script")`（Godot 4.7 原只打开脚本不切主屏）
+- **relayout 居中偏移**：`_center_view` 用 `GraphEdit.size` 替代 `viewport_rect.size`（原含 toolbar 高度致图偏右下）
+- **底部 Call Graph 右键菜单**：`allow_rmb_select=true`（Godot 默认 false，RMB 不触发 `item_mouse_selected`）
+- **信号参数匹配**：`_on_item_rmb` 补 position 参数（`Tree.item_mouse_selected` 传 2 参）
+- **锁定按钮视觉**：去 `toggle_mode`（pressed 态灰底遮盖 icon），改 `pressed` 手动切换
+
 ## [2.1.1] - 2026-06-27
 
 ### 新增

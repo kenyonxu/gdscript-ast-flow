@@ -116,11 +116,12 @@ The main screen "Flow Visualizer" Tab provides interactive graph views.
 | Re-layout | Auto-arrange nodes + center view |
 | Min degree | Filter: hide nodes below degree threshold |
 | Export JSON | Export CodeGraph JSON to file |
+| 🔒 Lock | When locked, clicking/double-clicking nodes won't jump to script editor (useful for screen recording/browsing). Green=unlocked, Red=locked |
 
 ### Node Interaction
 
 - **Click node** → Related nodes highlighted, unrelated nodes dimmed
-- **Double-click node** → Jump to source code location
+- **Double-click node** → Jump to source code location (when locked, only highlights without jumping)
 - **Legend** → Shows color meanings for current view, auto-updates on Scope/Graph switch
 
 ---
