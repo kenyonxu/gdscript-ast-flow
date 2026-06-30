@@ -234,6 +234,8 @@ func _clear_detail() -> void:
 		c.queue_free()
 
 func _on_jump_script(path: String) -> void:
+	if GDSGraphMainScreen.is_locked:
+		return
 	if path == "" or not ResourceLoader.exists(path):
 		return
 	var scr = load(path)

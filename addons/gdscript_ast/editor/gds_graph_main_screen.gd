@@ -17,7 +17,7 @@ var _project_view: GDSProjectGraphView = null
 var _min_degree: int = 0
 var _legend: HBoxContainer = null
 var _file_label: Label = null  # 当前文件路径显示
-var _is_locked: bool = false  # 锁定时点击节点不跳转脚本编辑器
+static var is_locked: bool = false  # 锁定时点击节点不跳转脚本编辑器（全局共享）
 var _lock_btn: Button = null
 # Chunk A: 场景 mode
 var _scene_main_screen: Control = null
@@ -203,7 +203,7 @@ func _on_node_selected(p_node: Node) -> void:
 	if not (p_node is GDSGraphNode):
 		return
 	# 锁定时只高亮，不跳转脚本编辑器
-	if not _is_locked:
+	if not is_locked:
 		var meta = p_node.get_meta("jump", {})
 		if meta.has("file") and meta.has("line") and meta["file"] != "":
 			var script = load(meta["file"])
@@ -213,7 +213,7 @@ func _on_node_selected(p_node: Node) -> void:
 	_highlight_related(p_node)
 
 func _on_lock_toggled(p_pressed: bool) -> void:
-	_is_locked = p_pressed
+	is_locked = p_pressed
 	if p_pressed:
 		_lock_btn.icon = load("res://addons/gdscript_ast/editor/icons/lock_red.svg")
 	else:

@@ -141,6 +141,8 @@ func _on_context_action(p_id: int) -> void:
 		2: _bridge.select_function(name)
 
 func _jump_to_definition(p_func_name: String) -> void:
+	if GDSGraphMainScreen.is_locked:
+		return
 	if p_func_name.is_empty():
 		return
 	var result = _bridge.get_current_result()
