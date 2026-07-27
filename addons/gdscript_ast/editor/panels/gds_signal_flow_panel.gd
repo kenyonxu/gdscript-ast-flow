@@ -7,6 +7,7 @@ extends VBoxContainer
 var _bridge: GDSAnalysisBridge = null
 var _l10n: GDSL10n = null
 var _tree: Tree = null
+var _search_edit: LineEdit = null
 
 func setup(p_bridge: GDSAnalysisBridge, p_l10n: GDSL10n = null) -> void:
 	_bridge = p_bridge
@@ -15,6 +16,11 @@ func setup(p_bridge: GDSAnalysisBridge, p_l10n: GDSL10n = null) -> void:
 	_build_ui()
 
 func _build_ui() -> void:
+	_search_edit = LineEdit.new()
+	_search_edit.placeholder_text = "搜索信号..."
+	_search_edit.text_changed.connect(_on_search_changed)
+	add_child(_search_edit)
+
 	_tree = Tree.new()
 	_tree.size_flags_horizontal = SIZE_EXPAND_FILL
 	_tree.size_flags_vertical = SIZE_EXPAND_FILL
@@ -22,6 +28,9 @@ func _build_ui() -> void:
 	_tree.columns = 1
 	_tree.item_selected.connect(_on_item_selected)
 	add_child(_tree)
+
+func _on_search_changed(p_text: String) -> void:
+	GDSTreeSearch.highlight(_tree, p_text, 0)
 
 func _refresh(p_result: GDScriptAnalysisResult) -> void:
 	_tree.clear()
