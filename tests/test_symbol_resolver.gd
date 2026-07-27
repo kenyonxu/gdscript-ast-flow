@@ -6,6 +6,7 @@ extends Node
 func _ready():
 	print("=== GDScript SymbolResolver Phase 2 Acceptance Tests ===\n")
 	run_all_tests()
+	get_tree().quit()  # CLI headless 跑通用 — 测完自动退出（编辑器 F6 也兼容）
 
 func run_all_tests():
 	test_1_symbol_table_def_use()
