@@ -8,6 +8,7 @@ extends VBoxContainer
 var _bridge: GDSAnalysisBridge = null
 var _l10n: GDSL10n = null
 var _tree: Tree = null
+var _context_menu: PopupMenu = null
 
 const COLORS := {
 	0: Color.GREEN,         # DEFINE
@@ -38,8 +39,19 @@ func _build_ui() -> void:
 	_tree.set_column_title(0, "Variable")
 	_tree.set_column_title(1, "Kind")
 	_tree.set_column_title(2, "Sites")
+	_tree.allow_rmb_select = true  # 右键选中 + 触发 item_mouse_selected
 	_tree.item_selected.connect(_on_item_selected)
+	_tree.item_activated.connect(_on_item_activated)  # 双击
+	_tree.item_mouse_selected.connect(_on_item_rmb)   # 右键
 	add_child(_tree)
+
+	# 右键上下文菜单（仅 site 行有效）
+	_context_menu = PopupMenu.new()
+	_context_menu.add_item("跳转到定义", 0)
+	_context_menu.add_item("复制 脚本:行", 1)
+	_context_menu.add_item("在主屏选中变量", 2)
+	_context_menu.id_pressed.connect(_on_context_action)
+	add_child(_context_menu)
 
 func _refresh(p_result: GDScriptAnalysisResult) -> void:
 	_tree.clear()
@@ -119,6 +131,58 @@ func _on_item_selected() -> void:
 		var parent_meta = item.get_parent().get_metadata(0)
 		if parent_meta != null and parent_meta.get("kind", "") == "variable":
 			_bridge.select_variable(parent_meta["name"])
+
+# 双击 site 行 → 跳转源码
+func _on_item_activated() -> void:
+	var item = _tree.get_selected()
+	if item == null:
+		return
+	var meta = item.get_metadata(0)
+	if meta == null or meta.get("kind", "") != "site":
+		return
+	_jump_to_site(meta["site"])
+
+# 右键 → 仅 site 行弹菜单
+func _on_item_rmb(_p_position: Vector2, p_mouse_button_index: int) -> void:
+	if p_mouse_button_index != MOUSE_BUTTON_RIGHT:
+		return
+	var item = _tree.get_selected()
+	if item == null:
+		return
+	var meta = item.get_metadata(0)
+	if meta != null and meta.get("kind", "") == "site":
+		_context_menu.popup_on_parent(Rect2(get_global_mouse_position(), Vector2.ZERO))
+
+# 菜单动作分发
+func _on_context_action(p_id: int) -> void:
+	var item = _tree.get_selected()
+	if item == null:
+		return
+	var meta = item.get_metadata(0)
+	if meta == null or meta.get("kind", "") != "site":
+		return
+	var site = meta["site"]
+	match p_id:
+		0: _jump_to_site(site)
+		1: DisplayServer.clipboard_set("%s:%d" % [site.script_path, site.line])
+		2:
+			var parent = item.get_parent()
+			if parent != null:
+				var pm = parent.get_metadata(0)
+				if pm != null and pm.get("kind", "") == "variable":
+					_bridge.select_variable(pm["name"])
+
+# 跳转到 site 对应源码行（尊重主屏锁定）
+func _jump_to_site(p_site) -> void:
+	if GDSGraphMainScreen.is_locked:
+		return
+	if p_site == null or p_site.line <= 0:
+		return
+	var result = _bridge.get_current_result()
+	if result == null or result.file_path.is_empty():
+		return
+	EditorInterface.edit_script(load(result.file_path), p_site.line)
+	EditorInterface.set_main_screen_editor("Script")
 
 func _on_variable_selected(p_name: String) -> void:
 	# Phase 3.1: 联动预留
