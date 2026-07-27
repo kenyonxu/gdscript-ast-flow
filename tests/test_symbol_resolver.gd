@@ -32,6 +32,7 @@ func run_all_tests():
 	test_21_is_unused_signal()
 	test_22_call_node_site_line()
 	test_23_expr_formatter()
+	test_24_signal_site_target()
 	print("\n=== All tests completed ===")
 
 
@@ -602,4 +603,31 @@ func test_23_expr_formatter():
 	var call9 = stmt9.expression
 	assert_eq("foo(1, 2)", GDSExprFormatter.format(call9), "CallNode foo(1, 2)")
 
+	print("  PASS")
+
+
+# Test 24: signal emit/connect site 的 target_object/target_type（跨文件类型推断）
+func test_24_signal_site_target():
+	print("Test 24: signal site target_object/target_type...")
+
+	# player.sig.emit() — player 是参数（player: Foo），跨文件场景
+	var src = "func _p(player: Foo) -> void:\n\tplayer.sig.emit()\n"
+	var r = resolve(src)
+	var info = r.get_signal_flow("sig")
+	assert_not_null(info, "sig should have info")
+	if info and info.emit_sites.size() > 0:
+		var site = info.emit_sites[0]
+		assert_eq("player", site.target_object, "emit site target_object = player")
+		# type_table 推断 player→Foo（参数 player: Foo 标注）
+		assert_eq("Foo", site.target_type, "emit site target_type = Foo (from type_table)")
+
+	# connect 分支：player.sig.connect(cb) → target_object=player, target_type=Foo
+	var src2 = "func _q(player: Foo) -> void:\n\tplayer.sig.connect(_cb)\nfunc _cb() -> void:\n\tpass\n"
+	var r2 = resolve(src2)
+	var info2 = r2.get_signal_flow("sig")
+	assert_not_null(info2, "sig (connect) should have info")
+	if info2 and info2.connect_sites.size() > 0:
+		var site2 = info2.connect_sites[0]
+		assert_eq("player", site2.target_object, "connect site target_object = player")
+		assert_eq("Foo", site2.target_type, "connect site target_type = Foo")
 	print("  PASS")

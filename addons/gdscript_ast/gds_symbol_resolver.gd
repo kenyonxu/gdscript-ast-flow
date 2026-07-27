@@ -489,6 +489,7 @@ func _resolve_attribute_call(p_call_node, p_attr, p_scope: GDScriptSymbolTable, 
 				info.name = sig_name
 				result.signal_graph.signals[sig_name] = info
 			info.connect_sites.append(_make_site(p_call_node, p_current_function, p_call_node.arguments))
+			_fill_target(info.connect_sites[-1], base)
 			# 记录 SIGNAL_CONNECT 边: callee=信号名, target_object=对象名 (供跨文件解析)
 			_add_call_edge(p_current_function, sig_name, p_attr.line, GDScriptCallEdge.CallType.SIGNAL_CONNECT, obj_base.name, p_call_node.arguments)
 		else:
@@ -515,6 +516,7 @@ func _resolve_attribute_call(p_call_node, p_attr, p_scope: GDScriptSymbolTable, 
 				einfo.name = emit_sig_name
 				result.signal_graph.signals[emit_sig_name] = einfo
 			einfo.emit_sites.append(_make_site(p_call_node, p_current_function, p_call_node.arguments))
+			_fill_target(einfo.emit_sites[-1], base)
 			# 记录 EMIT 边: callee=信号名, target_object=对象名 (供跨文件解析)
 			_add_call_edge(p_current_function, emit_sig_name, p_attr.line, GDScriptCallEdge.CallType.EMIT, emit_obj_base.name, p_call_node.arguments)
 		else:
@@ -538,6 +540,19 @@ func _resolve_attribute_call(p_call_node, p_attr, p_scope: GDScriptSymbolTable, 
 		var base_sym = p_scope.resolve(base.name)
 		if base_sym != null and base_sym.kind != GDScriptSymbol.Kind.SIGNAL:
 			_record_def_use(base.name, base, p_current_function, GDScriptDefUseSite.AccessType.READ)
+
+
+	# 填充 site 的 target_object/target_type（跨文件推断）
+	# p_base_expr: 外层 AttributeNode（如 player.sig → base_obj=player, sig_name=sig）
+	# 仅当 base_expr 是 AttributeNode 且 base.base 是 IdentifierNode 时填充
+	func _fill_target(p_site: GDScriptSite, p_base_expr) -> void:
+		if p_site == null or p_base_expr == null:
+			return
+		if p_base_expr is GDScriptToken.AttributeNode:
+			var base_obj = p_base_expr.base
+			if base_obj is GDScriptToken.IdentifierNode:
+				p_site.target_object = base_obj.name
+				p_site.target_type = result.type_table.get(base_obj.name, "")
 
 
 # emit("signal_name") 形式 — 已在 _resolve_call 中通过 callee.name == "emit" 触发
