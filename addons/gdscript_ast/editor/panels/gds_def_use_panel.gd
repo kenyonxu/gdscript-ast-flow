@@ -65,8 +65,14 @@ func _add_site_items(p_parent: TreeItem, p_site, p_label: String) -> void:
 		return
 	var child = _tree.create_item(p_parent)
 	child.set_text(0, "  %s" % p_label)
-	child.set_text(1, p_site.enclosing_function + "()")
+	# 列 1: 函数名() [脚本名.gd] — 脚本来源标注
+	var script_name = p_site.script_path.get_file() if p_site.script_path != "" else "?"
+	child.set_text(1, "%s() [%s]" % [p_site.enclosing_function, script_name])
 	child.set_text(2, "line %d" % p_site.line)
+	# tooltip: 完整路径 · 函数 · 行
+	child.set_tooltip_text(1, "%s · %s() · line %d" % [
+		p_site.script_path, p_site.enclosing_function, p_site.line
+	])
 	child.set_metadata(0, {"kind": "site", "site": p_site})
 	if COLORS.has(p_site.access_type):
 		child.set_custom_color(0, COLORS[p_site.access_type])
