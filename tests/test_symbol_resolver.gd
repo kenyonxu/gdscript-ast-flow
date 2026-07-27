@@ -29,6 +29,7 @@ func run_all_tests():
 	test_18_usage_status()
 	test_19_method_call_base_read()
 	test_20_parameter_flag()
+	test_21_is_unused_signal()
 	print("\n=== All tests completed ===")
 
 
@@ -480,4 +481,24 @@ func test_20_parameter_flag():
 	assert_not_null(ul, "lambda param z should have info")
 	if ul and ul.def_site:
 		assert_true(ul.def_site.is_parameter, "lambda param z.is_parameter should be true")
+	print("  PASS")
+
+
+# Test 21: signal is_unused 判定（未连接信号高亮依据）
+func test_21_is_unused_signal():
+	print("Test 21: signal is_unused flag...")
+	# declared 但 0 emit + 0 connect → unused
+	var src_unused = "signal dead_sig\n"
+	var r1 = resolve(src_unused)
+	var info1 = r1.get_signal_flow("dead_sig")
+	assert_not_null(info1, "dead_sig should have info")
+	if info1:
+		assert_true(info1.is_unused(), "dead_sig (0 emit + 0 connect) → unused")
+	# 有 emit → not unused
+	var src_emit = "signal used_sig\nfunc _p():\n\tused_sig.emit()\n"
+	var r2 = resolve(src_emit)
+	var info2 = r2.get_signal_flow("used_sig")
+	assert_not_null(info2, "used_sig should have info")
+	if info2:
+		assert_true(not info2.is_unused(), "used_sig (has emit) → not unused")
 	print("  PASS")
