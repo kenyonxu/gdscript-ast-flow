@@ -10,6 +10,9 @@ var _tree: Tree = null
 var _search_edit: LineEdit = null
 var _context_menu: PopupMenu = null
 
+# 未连接信号高亮配色 — 与 EMIT(红)/CONNECT(蓝) 区分
+const UNUSED_SIGNAL_COLOR := Color.GRAY
+
 func setup(p_bridge: GDSAnalysisBridge, p_l10n: GDSL10n = null) -> void:
 	_bridge = p_bridge
 	_l10n = p_l10n if p_l10n else GDSL10n.new()
@@ -112,6 +115,7 @@ func _refresh(p_result: GDScriptAnalysisResult) -> void:
 		else:
 			sig_item.set_text(0, "signal %s (external)" % sig_name)
 		sig_item.set_metadata(0, {"kind": "signal", "name": sig_name})
+		_apply_unused_highlight(sig_item, sig_name, info)
 
 		for site in info.emit_sites:
 			var emit_item = _tree.create_item(sig_item)
@@ -124,6 +128,15 @@ func _refresh(p_result: GDScriptAnalysisResult) -> void:
 			conn_item.set_text(0, "  CONNECT: %s() @line %d" % [site.enclosing_function, site.line])
 			conn_item.set_metadata(0, {"kind": "site", "site": site})
 			conn_item.set_custom_color(0, Color.DODGER_BLUE)
+
+# 未连接信号高亮 — `_` 开头信号排除（约定占位）
+func _apply_unused_highlight(p_item: TreeItem, p_name: String, p_info) -> void:
+	if p_name.begins_with("_"):
+		return
+	if not p_info.is_unused():
+		return
+	p_item.set_custom_color(0, UNUSED_SIGNAL_COLOR)
+	p_item.set_tooltip_text(0, "信号 '%s' 已声明但从未 emit/connect（dead signal）" % p_name)
 
 func _on_item_selected() -> void:
 	var item = _tree.get_selected()
