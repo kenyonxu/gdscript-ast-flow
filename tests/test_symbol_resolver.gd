@@ -27,6 +27,7 @@ func run_all_tests():
 	test_16_site_script_path()
 	test_17_site_line_not_zero()
 	test_18_usage_status()
+	test_19_method_call_base_read()
 	print("\n=== All tests completed ===")
 
 
@@ -419,4 +420,17 @@ func test_18_usage_status():
 	assert_not_null(u3, "ok should have info")
 	if u3:
 		assert_eq("normal", u3.get_usage_status(), "read var → 'normal'")
+	print("  PASS")
+
+
+# Test 19: 方法调用 base 的读取应计入 def_use READ（修复 health.take_damage() 盲点）
+func test_19_method_call_base_read():
+	print("Test 19: method call base counts as READ...")
+	var source = "var hp\nfunc _p():\n\thp.take_damage(10)\n"
+	var r = resolve(source)
+	var usage = r.get_variable_usages("hp")
+	assert_not_null(usage, "hp should have info")
+	if usage:
+		assert_true(usage.read_sites.size() > 0, "hp should have READ site (method call base)")
+		assert_eq("normal", usage.get_usage_status(), "hp should be normal (not unused)")
 	print("  PASS")
