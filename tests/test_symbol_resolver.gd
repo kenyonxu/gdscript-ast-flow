@@ -24,6 +24,7 @@ func run_all_tests():
 	test_13_type_infer_return()
 	test_14_type_infer_preload()
 	test_15_fstring()
+	test_16_site_script_path()
 	print("\n=== All tests completed ===")
 
 
@@ -347,4 +348,23 @@ func test_15_fstring():
 			has_expr = true
 			break
 	assert(has_expr, "FormattedStringNode should have at least one expr segment")
+	print("  PASS")
+
+
+# Test 16: site 记录 script_path（数据层 — 跨文件铺路）
+func test_16_site_script_path():
+	print("Test 16: site script_path recording...")
+	var source = "extends Node\nvar x: int = 0\nfunc _p():\n\tx = 1\n"
+	var tok = GDScriptTokenizer.new()
+	var ast = GDScriptParser.new().parse(tok.tokenize(source))
+	var resolver = GDScriptSymbolResolver.new()
+	var result = resolver.resolve(ast, "res://test_sample.gd")
+	var usage = result.get_variable_usages("x")
+	assert_not_null(usage, "x should have DefUseInfo")
+	if usage:
+		assert_not_null(usage.def_site, "x should have def_site")
+		if usage.def_site:
+			assert_eq("res://test_sample.gd", usage.def_site.script_path, "def_site.script_path should be recorded")
+		if usage.write_sites.size() > 0:
+			assert_eq("res://test_sample.gd", usage.write_sites[0].script_path, "write_site.script_path should be recorded")
 	print("  PASS")

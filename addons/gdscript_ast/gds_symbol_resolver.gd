@@ -15,6 +15,9 @@ var filter_builtin_calls := true
 var enable_type_inference := true
 var _return_type_table: Dictionary = {}
 
+# 当前解析文件路径 — 透传给 _record_def_use 记入 site.script_path
+var _current_script_path: String = ""
+
 
 # 入口 — Phase 1/2 阶段边界
 # p_ast: GDScriptToken.ClassNode — Phase 1 产出的 AST 根
@@ -23,6 +26,7 @@ func resolve(p_ast, p_file_path: String = "") -> GDScriptAnalysisResult:
 	result = GDScriptAnalysisResult.new()
 	result.ast = p_ast
 	result.file_path = p_file_path
+	_current_script_path = p_file_path
 	result.call_graph = GDScriptCallGraph.new()
 	result.signal_graph = GDScriptSignalGraph.new()
 	result.def_use_chain = GDScriptDefUseChain.new()
@@ -209,6 +213,7 @@ func _record_def_use(p_var_name: String, p_node, p_current_function: String, p_a
 	site.node = p_node
 	site.enclosing_function = p_current_function
 	site.access_type = p_access_type
+	site.script_path = _current_script_path
 
 	match p_access_type:
 		GDScriptDefUseSite.AccessType.DEFINE:
