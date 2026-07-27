@@ -8,6 +8,7 @@ var _bridge: GDSAnalysisBridge = null
 var _l10n: GDSL10n = null
 var _tree: Tree = null
 var _search_edit: LineEdit = null
+var _context_menu: PopupMenu = null
 
 func setup(p_bridge: GDSAnalysisBridge, p_l10n: GDSL10n = null) -> void:
 	_bridge = p_bridge
@@ -26,11 +27,76 @@ func _build_ui() -> void:
 	_tree.size_flags_vertical = SIZE_EXPAND_FILL
 	_tree.hide_root = true
 	_tree.columns = 1
+	_tree.allow_rmb_select = true
 	_tree.item_selected.connect(_on_item_selected)
+	_tree.item_activated.connect(_on_item_activated)
+	_tree.item_mouse_selected.connect(_on_item_rmb)
 	add_child(_tree)
+
+	_context_menu = PopupMenu.new()
+	_context_menu.add_item("跳转到定义", 0)
+	_context_menu.add_item("复制 脚本:行", 1)
+	_context_menu.add_item("选中信号", 2)
+	_context_menu.id_pressed.connect(_on_context_action)
+	add_child(_context_menu)
 
 func _on_search_changed(p_text: String) -> void:
 	GDSTreeSearch.highlight(_tree, p_text, 0)
+
+# 双击 site 行 → 跳转源码
+func _on_item_activated() -> void:
+	var item = _tree.get_selected()
+	if item == null:
+		return
+	var meta = item.get_metadata(0)
+	if meta == null or meta.get("kind", "") != "site":
+		return
+	_jump_to_site(meta["site"])
+
+# 右键 → 仅 site 行弹菜单
+func _on_item_rmb(_p_position: Vector2, p_mouse_button_index: int) -> void:
+	if p_mouse_button_index != MOUSE_BUTTON_RIGHT:
+		return
+	var item = _tree.get_selected()
+	if item == null:
+		return
+	var meta = item.get_metadata(0)
+	if meta != null and meta.get("kind", "") == "site":
+		_context_menu.popup_on_parent(Rect2(get_global_mouse_position(), Vector2.ZERO))
+
+# 菜单动作分发
+func _on_context_action(p_id: int) -> void:
+	var item = _tree.get_selected()
+	if item == null:
+		return
+	var meta = item.get_metadata(0)
+	if meta == null or meta.get("kind", "") != "site":
+		return
+	var site = meta["site"]
+	var result = _bridge.get_current_result()
+	match p_id:
+		0: _jump_to_site(site)
+		1:
+			if result != null:
+				DisplayServer.clipboard_set("%s:%d" % [result.file_path, site.line])
+		2:
+			var parent = item.get_parent()
+			if parent != null:
+				var pm = parent.get_metadata(0)
+				if pm != null and pm.get("kind", "") == "signal":
+					_bridge.select_signal(pm["name"])
+
+# 跳转到 site 对应源码行（尊重主屏锁定）
+func _jump_to_site(p_site) -> void:
+	if GDSGraphMainScreen.is_locked:
+		return
+	if p_site == null or p_site.line <= 0:
+		return
+	var result = _bridge.get_current_result()
+	if result == null or result.file_path.is_empty():
+		return
+	EditorInterface.edit_script(load(result.file_path), p_site.line)
+	EditorInterface.set_main_screen_editor("Script")
 
 func _refresh(p_result: GDScriptAnalysisResult) -> void:
 	_tree.clear()
