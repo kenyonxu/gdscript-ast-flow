@@ -465,11 +465,19 @@ func test_20_parameter_flag():
 	assert_not_null(uv, "var x should have info")
 	if uv and uv.def_site:
 		assert_true(not uv.def_site.is_parameter, "var x.is_parameter should be false")
+	# 函数局部 var 也应 is_parameter=false
+	var src_local = "func _p():\n\tvar y: int = 0\n\tprint(y)\n"
+	var rloc = resolve(src_local)
+	var uloc = rloc.get_variable_usages("y")
+	assert_not_null(uloc, "local var y should have info")
+	if uloc and uloc.def_site:
+		assert_true(not uloc.def_site.is_parameter, "local var y.is_parameter should be false")
 	# lambda 参数也应标 is_parameter=true
 	var src_lam = "func _p():\n\tvar cb = func(z: int):\n\t\tprint(z)\n"
 	var rl = resolve(src_lam)
 	# lambda 参数 z 在 def_use_chain 里（resolver 会记）
 	var ul = rl.get_variable_usages("z")
+	assert_not_null(ul, "lambda param z should have info")
 	if ul and ul.def_site:
 		assert_true(ul.def_site.is_parameter, "lambda param z.is_parameter should be true")
 	print("  PASS")

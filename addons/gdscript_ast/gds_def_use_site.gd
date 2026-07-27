@@ -16,4 +16,4 @@ var node = null
 var enclosing_function: String = ""
 var access_type: int = AccessType.READ
 var script_path: String = ""
-var is_parameter: bool = false
+var is_parameter: bool = false  # true = 函数/lambda 形参（区别于 var/const 定义）
