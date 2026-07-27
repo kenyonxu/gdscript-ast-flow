@@ -527,13 +527,15 @@ func _resolve_attribute_call(p_call_node, p_attr, p_scope: GDScriptSymbolTable, 
 
 	# [Fix] 方法调用 base 的读取计入 def_use READ
 	# 修复 hp.take_damage(10) 里 hp 作为 base 被读但未记 READ，导致误判 unused 的盲点
-	# 边界：仅当 base 是单个 IdentifierNode 且在脚本 symbol table 能 resolve 到（复用 _resolve_identifier_read 判断逻辑）
+	# 沿用 line 638 `a.b = value` 的 base READ 模式，加 scope.resolve + 排除 SIGNAL
+	# 边界：仅当 base 是单个 IdentifierNode 且在脚本 symbol table 能 resolve 到（非 SIGNAL）
 	# - self/super → SelfNode/SuperNode，非 IdentifierNode，跳过
 	# - 属性链 a.b.method() → base 是 AttributeNode，跳过
 	# - 字面量/调用结果/类型名/外部对象 → 非 IdentifierNode 或 resolve 返回 null，跳过
+	# - signal_name.emit()/connect() → base 是 SIGNAL 符号，由 signal_graph 追踪，不进 def_use_chain
 	if base is GDScriptToken.IdentifierNode:
 		var base_sym = p_scope.resolve(base.name)
-		if base_sym != null:
+		if base_sym != null and base_sym.kind != GDScriptSymbol.Kind.SIGNAL:
 			_record_def_use(base.name, base, p_current_function, GDScriptDefUseSite.AccessType.READ)
 
 

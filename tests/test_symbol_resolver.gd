@@ -433,4 +433,16 @@ func test_19_method_call_base_read():
 	if usage:
 		assert_true(usage.read_sites.size() > 0, "hp should have READ site (method call base)")
 		assert_eq("normal", usage.get_usage_status(), "hp should be normal (not unused)")
+
+	# 负向：signal_name.connect() 不应给 signal 记 READ（信号由 signal_graph 追踪，不进 def_use_chain）
+	var sig_src = "signal health_changed\nfunc _ready():\n\thealth_changed.connect(_on_h)\nfunc _on_h():\n\tpass\n"
+	var sr = resolve(sig_src)
+	var sig_usage = sr.get_variable_usages("health_changed")
+	assert_eq(null, sig_usage, "signal should NOT enter def_use_chain (no READ for connect)")
+
+	# 负向：signal_name.emit() 同理
+	var emit_src = "signal died\nfunc _p():\n\tdied.emit()\n"
+	var er = resolve(emit_src)
+	var emit_usage = er.get_variable_usages("died")
+	assert_eq(null, emit_usage, "signal should NOT enter def_use_chain (no READ for emit)")
 	print("  PASS")
