@@ -545,14 +545,14 @@ func _resolve_attribute_call(p_call_node, p_attr, p_scope: GDScriptSymbolTable, 
 	# 填充 site 的 target_object/target_type（跨文件推断）
 	# p_base_expr: 外层 AttributeNode（如 player.sig → base_obj=player, sig_name=sig）
 	# 仅当 base_expr 是 AttributeNode 且 base.base 是 IdentifierNode 时填充
-	func _fill_target(p_site: GDScriptSite, p_base_expr) -> void:
-		if p_site == null or p_base_expr == null:
-			return
-		if p_base_expr is GDScriptToken.AttributeNode:
-			var base_obj = p_base_expr.base
-			if base_obj is GDScriptToken.IdentifierNode:
-				p_site.target_object = base_obj.name
-				p_site.target_type = result.type_table.get(base_obj.name, "")
+func _fill_target(p_site: GDScriptSite, p_base_expr) -> void:
+	if p_site == null or p_base_expr == null:
+		return
+	if p_base_expr is GDScriptToken.AttributeNode:
+		var base_obj = p_base_expr.base
+		if base_obj is GDScriptToken.IdentifierNode:
+			p_site.target_object = base_obj.name
+			p_site.target_type = result.type_table.get(base_obj.name, "")
 
 
 # emit("signal_name") 形式 — 已在 _resolve_call 中通过 callee.name == "emit" 触发
