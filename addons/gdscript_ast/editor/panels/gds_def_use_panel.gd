@@ -16,6 +16,12 @@ const COLORS := {
 	3: Color.RED,           # READ_WRITE
 }
 
+# 未使用高亮配色 — 去饱和/冷色系，与 COLORS 的暖色读写动作语义隔离
+const USAGE_COLORS := {
+	"unused": Color.GRAY,          # 完全死变量
+	"write_only": Color.MAGENTA,   # 只写不读 dead store
+}
+
 func setup(p_bridge: GDSAnalysisBridge, p_l10n: GDSL10n = null) -> void:
 	_bridge = p_bridge
 	_l10n = p_l10n if p_l10n else GDSL10n.new()
@@ -52,6 +58,7 @@ func _refresh(p_result: GDScriptAnalysisResult) -> void:
 			info.write_sites.size()
 		])
 		item.set_metadata(0, {"kind": "variable", "name": var_name})
+		_apply_usage_highlight(item, var_name, info)
 
 		# 子项 — 每个 site 一行
 		_add_site_items(item, info.def_site, "DEF")
@@ -81,6 +88,23 @@ func _kind_string(p_info) -> String:
 	if p_info.def_site != null and p_info.def_site.access_type == 0:
 		return "var/const"
 	return "param"
+
+# 未使用变量高亮 — `_` 开头占位变量排除
+# 染变量名行 + Kind 列覆盖为 UNUSED/WRITE-ONLY（原类型移 tooltip）
+func _apply_usage_highlight(p_item: TreeItem, p_name: String, p_info) -> void:
+	if p_name.begins_with("_"):
+		return
+	var status = p_info.get_usage_status()
+	if status == "normal":
+		return
+	if USAGE_COLORS.has(status):
+		p_item.set_custom_color(0, USAGE_COLORS[status])
+	var orig_kind = _kind_string(p_info)
+	if status == "unused":
+		p_item.set_text(1, "UNUSED")
+	else:
+		p_item.set_text(1, "WRITE-ONLY")
+	p_item.set_tooltip_text(0, "%s · %s" % [p_name, orig_kind])
 
 func _on_item_selected() -> void:
 	var item = _tree.get_selected()
