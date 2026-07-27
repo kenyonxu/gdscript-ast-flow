@@ -119,13 +119,17 @@ func _refresh(p_result: GDScriptAnalysisResult) -> void:
 
 		for site in info.emit_sites:
 			var emit_item = _tree.create_item(sig_item)
-			emit_item.set_text(0, "  EMIT: %s() @line %d" % [site.enclosing_function, site.line])
+			var args_str = GDSExprFormatter.format_args(site.arguments)
+			emit_item.set_text(0, "  EMIT %s(%s) @L%d in %s()" % [sig_name, args_str, site.line, site.enclosing_function])
 			emit_item.set_metadata(0, {"kind": "site", "site": site})
 			emit_item.set_custom_color(0, Color.RED)
 
 		for site in info.connect_sites:
 			var conn_item = _tree.create_item(sig_item)
-			conn_item.set_text(0, "  CONNECT: %s() @line %d" % [site.enclosing_function, site.line])
+			var cb_str = "?"
+			if site.arguments != null and site.arguments.size() > 0:
+				cb_str = GDSExprFormatter.format(site.arguments[0])
+			conn_item.set_text(0, "  CONNECT %s → %s @L%d in %s()" % [sig_name, cb_str, site.line, site.enclosing_function])
 			conn_item.set_metadata(0, {"kind": "site", "site": site})
 			conn_item.set_custom_color(0, Color.DODGER_BLUE)
 

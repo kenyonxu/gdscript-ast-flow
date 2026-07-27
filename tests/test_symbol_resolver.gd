@@ -31,6 +31,7 @@ func run_all_tests():
 	test_20_parameter_flag()
 	test_21_is_unused_signal()
 	test_22_call_node_site_line()
+	test_23_expr_formatter()
 	print("\n=== All tests completed ===")
 
 
@@ -529,4 +530,76 @@ func test_22_call_node_site_line():
 	assert_not_null(ic, "c should have info")
 	if ic and ic.connect_sites.size() > 0:
 		assert_true(ic.connect_sites[0].line > 0, "signal connect site line > 0 (CallNode)")
+	print("  PASS")
+
+
+# Test 23: GDSExprFormatter 序列化常见表达式
+func test_23_expr_formatter():
+	print("Test 23: GDSExprFormatter...")
+
+	# null 兜底
+	assert_eq("<null>", GDSExprFormatter.format(null), "null → <null>")
+
+	# LiteralNode — 数字
+	var ast1 = parse("var x = 100\n")
+	var lit = ast1.members[0].initializer
+	assert_not_null(lit, "literal should not be null")
+	assert_eq("100", GDSExprFormatter.format(lit), "LiteralNode 100")
+
+	# LiteralNode — 字符串
+	var ast1b = parse("var s = \"hello\"\n")
+	var lit_str = ast1b.members[0].initializer
+	assert_eq("hello", GDSExprFormatter.format(lit_str), "LiteralNode string (str strips quotes)")
+
+	# IdentifierNode
+	var ast2 = parse("var y = x\n")
+	var id = ast2.members[0].initializer
+	assert_eq("x", GDSExprFormatter.format(id), "IdentifierNode x")
+
+	# BinaryOpNode — a + b
+	var ast3 = parse("var z = a + b\n")
+	var bin = ast3.members[0].initializer
+	assert_eq("a + b", GDSExprFormatter.format(bin), "BinaryOp a + b")
+
+	# BinaryOpNode — a * b
+	var ast3b = parse("var w = a * b\n")
+	var bin_mul = ast3b.members[0].initializer
+	assert_eq("a * b", GDSExprFormatter.format(bin_mul), "BinaryOp a * b")
+
+	# UnaryOpNode — -x
+	var ast4 = parse("var n = -x\n")
+	var una = ast4.members[0].initializer
+	assert_eq("-x", GDSExprFormatter.format(una), "UnaryOp -x")
+
+	# AttributeNode — self.hp
+	var ast5 = parse("var v = self.hp\n")
+	var attr = ast5.members[0].initializer
+	assert_eq("self.hp", GDSExprFormatter.format(attr), "AttributeNode self.hp")
+
+	# CallNode — print(x)
+	var ast6 = parse("func _p():\n\tprint(x)\n")
+	var stmt6 = ast6.members[0].body.statements[0]
+	var call = stmt6.expression
+	assert_eq("print(x)", GDSExprFormatter.format(call), "CallNode print(x)")
+
+	# CallNode 无参 — emit()
+	var ast7 = parse("signal s\nfunc _p():\n\ts.emit()\n")
+	var stmt7 = ast7.members[1].body.statements[0]
+	var call_emit = stmt7.expression
+	assert_eq("s.emit()", GDSExprFormatter.format(call_emit), "CallNode s.emit() no args")
+
+	# LambdaNode → <lambda>
+	var ast8 = parse("var cb = func(x): return x * 2\n")
+	var lam = ast8.members[0].initializer
+	assert_eq("<lambda>", GDSExprFormatter.format(lam), "LambdaNode → <lambda>")
+
+	# format_args 空数组
+	assert_eq("", GDSExprFormatter.format_args([]), "format_args empty")
+
+	# format_args 有参
+	var ast9 = parse("func _p():\n\tfoo(1, 2)\n")
+	var stmt9 = ast9.members[0].body.statements[0]
+	var call9 = stmt9.expression
+	assert_eq("foo(1, 2)", GDSExprFormatter.format(call9), "CallNode foo(1, 2)")
+
 	print("  PASS")
