@@ -665,7 +665,7 @@ func _resolve_lambda(p_node, p_parent_scope: GDScriptSymbolTable, p_current_func
 	for param in p_node.params:
 		if param is GDScriptToken.ParameterNode:
 			lambda_scope.define(param.name, GDScriptSymbol.Kind.PARAMETER, param, _type_to_string(param.datatype))
-			_record_def_use(param.name, param, p_current_function, GDScriptDefUseSite.AccessType.DEFINE)
+			_record_def_use(param.name, param, p_current_function, GDScriptDefUseSite.AccessType.DEFINE, true)
 
 	# 遍历 lambda body — 传入 p_node 自身用于捕获检测
 	_resolve_suite(p_node.body, lambda_scope, p_current_function, p_node)
