@@ -501,4 +501,11 @@ func test_21_is_unused_signal():
 	assert_not_null(info2, "used_sig should have info")
 	if info2:
 		assert_true(not info2.is_unused(), "used_sig (has emit) → not unused")
+	# 有 connect 但无 emit → not unused（锁 AND 语义，防误改 or）
+	var src_conn = "signal conn_sig\nfunc _ready():\n\tconn_sig.connect(_on_conn)\nfunc _on_conn():\n\tpass\n"
+	var r3 = resolve(src_conn)
+	var info3 = r3.get_signal_flow("conn_sig")
+	assert_not_null(info3, "conn_sig should have info")
+	if info3:
+		assert_true(not info3.is_unused(), "conn_sig (has connect, no emit) → not unused")
 	print("  PASS")

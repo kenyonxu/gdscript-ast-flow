@@ -129,6 +129,10 @@ func _refresh(p_result: GDScriptAnalysisResult) -> void:
 			conn_item.set_metadata(0, {"kind": "site", "site": site})
 			conn_item.set_custom_color(0, Color.DODGER_BLUE)
 
+	# 重建 items 后重应用搜索高亮（text 未变不触发 text_changed）
+	if _search_edit != null and _search_edit.text != "":
+		_on_search_changed(_search_edit.text)
+
 # 未连接信号高亮 — `_` 开头信号排除（约定占位）
 func _apply_unused_highlight(p_item: TreeItem, p_name: String, p_info) -> void:
 	if p_name.begins_with("_"):
