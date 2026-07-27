@@ -16,3 +16,14 @@ func get_all_sites() -> Array:
 	all.append_array(read_sites)
 	all.append_array(write_sites)
 	return all
+
+
+# 使用状态判定 — UI 未使用高亮依据
+# 返回 "unused"(完全死: 0 read + 0 write) / "write_only"(只写不读) / "normal"
+# 注: `_` 开头占位变量的排除由 UI 层负责（约定，非数据语义）
+func get_usage_status() -> String:
+	if read_sites.is_empty() and write_sites.is_empty():
+		return "unused"
+	if read_sites.is_empty():
+		return "write_only"
+	return "normal"

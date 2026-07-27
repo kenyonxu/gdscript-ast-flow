@@ -26,6 +26,7 @@ func run_all_tests():
 	test_15_fstring()
 	test_16_site_script_path()
 	test_17_site_line_not_zero()
+	test_18_usage_status()
 	print("\n=== All tests completed ===")
 
 
@@ -389,4 +390,33 @@ func test_17_site_line_not_zero():
 			assert_true(usage.write_sites[0].line > 0, "write_site.line should be > 0 (line 3)")
 		if usage.read_sites.size() > 0:
 			assert_true(usage.read_sites[0].line > 0, "read_site.line should be > 0 (line 4)")
+	print("  PASS")
+
+
+# Test 18: DefUseInfo.get_usage_status() 判定（未使用分级高亮依据）
+func test_18_usage_status():
+	print("Test 18: get_usage_status() classification...")
+	# 完全死变量 — 只声明，无读无写
+	var src_unused = "extends Node\nvar dead: int = 0\n"
+	var r1 = resolve(src_unused)
+	var u1 = r1.get_variable_usages("dead")
+	assert_not_null(u1, "dead should have info")
+	if u1:
+		assert_eq("unused", u1.get_usage_status(), "dead var → 'unused'")
+
+	# 只写不读 — dead store
+	var src_wo = "extends Node\nvar wo: int = 0\nfunc _p():\n\two = 1\n"
+	var r2 = resolve(src_wo)
+	var u2 = r2.get_variable_usages("wo")
+	assert_not_null(u2, "wo should have info")
+	if u2:
+		assert_eq("write_only", u2.get_usage_status(), "write-only var → 'write_only'")
+
+	# 正常 — 有读
+	var src_ok = "extends Node\nvar ok: int = 0\nfunc _p():\n\tprint(ok)\n"
+	var r3 = resolve(src_ok)
+	var u3 = r3.get_variable_usages("ok")
+	assert_not_null(u3, "ok should have info")
+	if u3:
+		assert_eq("normal", u3.get_usage_status(), "read var → 'normal'")
 	print("  PASS")
