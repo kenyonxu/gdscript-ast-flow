@@ -17,7 +17,7 @@ const COLORS := {
 	3: Color.RED,           # READ_WRITE
 }
 
-# 未使用高亮配色 — 去饱和/冷色系，与 COLORS 的暖色读写动作语义隔离
+# 未使用高亮配色 — 辅助色系，与 COLORS 的读写动作语义隔离
 const USAGE_COLORS := {
 	"unused": Color.GRAY,          # 完全死变量
 	"write_only": Color.MAGENTA,   # 只写不读 dead store
@@ -89,8 +89,9 @@ func _add_site_items(p_parent: TreeItem, p_site, p_label: String) -> void:
 	child.set_text(1, "%s() [%s]" % [p_site.enclosing_function, script_name])
 	child.set_text(2, "line %d" % p_site.line)
 	# tooltip: 完整路径 · 函数 · 行
+	var path_for_tip = p_site.script_path if p_site.script_path != "" else "?"
 	child.set_tooltip_text(1, "%s · %s() · line %d" % [
-		p_site.script_path, p_site.enclosing_function, p_site.line
+		path_for_tip, p_site.enclosing_function, p_site.line
 	])
 	child.set_metadata(0, {"kind": "site", "site": p_site})
 	if COLORS.has(p_site.access_type):
