@@ -30,6 +30,7 @@ func run_all_tests():
 	test_19_method_call_base_read()
 	test_20_parameter_flag()
 	test_21_is_unused_signal()
+	test_22_call_node_site_line()
 	print("\n=== All tests completed ===")
 
 
@@ -508,4 +509,24 @@ func test_21_is_unused_signal():
 	assert_not_null(info3, "conn_sig should have info")
 	if info3:
 		assert_true(not info3.is_unused(), "conn_sig (has connect, no emit) → not unused")
+	print("  PASS")
+
+
+# Test 22: CallNode/AttributeNode 的 line（signal emit/connect site line > 0）
+func test_22_call_node_site_line():
+	print("Test 22: CallNode/AttributeNode site line...")
+	# signal emit (s.emit()) — CallNode line
+	var src_emit = "signal s\nfunc _p():\n\ts.emit()\n"
+	var re = resolve(src_emit)
+	var ie = re.get_signal_flow("s")
+	assert_not_null(ie, "s should have info")
+	if ie and ie.emit_sites.size() > 0:
+		assert_true(ie.emit_sites[0].line > 0, "signal emit site line > 0 (CallNode)")
+	# signal connect (c.connect(cb)) — CallNode line
+	var src_conn = "signal c\nfunc _p():\n\tc.connect(_cb)\nfunc _cb():\n\tpass\n"
+	var rc = resolve(src_conn)
+	var ic = rc.get_signal_flow("c")
+	assert_not_null(ic, "c should have info")
+	if ic and ic.connect_sites.size() > 0:
+		assert_true(ic.connect_sites[0].line > 0, "signal connect site line > 0 (CallNode)")
 	print("  PASS")

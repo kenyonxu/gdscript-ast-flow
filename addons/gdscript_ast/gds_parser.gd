@@ -952,6 +952,7 @@ func _parse_expression(p_level: int = 0):
 					var id_t = _expect(GDScriptToken.Type.IDENTIFIER, "属性访问需要标识符")
 					if id_t:
 						attr.name = id_t.literal
+						attr.line = id_t.start_line
 					left = attr
 				elif t.type == GDScriptToken.Type.BRACKET_OPEN:
 					_advance()
@@ -966,6 +967,7 @@ func _parse_expression(p_level: int = 0):
 					var call = GDScriptToken.CallNode.new()
 					call.callee = left
 					call.arguments = _parse_call_args()
+					call.line = left.line
 					left = call
 				continue  # postfix 可链式调用 a.b().c[0]()
 
