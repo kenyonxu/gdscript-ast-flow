@@ -1013,6 +1013,7 @@ func _parse_atom():
 			_advance()
 			var node = GDScriptToken.IdentifierNode.new()
 			node.name = t.literal
+			node.line = t.start_line
 			return node
 
 		GDScriptToken.Type.LITERAL:
@@ -1075,6 +1076,7 @@ func _parse_atom():
 			# $NodePath
 			var id_t = _peek()
 			var node = GDScriptToken.IdentifierNode.new()
+			node.line = t.start_line
 			if id_t and id_t.type == GDScriptToken.Type.IDENTIFIER:
 				node.name = "$" + _advance().literal
 			else:

@@ -25,6 +25,7 @@ func run_all_tests():
 	test_14_type_infer_preload()
 	test_15_fstring()
 	test_16_site_script_path()
+	test_17_site_line_not_zero()
 	print("\n=== All tests completed ===")
 
 
@@ -367,4 +368,25 @@ func test_16_site_script_path():
 			assert_eq("res://test_sample.gd", usage.def_site.script_path, "def_site.script_path should be recorded")
 		if usage.write_sites.size() > 0:
 			assert_eq("res://test_sample.gd", usage.write_sites[0].script_path, "write_site.script_path should be recorded")
+	print("  PASS")
+
+
+# Test 17: site.line 不为 0（regression — _record_def_use 三元条件写反导致恒 0）
+func test_17_site_line_not_zero():
+	print("Test 17: site.line regression (was always 0)...")
+	var source = "extends Node\nvar x: int = 0\nfunc _p():\n\tx = 1\n\tprint(x)\n"
+	var tok = GDScriptTokenizer.new()
+	var ast = GDScriptParser.new().parse(tok.tokenize(source))
+	var resolver = GDScriptSymbolResolver.new()
+	var result = resolver.resolve(ast, "res://test.gd")
+	var usage = result.get_variable_usages("x")
+	assert_not_null(usage, "x should have DefUseInfo")
+	if usage:
+		assert_not_null(usage.def_site, "x should have def_site")
+		if usage.def_site:
+			assert_true(usage.def_site.line > 0, "def_site.line should be > 0 (line 2)")
+		if usage.write_sites.size() > 0:
+			assert_true(usage.write_sites[0].line > 0, "write_site.line should be > 0 (line 3)")
+		if usage.read_sites.size() > 0:
+			assert_true(usage.read_sites[0].line > 0, "read_site.line should be > 0 (line 4)")
 	print("  PASS")

@@ -209,7 +209,7 @@ func _record_def_use(p_var_name: String, p_node, p_current_function: String, p_a
 	var info = result.def_use_chain._ensure_info(p_var_name)
 
 	var site = GDScriptDefUseSite.new()
-	site.line = p_node.line if p_node.has_method("get") == false and "line" in p_node else 0
+	site.line = p_node.line if "line" in p_node else 0
 	site.node = p_node
 	site.enclosing_function = p_current_function
 	site.access_type = p_access_type
