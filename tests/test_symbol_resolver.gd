@@ -28,6 +28,7 @@ func run_all_tests():
 	test_17_site_line_not_zero()
 	test_18_usage_status()
 	test_19_method_call_base_read()
+	test_20_parameter_flag()
 	print("\n=== All tests completed ===")
 
 
@@ -445,4 +446,23 @@ func test_19_method_call_base_read():
 	var er = resolve(emit_src)
 	var emit_usage = er.get_variable_usages("died")
 	assert_eq(null, emit_usage, "signal should NOT enter def_use_chain (no READ for emit)")
+	print("  PASS")
+
+# Test 20: 参数 site 标 is_parameter（区分参数 vs 变量）
+func test_20_parameter_flag():
+	print("Test 20: parameter is_parameter flag...")
+	# 参数应标 is_parameter=true
+	var src_param = "func _p(a: int):\n\tprint(a)\n"
+	var rp = resolve(src_param)
+	var up = rp.get_variable_usages("a")
+	assert_not_null(up, "param a should have info")
+	if up and up.def_site:
+		assert_true(up.def_site.is_parameter, "param a.is_parameter should be true")
+	# 变量应标 is_parameter=false
+	var src_var = "var x: int\nfunc _p():\n\tprint(x)\n"
+	var rv = resolve(src_var)
+	var uv = rv.get_variable_usages("x")
+	assert_not_null(uv, "var x should have info")
+	if uv and uv.def_site:
+		assert_true(not uv.def_site.is_parameter, "var x.is_parameter should be false")
 	print("  PASS")

@@ -98,9 +98,11 @@ func _add_site_items(p_parent: TreeItem, p_site, p_label: String) -> void:
 		child.set_custom_color(0, COLORS[p_site.access_type])
 
 func _kind_string(p_info) -> String:
-	if p_info.def_site != null and p_info.def_site.access_type == 0:
-		return "var/const"
-	return "param"
+	if p_info.def_site == null:
+		return ""
+	if p_info.def_site.is_parameter:
+		return "param"
+	return "var/const"
 
 # 未使用变量高亮 — `_` 开头占位变量排除
 # 染变量名行 + Kind 列覆盖为 UNUSED/WRITE-ONLY（原类型移 tooltip）

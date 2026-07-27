@@ -205,7 +205,7 @@ func _resolve_suite(p_body, p_scope: GDScriptSymbolTable, p_current_function: St
 
 
 # 记录 DefUse 站点
-func _record_def_use(p_var_name: String, p_node, p_current_function: String, p_access_type: int):
+func _record_def_use(p_var_name: String, p_node, p_current_function: String, p_access_type: int, p_is_parameter: bool = false):
 	var info = result.def_use_chain._ensure_info(p_var_name)
 
 	var site = GDScriptDefUseSite.new()
@@ -214,6 +214,7 @@ func _record_def_use(p_var_name: String, p_node, p_current_function: String, p_a
 	site.enclosing_function = p_current_function
 	site.access_type = p_access_type
 	site.script_path = _current_script_path
+	site.is_parameter = p_is_parameter
 
 	match p_access_type:
 		GDScriptDefUseSite.AccessType.DEFINE:
@@ -297,7 +298,7 @@ func _resolve_function(p_node, p_parent_scope: GDScriptSymbolTable):
 			if ptype != "":
 				result.type_table[param.name] = ptype
 			# 记录参数 def site
-			_record_def_use(param.name, param, p_node.name, GDScriptDefUseSite.AccessType.DEFINE)
+			_record_def_use(param.name, param, p_node.name, GDScriptDefUseSite.AccessType.DEFINE, true)
 
 	# 遍历函数体
 	if p_node.body != null:
