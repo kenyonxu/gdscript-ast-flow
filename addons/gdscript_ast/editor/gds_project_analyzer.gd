@@ -225,6 +225,12 @@ func _resolve_file_cross_edges(p_path: String, p_file: GDScriptAnalysisResult, p
 			var obj_type = p_file.type_table.get(edge.target_object, "")
 			if obj_type != "":
 				_try_resolve_cross_call(p_path, edge, obj_type, edge.callee, GDSCrossFileEdge.Kind.SIGNAL_EMIT, p_project)
+		# VARIABLE_READ/WRITE: obj.field 跨文件变量读写
+		if edge.call_type in [GDScriptCallEdge.CallType.VARIABLE_READ, GDScriptCallEdge.CallType.VARIABLE_WRITE] \
+				and edge.target_object != "":
+			var obj_type = p_file.type_table.get(edge.target_object, "")
+			if obj_type != "":
+				_try_resolve_cross_call(p_path, edge, obj_type, edge.callee, GDSCrossFileEdge.Kind.VARIABLE_ACCESS, p_project)
 
 
 func _try_resolve_cross_call(p_source_file: String, p_edge, p_obj_type: String, p_symbol: String, p_kind: int, p_project: GDScriptProjectResult) -> void:
@@ -252,7 +258,7 @@ func _file_defines_symbol(p_result: GDScriptAnalysisResult, p_name: String) -> b
 		return false
 	for sym_name in p_result.symbol_table.symbols:
 		var sym = p_result.symbol_table.symbols[sym_name]
-		if sym.name == p_name and sym.kind in [GDScriptSymbol.Kind.FUNCTION, GDScriptSymbol.Kind.SIGNAL]:
+		if sym.name == p_name and sym.kind in [GDScriptSymbol.Kind.FUNCTION, GDScriptSymbol.Kind.SIGNAL, GDScriptSymbol.Kind.VARIABLE, GDScriptSymbol.Kind.CONSTANT]:
 			return true
 	return false
 
