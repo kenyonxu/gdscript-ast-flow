@@ -15,11 +15,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **GitHub**: `https://github.com/kenyonxu/gdscript-ast-flow`
 - **本地**: `git@github.com:kenyonxu/gdscript-ast-flow.git`
 
+**分支策略**：单主线 `master`，直接发布。无 develop/staging 分支（历史 develop 已于 2026-06-30 删除，因落后 master 且无独有提交）。发布产物见 `release/` 目录。
+
 ## 项目结构
 
 ```
 addons/gdscript_ast/
-├── plugin.cfg                   # 插件配置 (v2.1.0)
+├── plugin.cfg                   # 插件配置 (v2.2.0)
 ├── plugin.gd                    # EditorPlugin 入口 (class_name: GDScriptUtil)
 ├── gds_ast_nodes.gd             # Token.Type 枚举 + AST 节点类
 ├── gds_tokenizer.gd             # 词法分析器
@@ -30,7 +32,7 @@ addons/gdscript_ast/
 ├── gds_tres_parser.gd           # .tres 资源解析器
 ├── gds_scene_resource_result.gd # 场景/资源数据模型 + 结果容器
 ├── gds_project_result.gd        # 项目级结果（scenes/resources/cross_file 边 + CodeGraph JSON）
-├── gds_cross_file_edge.gd       # 跨文件边（CALL/SIGNAL_CONNECT/SCRIPT_ATTACH 等）
+├── gds_cross_file_edge.gd       # 跨文件边（CALL/SIGNAL_CONNECT/SCRIPT_ATTACH/VARIABLE_ACCESS 等）
 ├── editor/
 │   ├── gds_project_analyzer.gd  # 项目级分析器（扫描 + 集成 + uid_map + include 优先 exclude）
 │   ├── gds_analysis_bridge.gd   # 分析桥（单文件实时 + 项目批量）
@@ -63,6 +65,11 @@ docs/superpowers/
 - **tscn/tres 解析**（已完成）：.tscn/.tres 解析 + CodeGraph JSON v2 + instance 子场景展开
 - **场景可视化**（v2.1，已完成）：主屏「场景」mode + 三视角（节点树/脚本反查/信号图）+ 视角联动
 - **解析器语法增强**（v2.1，已完成）：表达式后缀 + `%Node` + 分号 + extends 字符串 + true/false + 行续接 + 错误恢复
+- **面板可用性强化**（v2.2，已完成）：
+  - DefUse/Signal Flow/Call Graph 三面板：site 双击跳转 + 右键菜单 + 未使用标识 + 搜索
+  - 跨文件追踪：obj.field 读写（VARIABLE_ACCESS edge）+ callee/signal 跨文件跳转 + 类型名/文件名显示
+  - 底部 tab 旁文件名 + 颜色图例（[?] inline）
+  - `bridge.get_target_file_prefix`（跨文件类型→文件名）
 
 详细设计参考 `docs/superpowers/specs/2026-06-20-godot47-gdscript-parser-design.md`。
 实现计划参考 `docs/superpowers/plans/2026-06-20-phase1-gdscript-parser.md`。

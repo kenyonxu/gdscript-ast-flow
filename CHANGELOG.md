@@ -2,6 +2,37 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/) 风格，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.2.0] - 2026-07-28
+
+### 新增
+- **DefUse 面板强化**：
+  - site 双击跳转源码 + 右键菜单（跳转/复制/选中）
+  - 未使用变量分级高亮（灰=完全死 / 品红=只写不读）
+  - site 行显示脚本来源 `[脚本名.gd]`
+  - 参数显示 `param`（is_parameter 标志）
+  - **跨文件变量追踪**：`obj.field` 读写 → VARIABLE_ACCESS cross edge → DefUse 面板青色显示
+- **Signal Flow 面板强化**：
+  - 搜索栏 + site 双击跳转 + 右键菜单
+  - 未连接信号高亮（declared 但 0 emit + 0 connect）
+  - site 行显示信号名 + 参数/回调（GDSExprFormatter）
+  - 跨文件类型名 `[Player]` / 文件名 `[player.gd]`
+- **Call Graph 面板强化**：
+  - 未使用函数高亮（in-degree==0）
+  - 双击跳转 + 跨文件 callee 跳转（type_table + class_registry）
+  - emit/connect edge 跳转到 signal 定义
+  - callee 显示文件名 `[player.gd]`
+- **公共**：
+  - 底部 tab 旁显示当前文件名（`clip_tabs=false` 修复 TabBar 全显示）
+  - 颜色图例（`[?]` inline 展开/收起，按 tab 切换内容）
+  - `bridge.get_target_file_prefix`（跨文件类型→文件名，fallback 类型名）
+
+### 修复
+- parser `node.line`（IdentifierNode / CallNode / AttributeNode 创建时漏 set line，致 site.line=0）
+- resolver 方法调用 base READ 误判 unused（`health.take_damage()` 的 health 被读未记 READ）
+- 参数显示 `var/const`（`_kind_string` 无法区分参数 vs 变量）
+- 类作用域变量空 enclosing_function 显示 `<class>`
+- `_jump_to_definition` 双 return bug
+
 ## [2.1.2] - 2026-06-30
 
 ### 新增
