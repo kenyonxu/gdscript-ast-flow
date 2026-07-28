@@ -54,6 +54,7 @@ func _build_ui() -> void:
 	_tree.item_selected.connect(_on_item_selected)
 	# Godot 4.3+ item_mouse_selected 信号传 mouse_button_index
 	_tree.item_mouse_selected.connect(_on_item_rmb)
+	_tree.item_activated.connect(_on_item_activated)  # 双击
 	left.add_child(_tree)
 
 	# 右侧详情
@@ -133,6 +134,23 @@ func _on_function_selected(p_name: String) -> void:
 	# 简单实现：不做额外处理，保持 Tree 已有选择状态
 	pass
 
+# 双击 → 跳转定义（caller 顶层项跳自身，edge 跳 callee）
+func _on_item_activated() -> void:
+	var item = _tree.get_selected()
+	if item == null:
+		return
+	var meta = item.get_metadata(0)
+	if meta == null:
+		return
+	var name = ""
+	if meta.get("kind", "") == "caller":
+		name = meta.get("name", "")
+	elif meta.get("kind", "") == "edge":
+		var edge = meta.get("edge", null)
+		if edge != null:
+			name = edge.callee
+	_jump_to_definition(name)
+
 func _on_item_rmb(_p_position: Vector2, p_mouse_button_index: int) -> void:
 	if p_mouse_button_index == MOUSE_BUTTON_RIGHT and _tree.get_selected() != null:
 		_context_menu.popup_on_parent(Rect2(get_global_mouse_position(), Vector2.ZERO))
@@ -167,7 +185,6 @@ func _jump_to_definition(p_func_name: String) -> void:
 		if func_node.name == p_func_name:
 			EditorInterface.edit_script(load(result.file_path), func_node.line)
 			EditorInterface.set_main_screen_editor("Script")
-			return
 			return
 
 func _on_search_changed(p_text: String) -> void:
