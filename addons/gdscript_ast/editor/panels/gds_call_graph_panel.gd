@@ -95,7 +95,11 @@ func _refresh(p_result: GDScriptAnalysisResult) -> void:
 		_apply_unused_highlight(caller_item, caller, p_result)
 		for edge in groups[caller]:
 			var child = _tree.create_item(caller_item)
-			child.set_text(0, "  → %s()" % edge.callee)
+			# 跨文件 callee：edge.target_object（如 "player"）→ type_table 推断类型 → bridge.get_target_file_prefix → "[player.gd]"
+			# 本文件 callee（SELF/SUPER，target_object 空）→ target_type 空 → 无前缀（回归兼容）
+			var target_type = p_result.type_table.get(edge.target_object, "")
+			var target_prefix = _bridge.get_target_file_prefix(target_type)
+			child.set_text(0, "  → %s%s()" % [target_prefix, edge.callee])
 			child.set_metadata(0, {"kind": "edge", "edge": edge})
 			if COLORS.has(edge.call_type):
 				child.set_custom_color(0, COLORS[edge.call_type])
