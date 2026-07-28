@@ -23,6 +23,9 @@ const COLORS := {
 	7: Color.RED,          # EMIT
 }
 
+# 未使用函数高亮 — 与 COLORS 的调用动作色系隔离
+const UNUSED_FUNC_COLOR := Color.GRAY
+
 func setup(p_bridge: GDSAnalysisBridge, p_l10n: GDSL10n = null) -> void:
 	_bridge = p_bridge
 	_l10n = p_l10n if p_l10n else GDSL10n.new()
@@ -88,12 +91,23 @@ func _refresh(p_result: GDScriptAnalysisResult) -> void:
 		var caller_item = _tree.create_item(root)
 		caller_item.set_text(0, caller + "()")
 		caller_item.set_metadata(0, {"kind": "caller", "name": caller})
+		_apply_unused_highlight(caller_item, caller, p_result)
 		for edge in groups[caller]:
 			var child = _tree.create_item(caller_item)
 			child.set_text(0, "  → %s()" % edge.callee)
 			child.set_metadata(0, {"kind": "edge", "edge": edge})
 			if COLORS.has(edge.call_type):
 				child.set_custom_color(0, COLORS[edge.call_type])
+
+# 未使用函数高亮 — caller 顶层项 in-degree==0（不被调）→ 灰 + UNUSED
+# `_` 开头排除（私有函数可能被外部类跨文件调用，单文件看不到）
+func _apply_unused_highlight(p_item: TreeItem, p_func_name: String, p_result: GDScriptAnalysisResult) -> void:
+	if p_func_name.begins_with("_"):
+		return
+	if p_result.call_in_degree.get(p_func_name, 0) > 0:
+		return
+	p_item.set_custom_color(0, UNUSED_FUNC_COLOR)
+	p_item.set_text(0, "%s()  [UNUSED]" % p_func_name)
 
 func _on_item_selected() -> void:
 	var item = _tree.get_selected()
