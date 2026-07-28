@@ -134,7 +134,7 @@ func _on_function_selected(p_name: String) -> void:
 	# 简单实现：不做额外处理，保持 Tree 已有选择状态
 	pass
 
-# 双击 → 跳转定义（caller 顶层项跳自身，edge 跳 callee）
+# 双击 → 跳转定义（caller 顶层项跳自身，edge 跳 callee，跨文件 edge 跳外部类）
 func _on_item_activated() -> void:
 	var item = _tree.get_selected()
 	if item == null:
@@ -143,13 +143,15 @@ func _on_item_activated() -> void:
 	if meta == null:
 		return
 	var name = ""
+	var target_obj = ""
 	if meta.get("kind", "") == "caller":
 		name = meta.get("name", "")
 	elif meta.get("kind", "") == "edge":
 		var edge = meta.get("edge", null)
 		if edge != null:
 			name = edge.callee
-	_jump_to_definition(name)
+			target_obj = edge.target_object
+	_jump_to_definition(name, target_obj)
 
 func _on_item_rmb(_p_position: Vector2, p_mouse_button_index: int) -> void:
 	if p_mouse_button_index == MOUSE_BUTTON_RIGHT and _tree.get_selected() != null:
@@ -161,6 +163,7 @@ func _on_context_action(p_id: int) -> void:
 		return
 	var meta = item.get_metadata(0)
 	var name = ""
+	var target_obj = ""
 	if meta != null:
 		if meta.get("kind", "") == "caller":
 			name = meta.get("name", "")
@@ -168,12 +171,13 @@ func _on_context_action(p_id: int) -> void:
 			var edge = meta.get("edge", null)
 			if edge != null:
 				name = edge.callee
+				target_obj = edge.target_object
 	match p_id:
-		0: _jump_to_definition(name)
+		0: _jump_to_definition(name, target_obj)
 		1: _bridge.select_function(name)
 		2: _bridge.select_function(name)
 
-func _jump_to_definition(p_func_name: String) -> void:
+func _jump_to_definition(p_func_name: String, p_target_object: String = "") -> void:
 	if GDSGraphMainScreen.is_locked:
 		return
 	if p_func_name.is_empty():
@@ -181,9 +185,28 @@ func _jump_to_definition(p_func_name: String) -> void:
 	var result = _bridge.get_current_result()
 	if result == null or result.file_path.is_empty():
 		return
+	# 1. 本文件查
 	for func_node in result.get_all_functions():
 		if func_node.name == p_func_name:
 			EditorInterface.edit_script(load(result.file_path), func_node.line)
+			EditorInterface.set_main_screen_editor("Script")
+			return
+	# 2. 跨文件查（target_object 非空，如 EXTERNAL edge 的 obj.method）
+	if p_target_object == "":
+		return
+	var target_type = result.type_table.get(p_target_object, "")
+	if target_type == "":
+		return
+	var project = _bridge.get_project_result()
+	if project == null:
+		return
+	var target_file = project.class_registry.get(target_type, "")
+	if target_file == "" or not project.files.has(target_file):
+		return
+	var target_result = project.files[target_file]
+	for func_node in target_result.get_all_functions():
+		if func_node.name == p_func_name:
+			EditorInterface.edit_script(load(target_file), func_node.line)
 			EditorInterface.set_main_screen_editor("Script")
 			return
 
