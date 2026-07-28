@@ -159,6 +159,10 @@ func _resolve_expression(p_expr, p_scope: GDScriptSymbolTable, p_current_functio
 		_resolve_identifier_read(p_expr, p_scope, p_current_function, p_lambda_node)
 	elif p_expr is GDScriptToken.AttributeNode:
 		_resolve_expression(p_expr.base, p_scope, p_current_function, p_lambda_node)
+		# obj.field 读 → 记 VARIABLE_READ edge（跨文件追踪 obj.field）
+		# 仅 base 是 IdentifierNode（如 player.hp），self.hp（SelfNode）/字面量等不记
+		if p_expr.base is GDScriptToken.IdentifierNode:
+			_add_call_edge(p_current_function, p_expr.name, p_expr.line, GDScriptCallEdge.CallType.VARIABLE_READ, p_expr.base.name)
 	elif p_expr is GDScriptToken.SubscriptNode:
 		_resolve_expression(p_expr.base, p_scope, p_current_function, p_lambda_node)
 		_resolve_expression(p_expr.index, p_scope, p_current_function, p_lambda_node)
@@ -654,6 +658,8 @@ func _resolve_assignment(p_node, p_scope: GDScriptSymbolTable, p_current_functio
 		# obj.hp = 10 → obj 是 IdentifierNode，记录 READ
 		if base is GDScriptToken.IdentifierNode:
 			_record_def_use(base.name, base, p_current_function, GDScriptDefUseSite.AccessType.READ)
+			# obj.field = x 写 → 记 VARIABLE_WRITE edge（跨文件追踪）
+			_add_call_edge(p_current_function, p_node.target.name, p_node.line, GDScriptCallEdge.CallType.VARIABLE_WRITE, base.name)
 		# 递归处理更深层的属性链: a.b.c = value → a.b 是 READ
 		elif base is GDScriptToken.AttributeNode:
 			_resolve_expression(base, p_scope, p_current_function)

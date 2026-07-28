@@ -33,6 +33,7 @@ func run_all_tests():
 	test_22_call_node_site_line()
 	test_23_expr_formatter()
 	test_24_signal_site_target()
+	test_25_variable_cross_edge()
 	print("\n=== All tests completed ===")
 
 
@@ -630,4 +631,25 @@ func test_24_signal_site_target():
 		var site2 = info2.connect_sites[0]
 		assert_eq("player", site2.target_object, "connect site target_object = player")
 		assert_eq("Foo", site2.target_type, "connect site target_type = Foo")
+	print("  PASS")
+
+# Test 25: obj.field 读写记 VARIABLE_READ/WRITE call edge（跨文件变量追踪）
+func test_25_variable_cross_edge():
+	print("Test 25: variable cross-file edge (obj.field read/write)...")
+	# obj.field 读 + 写（obj 是参数 player: Player）
+	var src = "func _p(player: Player) -> void:
+	var v = player.hp
+	player.hp = 10
+"
+	var r = resolve(src)
+	# 找 VARIABLE_READ edge（player.hp 读）
+	var found_read = false
+	var found_write = false
+	for edge in r.call_graph.edges:
+		if edge.call_type == GDScriptCallEdge.CallType.VARIABLE_READ and edge.callee == "hp" and edge.target_object == "player":
+			found_read = true
+		if edge.call_type == GDScriptCallEdge.CallType.VARIABLE_WRITE and edge.callee == "hp" and edge.target_object == "player":
+			found_write = true
+	assert_true(found_read, "should have VARIABLE_READ edge for player.hp")
+	assert_true(found_write, "should have VARIABLE_WRITE edge for player.hp")
 	print("  PASS")
