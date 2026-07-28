@@ -116,6 +116,18 @@ func _do_project_analysis() -> void:
 func get_project_result() -> GDScriptProjectResult:
 	return _project_result
 
+# 跨文件目标文件前缀 — 类型名 → class_registry 文件名 → "[文件名.gd] "
+# fallback: 项目未分析或 class_registry 无该类型 → "[类型名] "（A3 行为）；类型空 → ""
+func get_target_file_prefix(p_target_type: String) -> String:
+	if p_target_type == "":
+		return ""
+	if _project_result == null:
+		return "[%s] " % p_target_type  # 项目未分析，fallback 类型名（A3 行为）
+	var target_file = _project_result.class_registry.get(p_target_type, "")
+	if target_file == "":
+		return "[%s] " % p_target_type  # class_registry 无该类型，fallback 类型名
+	return "[%s] " % target_file.get_file()
+
 # 增量: 重分析单文件 + 重建注册表 + 重解析跨文件边
 # Chunk E2: 扩展支持 .tscn/.tres 文件
 func refresh_file_in_project(p_path: String) -> void:
