@@ -79,6 +79,22 @@ func _refresh(p_result: GDScriptAnalysisResult) -> void:
 		for s in info.write_sites:
 			_add_site_items(item, s, "WRITE")
 
+	# 跨文件 VARIABLE_ACCESS site（本文件定义的 field 被其他文件读写）
+	var project = _bridge.get_project_result()
+	if project != null and not p_result.file_path.is_empty():
+		for xedge in project.cross_edges:
+			# 仅 VARIABLE_ACCESS + 目标是当前文件（本文件的 field 被外部访问）
+			if xedge.kind == GDSCrossFileEdge.Kind.VARIABLE_ACCESS and xedge.target_file == p_result.file_path:
+				# 在 def_use_chain 找对应变量（按 target_symbol 匹配 field 名）
+				if p_result.def_use_chain.variables.has(xedge.target_symbol):
+					var info = p_result.def_use_chain.variables[xedge.target_symbol]
+					var cf_item = _tree.create_item(root)
+					cf_item.set_text(0, xedge.target_symbol)
+					cf_item.set_text(1, "[跨文件]")
+					cf_item.set_text(2, "%s → %s()" % [xedge.source_file.get_file(), xedge.source_symbol])
+					cf_item.set_metadata(0, {"kind": "variable", "name": xedge.target_symbol})
+					cf_item.set_custom_color(0, Color.CYAN)  # 跨文件 site 青色区分
+
 func _add_site_items(p_parent: TreeItem, p_site, p_label: String) -> void:
 	if p_site == null:
 		return
