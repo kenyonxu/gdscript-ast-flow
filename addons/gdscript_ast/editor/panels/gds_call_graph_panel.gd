@@ -195,6 +195,13 @@ func _jump_to_definition(p_func_name: String, p_target_object: String = "") -> v
 			EditorInterface.edit_script(load(result.file_path), func_node.line)
 			EditorInterface.set_main_screen_editor("Script")
 			return
+	# 1b. 本文件查 signal（emit/connect 的 callee 可能是 signal）
+	if result.signal_graph != null and result.signal_graph.signals.has(p_func_name):
+		var sig_info = result.signal_graph.signals[p_func_name]
+		if sig_info.declaration != null:
+			EditorInterface.edit_script(load(result.file_path), sig_info.declaration.line)
+			EditorInterface.set_main_screen_editor("Script")
+			return
 	# 2. 跨文件查（target_object 非空，如 EXTERNAL edge 的 obj.method）
 	if p_target_object == "":
 		return
@@ -211,6 +218,13 @@ func _jump_to_definition(p_func_name: String, p_target_object: String = "") -> v
 	for func_node in target_result.get_all_functions():
 		if func_node.name == p_func_name:
 			EditorInterface.edit_script(load(target_file), func_node.line)
+			EditorInterface.set_main_screen_editor("Script")
+			return
+	# 2b. 跨文件查 signal（emit/connect 的 callee 是 signal，如 health_changed 是 Player 的 signal）
+	if target_result.signal_graph != null and target_result.signal_graph.signals.has(p_func_name):
+		var sig_info = target_result.signal_graph.signals[p_func_name]
+		if sig_info.declaration != null:
+			EditorInterface.edit_script(load(target_file), sig_info.declaration.line)
 			EditorInterface.set_main_screen_editor("Script")
 			return
 
