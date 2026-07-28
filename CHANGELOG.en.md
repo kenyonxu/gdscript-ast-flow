@@ -2,6 +2,37 @@
 
 This project follows [Keep a Changelog](https://keepachangelog.com/) style. Version numbers follow [Semantic Versioning](https://semver.org/).
 
+## [2.2.0] - 2026-07-28
+
+### Added
+- **DefUse panel enhancements**:
+  - Site double-click to jump to source + right-click menu (jump/copy/select)
+  - Unused variable graded highlight (gray=dead / magenta=write-only)
+  - Site row shows script source `[script.gd]`
+  - Parameter display `param` (is_parameter flag)
+  - **Cross-file variable tracking**: `obj.field` read/write → VARIABLE_ACCESS cross edge → DefUse panel cyan display
+- **Signal Flow panel enhancements**:
+  - Search bar + site double-click jump + right-click menu
+  - Unconnected signal highlight (declared but 0 emit + 0 connect)
+  - Site row shows signal name + args/callback (GDSExprFormatter)
+  - Cross-file type name `[Player]` / file name `[player.gd]`
+- **Call Graph panel enhancements**:
+  - Unused function highlight (in-degree==0)
+  - Double-click jump + cross-file callee jump (type_table + class_registry)
+  - emit/connect edge jump to signal definition
+  - Callee shows file name `[player.gd]`
+- **Common**:
+  - Bottom panel tab bar shows current file name (`clip_tabs=false` fix for TabBar full display)
+  - Color legend (`[?]` inline expand/collapse, switches by tab)
+  - `bridge.get_target_file_prefix` (cross-file type→file name, fallback type name)
+
+### Fixed
+- parser `node.line` (IdentifierNode / CallNode / AttributeNode created without set line, causing site.line=0)
+- resolver method call base READ misjudged as unused (`health.take_damage()` — health read but not recorded)
+- Parameter display `var/const` (`_kind_string` couldn't distinguish parameter vs variable)
+- Class-scope variable empty enclosing_function shows `<class>`
+- `_jump_to_definition` double return bug
+
 ## [2.1.2] - 2026-06-30
 
 ### Added
