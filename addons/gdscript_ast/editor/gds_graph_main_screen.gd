@@ -99,7 +99,7 @@ func _build_ui() -> void:
 	# 锁定按钮（锁定时点击节点不跳转脚本编辑器）
 	_lock_btn = Button.new()
 	_lock_btn.flat = true
-	_lock_btn.icon = load("res://addons/gdscript_ast/editor/icons/lock_gree.svg")
+	_lock_btn.icon = load("res://addons/gdscript_ast/editor/icons/lock_green.svg")
 	_lock_btn.tooltip_text = "锁定后点击节点不跳转脚本编辑器"
 	_lock_btn.pressed.connect(_on_lock_pressed)
 	_code_toolbar.add_child(_lock_btn)
@@ -229,7 +229,7 @@ func _on_lock_pressed() -> void:
 	if is_locked:
 		_lock_btn.icon = load("res://addons/gdscript_ast/editor/icons/lock_red.svg")
 	else:
-		_lock_btn.icon = load("res://addons/gdscript_ast/editor/icons/lock_gree.svg")
+		_lock_btn.icon = load("res://addons/gdscript_ast/editor/icons/lock_green.svg")
 
 func _on_node_deselected(_p_node: Node) -> void:
 	# 取消选择 → 全部恢复全透明
