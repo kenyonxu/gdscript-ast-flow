@@ -55,6 +55,14 @@ A Godot 4.7 GDScript AST parser + logic flow analysis tool. Integrated as an Edi
 - **View linking** — click node in lookup/signal graph → jump to node tree view
 - **Real-world project support** — limboai behavior trees, instantiated scenes, modern Godot syntax (`%Node` / expression suffixes / UID references / line continuation, etc.)
 
+### Panel Usability Enhancements (new in 2.2)
+
+- **Cross-file tracking** — `obj.field` read/write (VARIABLE_ACCESS edge), cross-file callee/signal jump, type/file name display `[Player]` / `[player.gd]`
+- **Unused detection** — dead variables (gray=dead / magenta=write-only), unused functions (gray), unconnected signals (gray)
+- **Site jump + right-click** — double-click to source line, right-click menu (jump/copy/select) in DefUse / Signal Flow / Call Graph panels
+- **Search** — Signal Flow / Call Graph search bar
+- **UI polish** — tab bar shows current file name, inline color legend (`[?]` expand/collapse)
+
 ### Editor Integration
 
 - Bottom panel: Summary / Call Graph / Signal Flow / Def-Use / Project tabs
