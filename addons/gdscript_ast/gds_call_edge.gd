@@ -13,6 +13,8 @@ enum CallType {
 	LAMBDA = 5,          # lambda 作为回调
 	STATIC = 6,          # ClassName.static_method()
 	EMIT = 7,            # emit("signal") / signal.emit()
+	VARIABLE_READ = 8,   # obj.field 读取（跨文件变量追踪）
+	VARIABLE_WRITE = 9,  # obj.field = x 写入
 }
 
 var caller: String = ""

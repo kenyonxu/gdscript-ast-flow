@@ -11,6 +11,7 @@ enum Kind {
 	INSTANCE,        # T.new() 实例化
 	EXTENDS,         # extends T 继承
 	SCRIPT_ATTACH,   # .tscn/.tres → .gd 脚本关联（场景节点挂载脚本）
+	VARIABLE_ACCESS, # obj.field 跨文件读写
 }
 
 var kind: int = Kind.CALL
@@ -21,7 +22,7 @@ var target_class: String = ""      # 目标类名
 var target_symbol: String = ""     # 目标方法/信号名
 var line: int = 0
 
-const KIND_NAMES := ["CALL", "SIGNAL_EMIT", "SIGNAL_CONNECT", "INSTANCE", "EXTENDS", "SCRIPT_ATTACH"]
+const KIND_NAMES := ["CALL", "SIGNAL_EMIT", "SIGNAL_CONNECT", "INSTANCE", "EXTENDS", "SCRIPT_ATTACH", "VARIABLE_ACCESS"]
 
 func to_dict() -> Dictionary:
 	return {
