@@ -47,20 +47,49 @@ Displays analysis summary for the current file: function count, signal count, va
 - Edge type labels: `[self]`, `[super]`, `[ext]` (external object), `[connect]` (signal connection), `[emit]`
 - Built-in functions (60+ like `print`, `range`) are automatically filtered out
 
+**New in v2.2**:
+- **Unused function highlight**: functions with in-degree 0 are greyed out with an `[UNUSED]` tag (private functions with a `_` prefix are excluded)
+- **Double-click jump**: double-click a caller top-level item → jump to its own definition; double-click an edge → jump to the callee definition
+- **Cross-file callee jump**: right-click an `obj.method()` edge → Jump to Definition, resolves to the external class file via type_table + class_registry
+- **signal emit/connect jump**: right-click a `health_changed` edge → jump to the signal definition (falls back to signal_graph when not found in the function table)
+- **Cross-file callee filename**: cross-file edges show `[player.gd] → take_damage()` (inferred via type_table → class_registry)
+
 ### Signal Flow
 
 - Lists all signal declarations in the file
 - Each signal shows: declaration line, emit site list, connect site list
+
+**New in v2.2**:
+- **Search bar**: a top LineEdit filters signal names in real time
+- **Site double-click jump + context menu**: double-click an EMIT/CONNECT row → jump to source; right-click menu (jump / copy `script:line` / select signal)
+- **Unconnected signal highlight**: declared but 0 emit + 0 connect → greyed out (`_` prefix excluded)
+- **Site row granularity**: shows signal name + args (emit) / callback (connect), e.g. `EMIT health_changed(100, 90) @L10 in attack()` / `CONNECT health_changed → _on_player_hit @L8`
+- **Cross-file type/filename**: site prefix `[Player]` (type_table) or `[player.gd]` (class_registry, requires project analysis)
 
 ### Def-Use
 
 - Lists all variables in the file
 - Each variable shows: definition location, read site list, write site list
 
+**New in v2.2**:
+- **Site double-click jump + context menu**: double-click a DEF/READ/WRITE row → jump to source; right-click menu (jump / copy / select variable)
+- **Graded unused-variable highlight**: fully unused (0 read + 0 write) → grey + `UNUSED`; write-only → magenta + `WRITE-ONLY` (`_` prefix excluded)
+- **Site script source**: site rows show `function_name() [script_name.gd]`
+- **Parameter kind**: the Kind column shows `param` for parameters (is_parameter flag), distinct from `var/const`
+- **Class-scope display**: class-scope variables show `<class>` in enclosing_function
+- **Cross-file variable tracking** (core): a field defined in this file that is read/written via `obj.field` in other files → cyan rows show the cross-file site (e.g. `enemy.gd → attack()`). Requires project analysis (VARIABLE_ACCESS cross edge)
+
 ### Project
 
 - Shows project scan results: file list + cross-file reference count per file
 - Expand a file to see outbound references (→) and inbound references (←)
+
+**New in v2.2**: cross-file edges now include VARIABLE_ACCESS (`obj.field` reads/writes); outbound/inbound references show cross-file variable accesses.
+
+### Common UI (new in v2.2)
+
+- **Filename next to tabs**: the TabBar right side shows the currently analyzed filename (`clip_tabs=false` keeps all 5 tabs visible)
+- **Color legend**: a `[?]` button next to the filename toggles an inline color legend (color swatches + labels) for the current tab; the legend updates automatically when switching tabs
 
 ---
 

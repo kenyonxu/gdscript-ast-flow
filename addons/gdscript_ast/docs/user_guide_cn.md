@@ -47,20 +47,49 @@
 - 边类型标注：`[self]`（自身调用）、`[super]`（父类调用）、`[ext]`（外部对象调用）、`[connect]`（信号连接）、`[emit]`（信号发射）
 - 内置函数（`print`、`range` 等 60+ 个）自动过滤，不显示
 
+**v2.2 新增**：
+- **未使用函数高亮**：入度为 0 的函数灰色 + `[UNUSED]` 标注（`_` 前缀私有函数排除）
+- **双击跳转**：双击 caller 顶层项 → 跳自身定义；双击 edge → 跳 callee 定义
+- **跨文件 callee 跳转**：右键 `obj.method()` edge → Jump to Definition，经 type_table + class_registry 跳到外部类文件
+- **signal emit/connect 跳转**：右键 `health_changed` edge → 跳 signal 定义（函数表查不到时回退查 signal_graph）
+- **跨文件 callee 文件名**：跨文件 edge 显示 `[player.gd] → take_damage()`（type_table → class_registry 推断）
+
 ### Signal Flow
 
 - 列出文件中所有 signal 声明
 - 每个 signal 显示：声明行、emit 位置列表、connect 位置列表
+
+**v2.2 新增**：
+- **搜索栏**：顶部 LineEdit 实时过滤信号名
+- **site 双击跳转 + 右键菜单**：双击 EMIT/CONNECT 行 → 跳源码；右键菜单（跳转 / 复制 `脚本:行` / 选中信号）
+- **未连接信号高亮**：declared 但 0 emit + 0 connect → 灰色（`_` 前缀排除）
+- **site 行粒度**：显示信号名 + 参数（emit）/ 回调（connect），格式如 `EMIT health_changed(100, 90) @L10 in attack()` / `CONNECT health_changed → _on_player_hit @L8`
+- **跨文件类型名/文件名**：site 前缀 `[Player]`（type_table）或 `[player.gd]`（class_registry，需项目分析）
 
 ### Def-Use
 
 - 列出文件中所有变量
 - 每个变量显示：定义位置、读取位置列表、写入位置列表
 
+**v2.2 新增**：
+- **site 双击跳转 + 右键菜单**：双击 DEF/READ/WRITE 行 → 跳源码；右键菜单（跳转 / 复制 / 选中变量）
+- **未使用变量分级高亮**：完全未用（0 read + 0 write）→ 灰色 + `UNUSED`；只写不读 → 品红 + `WRITE-ONLY`（`_` 前缀排除）
+- **site 脚本来源**：site 行显示 `函数名() [脚本名.gd]`
+- **参数显示 param**：参数 Kind 列显示 `param`（is_parameter 标志），区别于 `var/const`
+- **类作用域显示**：类作用域变量的 enclosing_function 显示 `<class>`
+- **跨文件变量追踪**（核心）：本文件定义的 field 被其他文件 `obj.field` 读写 → 青色行显示跨文件 site（如 `enemy.gd → attack()`）。需项目分析（VARIABLE_ACCESS cross edge）
+
 ### Project
 
 - 显示项目扫描结果：文件列表 + 每个文件的跨文件引用数
 - 展开文件可看到出向引用（→）和入向引用（←）
+
+**v2.2 新增**：跨文件边现在包含 VARIABLE_ACCESS（`obj.field` 读写），出向/入向引用会显示跨文件变量访问。
+
+### 公共 UI（v2.2 新增）
+
+- **tab 旁文件名**：TabBar 右侧显示当前分析文件名（`clip_tabs=false` 让 5 个 tab 全部显示）
+- **颜色图例**：文件名旁 `[?]` 按钮，点击 inline 展开/收起当前 tab 的颜色图例（色块 + 标签）；切换 tab 时图例内容自动更新
 
 ---
 

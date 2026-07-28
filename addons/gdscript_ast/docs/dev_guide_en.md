@@ -129,13 +129,22 @@ func to_dict() -> Dictionary
 # GDScriptCallEdge
 var caller: String
 var callee: String
-var call_type: int          # CallType enum value
-var target_object: String   # Target object name (external calls)
 var site_line: int          # Call site line number
+var call_type: int          # CallType enum value
+var target_object: String   # Target object name (EXTERNAL/EMIT/VARIABLE_*; the `obj` in obj.field)
+var arguments: Array        # Call argument AST nodes (consumed by GDSExprFormatter)
 
 enum CallType {
-    SELF = 0, SUPER = 1, EXTERNAL = 2,
-    CONNECT = 3, SIGNAL_CONNECT = 4, LAMBDA = 5, EMIT = 6,
+    SELF = 0,            # self.method() or implicit self call
+    SUPER = 1,           # super.method()
+    EXTERNAL = 2,        # obj.method() external object call
+    CONNECT = 3,         # callback in .connect("sig", cb)
+    SIGNAL_CONNECT = 4,  # callback in signal_name.connect(cb)
+    LAMBDA = 5,          # lambda as callback
+    STATIC = 6,          # ClassName.static_method()
+    EMIT = 7,            # emit("signal") / signal.emit()
+    VARIABLE_READ = 8,   # obj.field read (v2.2 cross-file variable tracking)
+    VARIABLE_WRITE = 9,  # obj.field = x write (v2.2)
 }
 
 # GDScriptCallGraph
@@ -150,14 +159,21 @@ func get_callees_of(p_func_name: String) -> Array
 
 ```
 # GDScriptSite
-var file_path: String
-var line: int
-var function: String
+var line: int                      # line number
+var node                           # AST node (emit/connect call expression)
+var enclosing_function: String     # containing function name
+var arguments: Array               # emit args / connect callback (AST nodes)
+var target_object: String          # base object name (the `player` in player.health_changed) (v2.2)
+var target_type: String            # inferred type of target_object (type_table) (v2.2)
 
 # GDScriptSignalInfo
-var declaration: GDScriptSite
-var emit_sites: Array[GDScriptSite]
-var connect_sites: Array[GDScriptSite]
+var name: String                   # signal name
+var declaration: GDScriptSite      # declaration site (null = external signal)
+var params: Array                  # declared parameter list
+var emit_sites: Array[GDScriptSite]     # emit site list
+var connect_sites: Array[GDScriptSite]  # connect site list
+
+func is_unused() -> bool           # 0 emit + 0 connect → true (dead signal; basis for UI unconnected highlight) (v2.2)
 
 # GDScriptSignalGraph
 var signals: Dictionary[String, GDScriptSignalInfo]
@@ -169,14 +185,28 @@ func get_signal_flow(p_signal_name: String) -> GDScriptSignalInfo
 
 ```
 # GDScriptDefUseSite
-var file_path: String
-var line: int
-var function: String
+var line: int                      # line number
+var node                           # AST node
+var enclosing_function: String     # containing function name (class scope shows <class>)
+var access_type: int               # AccessType enum value
+var script_path: String            # source file of this site (resolver forwards _current_script_path) (v2.2)
+var is_parameter: bool             # true = function/lambda parameter (distinct from var/const) (v2.2)
+
+enum AccessType {
+    DEFINE = 0,      # var x = ... / const x = ...
+    READ = 1,        # read variable value
+    WRITE = 2,       # assignment write
+    READ_WRITE = 3,  # read+write (compound assignment)
+}
 
 # GDScriptDefUseInfo
-var definition: GDScriptDefUseSite
-var reads: Array[GDScriptDefUseSite]
-var writes: Array[GDScriptDefUseSite]
+var name: String                            # variable name
+var def_site: GDScriptDefUseSite            # definition site
+var read_sites: Array[GDScriptDefUseSite]   # read site list
+var write_sites: Array[GDScriptDefUseSite]  # write site list
+
+func get_all_sites() -> Array      # def + reads + writes merged
+func get_usage_status() -> String  # "unused" / "write_only" / "normal" (v2.2)
 
 # GDScriptDefUseChain
 var variables: Dictionary[String, GDScriptDefUseInfo]
@@ -203,7 +233,17 @@ func analyze_full() -> GDScriptProjectResult
 
 ```
 # GDSCrossFileEdge
-enum Kind { CALL = 0, SIGNAL_EMIT = 1, SIGNAL_CONNECT = 2, INSTANCE = 3, EXTENDS = 4 }
+enum Kind {
+    CALL = 0,            # obj.method() cross-file call
+    SIGNAL_EMIT = 1,     # obj.emit("sig") cross-file emit
+    SIGNAL_CONNECT = 2,  # obj.connect("sig", cb) cross-file connect
+    INSTANCE = 3,        # T.new() instantiation
+    EXTENDS = 4,         # extends T inheritance
+    SCRIPT_ATTACH = 5,   # .tscn/.tres → .gd script attach (v2.1 scene node)
+    VARIABLE_ACCESS = 6, # obj.field cross-file read/write (v2.2)
+}
+
+const KIND_NAMES: Array[String]  # ["CALL" ... "VARIABLE_ACCESS"], used by to_dict serialization
 
 # GDScriptProjectResult
 func get_callers_across_files(p_class: String, p_method: String) -> Array
@@ -296,6 +336,46 @@ var script_associations: Array     # scene→script association index
 var scene_signal_connections: Array # cross-scene signal connections
 var uid_map: Dictionary            # uid:// → res:// mapping
 ```
+
+---
+
+## API 15. Expression Serialization & Cross-File Bridge (new in v2.2)
+
+### GDSExprFormatter
+
+**File**: `addons/gdscript_ast/gds_expr_formatter.gd`
+**class_name**: `GDSExprFormatter`
+
+Serializes AST expression nodes into strings (static methods covering 17 node types + fallback). Used by the Signal Flow panel to render emit arguments / connect callbacks.
+
+```
+static func format(p_expr) -> String              # single AST expression → string
+static func format_args(p_args: Array) -> String  # argument array → "a, b, c"
+```
+
+### GDSAnalysisBridge new method
+
+**File**: `addons/gdscript_ast/editor/gds_analysis_bridge.gd` · `class_name: GDSAnalysisBridge`
+
+```
+func get_target_file_prefix(p_target_type: String) -> String
+# type name → class_registry filename → "[filename.gd] " prefix
+# fallback: no project analyzed / type missing from class_registry → "[TypeName]"; empty type → ""
+```
+
+Call Graph / Signal Flow / Def-Use panels use it to show the source filename before cross-file sites / edges.
+
+### resolver / project_analyzer changes (v2.2)
+
+**GDScriptSymbolResolver**:
+- new member `var _current_script_path: String` (set at resolve entry, forwarded to DefUseSite.script_path)
+- `_resolve_expression` AttributeNode branch: `obj.field` read → records a VARIABLE_READ edge
+- `_resolve_assignment` AttributeNode branch: `obj.field = x` write → records a VARIABLE_WRITE edge
+- `_fill_target(site, base_expr)`: fills target_object / target_type for emit/connect sites
+
+**GDScriptProjectAnalyzer**:
+- `_resolve_file_cross_edges`: new VARIABLE_READ / WRITE case → `_try_resolve_cross_call(VARIABLE_ACCESS)`
+- `_file_defines_symbol`: extended to check VARIABLE / CONSTANT (field definitions) so cross-file variable tracking can match
 
 ---
 

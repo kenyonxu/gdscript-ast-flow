@@ -129,18 +129,22 @@ func to_dict() -> Dictionary                            # 序列化为字典（�
 # GDScriptCallEdge
 var caller: String          # 调用者函数名
 var callee: String          # 被调用者函数名
-var call_type: int          # CallType 枚举值
-var target_object: String   # external 调用时的目标对象名
 var site_line: int          # 调用发生行号
+var call_type: int          # CallType 枚举值
+var target_object: String   # 目标对象名（EXTERNAL/EMIT/VARIABLE_* 时填，obj.field 的 obj）
+var arguments: Array        # 调用参数 AST 节点（供 GDSExprFormatter 序列化）
 
 enum CallType {
-    SELF = 0,
-    SUPER = 1,
-    EXTERNAL = 2,
-    CONNECT = 3,
-    SIGNAL_CONNECT = 4,
-    LAMBDA = 5,
-    EMIT = 6,
+    SELF = 0,            # self.method() 或隐式 self 调用
+    SUPER = 1,           # super.method()
+    EXTERNAL = 2,        # obj.method() 外部对象调用
+    CONNECT = 3,         # .connect("sig", cb) 中的回调
+    SIGNAL_CONNECT = 4,  # signal_name.connect(cb) 中的回调
+    LAMBDA = 5,          # lambda 作为回调
+    STATIC = 6,          # ClassName.static_method()
+    EMIT = 7,            # emit("signal") / signal.emit()
+    VARIABLE_READ = 8,   # obj.field 读取（v2.2 跨文件变量追踪）
+    VARIABLE_WRITE = 9,  # obj.field = x 写入（v2.2）
 }
 
 # GDScriptCallGraph
@@ -158,14 +162,21 @@ func get_callees_of(p_func_name: String) -> Array
 
 ```
 # GDScriptSite
-var file_path: String
-var line: int
-var function: String
+var line: int                      # 行号
+var node                           # AST 节点（emit/connect 调用表达式）
+var enclosing_function: String     # 所在函数名
+var arguments: Array               # emit 参数 / connect 回调（AST 节点）
+var target_object: String          # base 对象名（player.health_changed 的 player）（v2.2）
+var target_type: String            # target_object 推断类型（type_table）（v2.2）
 
 # GDScriptSignalInfo
-var declaration: GDScriptSite       # signal 声明位置（null 表示外部信号）
+var name: String                   # 信号名
+var declaration: GDScriptSite      # 声明位置（null 表示外部信号）
+var params: Array                  # 声明参数列表
 var emit_sites: Array[GDScriptSite]     # emit 位置列表
 var connect_sites: Array[GDScriptSite]  # connect 位置列表
+
+func is_unused() -> bool           # 0 emit + 0 connect → true（dead signal，UI 未连接高亮依据）（v2.2）
 
 # GDScriptSignalGraph
 var signals: Dictionary[String, GDScriptSignalInfo]
@@ -180,14 +191,28 @@ func get_signal_flow(p_signal_name: String) -> GDScriptSignalInfo
 
 ```
 # GDScriptDefUseSite
-var file_path: String
-var line: int
-var function: String
+var line: int                      # 行号
+var node                           # AST 节点
+var enclosing_function: String     # 所在函数名（类作用域显示 <class>）
+var access_type: int               # AccessType 枚举值
+var script_path: String            # site 来源文件（resolver 透传 _current_script_path）（v2.2）
+var is_parameter: bool             # true = 函数/lambda 形参（区别于 var/const）（v2.2）
+
+enum AccessType {
+    DEFINE = 0,      # var x = ... / const x = ... 定义
+    READ = 1,        # 读取变量值
+    WRITE = 2,       # 赋值写入
+    READ_WRITE = 3,  # 读+写（复合赋值）
+}
 
 # GDScriptDefUseInfo
-var definition: GDScriptDefUseSite
-var reads: Array[GDScriptDefUseSite]
-var writes: Array[GDScriptDefUseSite]
+var name: String                       # 变量名
+var def_site: GDScriptDefUseSite       # 定义位置
+var read_sites: Array[GDScriptDefUseSite]   # 读取位置列表
+var write_sites: Array[GDScriptDefUseSite]  # 写入位置列表
+
+func get_all_sites() -> Array       # def + reads + writes 合并
+func get_usage_status() -> String  # "unused" / "write_only" / "normal"（v2.2）
 
 # GDScriptDefUseChain
 var variables: Dictionary[String, GDScriptDefUseInfo]
@@ -223,12 +248,16 @@ var target_symbol: String   # 目标符号（函数/信号名）
 var line: int               # 引用行号
 
 enum Kind {
-    CALL = 0,
-    SIGNAL_EMIT = 1,
-    SIGNAL_CONNECT = 2,
-    INSTANCE = 3,
-    EXTENDS = 4,
+    CALL = 0,            # obj.method() 跨文件调用
+    SIGNAL_EMIT = 1,     # obj.emit("sig") 跨文件发射
+    SIGNAL_CONNECT = 2,  # obj.connect("sig", cb) 跨文件连接
+    INSTANCE = 3,        # T.new() 实例化
+    EXTENDS = 4,         # extends T 继承
+    SCRIPT_ATTACH = 5,   # .tscn/.tres → .gd 脚本关联（v2.1 场景节点挂载）
+    VARIABLE_ACCESS = 6, # obj.field 跨文件读写（v2.2）
 }
+
+const KIND_NAMES: Array[String]  # ["CALL" ... "VARIABLE_ACCESS"]，to_dict 序列化用
 
 # GDScriptProjectResult
 var root_path: String
@@ -346,6 +375,46 @@ var script_associations: Array     # 场景→脚本关联索引
 var scene_signal_connections: Array # 跨场景信号连接
 var uid_map: Dictionary            # uid:// → res:// 映射
 ```
+
+---
+
+## API 15. 表达式序列化与跨文件桥（v2.2 新增）
+
+### GDSExprFormatter
+
+**文件**: `addons/gdscript_ast/gds_expr_formatter.gd`
+**class_name**: `GDSExprFormatter`
+
+AST 表达式节点 → 字符串序列化（静态方法，覆盖 17 种节点 + 兜底）。供 Signal Flow 面板渲染 emit 参数 / connect 回调时使用。
+
+```
+static func format(p_expr) -> String              # 单个 AST 表达式 → 字符串
+static func format_args(p_args: Array) -> String  # 参数数组 → "a, b, c"
+```
+
+### GDSAnalysisBridge 新增方法
+
+**文件**: `addons/gdscript_ast/editor/gds_analysis_bridge.gd` · `class_name: GDSAnalysisBridge`
+
+```
+func get_target_file_prefix(p_target_type: String) -> String
+# 类型名 → class_registry 文件名 → "[文件名.gd] " 前缀
+# fallback：项目未分析 / class_registry 无该类型 → "[类型名]"；类型为空 → ""
+```
+
+Call Graph / Signal Flow / Def-Use 面板在跨文件 site / edge 前用它显示来源文件名。
+
+### resolver / project_analyzer 变更（v2.2）
+
+**GDScriptSymbolResolver**：
+- 新增成员 `var _current_script_path: String`（resolve 入口赋值，透传给 DefUseSite.script_path）
+- `_resolve_expression` AttributeNode 分支：`obj.field` 读 → 记 VARIABLE_READ 边
+- `_resolve_assignment` AttributeNode 分支：`obj.field = x` 写 → 记 VARIABLE_WRITE 边
+- `_fill_target(site, base_expr)`：emit/connect site 填 target_object / target_type
+
+**GDScriptProjectAnalyzer**：
+- `_resolve_file_cross_edges`：新增 VARIABLE_READ / WRITE case → `_try_resolve_cross_call(VARIABLE_ACCESS)`
+- `_file_defines_symbol`：扩展检查 VARIABLE / CONSTANT（field 定义），供跨文件变量追踪命中
 
 ---
 
