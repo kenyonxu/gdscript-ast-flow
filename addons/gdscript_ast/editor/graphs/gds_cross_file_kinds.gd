@@ -43,8 +43,13 @@ static func make_slot(p_kind: int) -> Dictionary:
 	return {"li": true, "lt": p_kind, "lc": c, "ri": true, "rt": p_kind, "rc": c}
 
 # 构造一个节点的多 port slot_config（按它涉及的 Kind 列表）
+# slot index 必须等于 KIND_PORT[kind]，否则边 port（=KIND_PORT）访问 slot 时 port_cache 越界。
+# 故按 KIND_PORT 放 slot，中间未涉及的 index 用 disable dummy 填充。
 static func make_slot_config(p_kinds: Array) -> Dictionary:
 	var slots: Array = []
 	for k in p_kinds:
-		slots.append(make_slot(k))
+		var port = KIND_PORT[k]
+		while slots.size() <= port:
+			slots.append({"li": false, "lt": 0, "lc": Color.WHITE, "ri": false, "rt": 0, "rc": Color.WHITE})
+		slots[port] = make_slot(k)
 	return {"slots": slots}
