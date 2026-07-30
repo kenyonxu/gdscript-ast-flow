@@ -42,11 +42,11 @@ func test_kind_colors():
 func test_slot_config_multi_port():
 	print("Test: GDSCrossFileKinds.make_slot_config multi-port...")
 	var sc = GDSCrossFileKinds.make_slot_config([GDSCrossFileEdge.Kind.CALL, GDSCrossFileEdge.Kind.VARIABLE_ACCESS])
-	# slot index = KIND_PORT：CALL@0, VA@3，中间 1/2 dummy
-	assert_eq(4, sc.slots.size(), "4 slots (CALL@0, dummy@1/2, VA@3)")
-	assert_eq(true, sc.slots[0].li, "slot0 CALL left enabled")
+	# 全 4 Kind slot enabled（Godot port 密集 = KIND_PORT），密集 index 0-3
+	assert_eq(4, sc.slots.size(), "4 slots (全 4 Kind enabled)")
+	assert_eq(true, sc.slots[0].li, "slot0 CALL enabled")
 	assert_eq(Color.DODGER_BLUE, sc.slots[0].lc, "slot0 CALL blue")
-	assert_eq(false, sc.slots[1].li, "slot1 dummy disabled")
+	assert_eq(true, sc.slots[1].li, "slot1 INSTANCE enabled")
 	assert_eq(Color.CYAN, sc.slots[3].rc, "slot3 VA cyan right")
 	print("  PASS")
 

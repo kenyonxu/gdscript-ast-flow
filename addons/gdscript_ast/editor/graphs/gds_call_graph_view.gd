@@ -145,19 +145,14 @@ func _ensure_fn_node(p_nodes: Dictionary, p_name: String, p_result: GDScriptAnal
 		"jump": {"file": p_result.file_path, "line": 0},
 	}
 
-# 给节点补某 Kind 的 slot（合并到 slot_config.slots 对应 port index）
+# 给节点设 slot_config（全 4 Kind enabled，密集 = KIND_PORT；Godot port 按 enabled 密集编号）。
+# p_kind 忽略（总全 4），保留签名兼容调用方。
 func _add_kind_slot(p_nodes: Dictionary, p_node_key: String, p_kind: int) -> void:
-	# p_node_key 是 p_nodes 字典的 key：函数用函数名（如 "hit"），外部节点用 ext_name（如 "ext_enemy"）
 	var node = p_nodes.get(p_node_key)
 	if node == null:
 		return
-	if not node.has("slot_config"):
-		node["slot_config"] = {"slots": []}
-	var slots = node.slot_config.slots
-	var port = CrossFileKinds.KIND_PORT[p_kind]
-	while slots.size() <= port:
-		slots.append({"li": false, "lt": 0, "lc": Color.WHITE, "ri": false, "rt": 0, "rc": Color.WHITE})
-	slots[port] = CrossFileKinds.make_slot(p_kind)
+	if not node.has("slot_config") or node.slot_config.slots.size() < CrossFileKinds.CALL_GRAPH_KINDS.size():
+		node["slot_config"] = CrossFileKinds.make_slot_config(CrossFileKinds.CALL_GRAPH_KINDS)
 
 func _format_signature(p_fn) -> String:
 	# 参数列表
