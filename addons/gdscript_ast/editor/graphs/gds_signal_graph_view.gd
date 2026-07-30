@@ -4,6 +4,9 @@
 class_name GDSSignalGraphView
 extends RefCounted
 
+const EMIT_COLOR := Color.RED
+const CONNECT_COLOR := Color.DODGER_BLUE
+
 # 传统 build：直接 add_child 到 GraphEdit（小图兼容）
 func build(p_graph: GraphEdit, p_result: GDScriptAnalysisResult, p_min_degree: int = 0) -> void:
 	var logical = build_logical(p_result, p_min_degree)
@@ -51,7 +54,9 @@ func build_logical(p_result: GDScriptAnalysisResult, p_min_degree: int = 0) -> D
 			"location": "@%s" % p_result.file_path.get_file(),
 			"pos": Vector2(500, row * 100),
 			"jump": {"file": p_result.file_path, "line": 0},
-			"slot_config": {"left": [0, Color.DODGER_BLUE], "right": [1, Color.RED]},
+			"slot_config": {"slots": [
+				{"li": true, "lt": 0, "lc": CONNECT_COLOR, "ri": true, "rt": 1, "rc": EMIT_COLOR},
+			]},
 		}
 		row += 1
 	
@@ -83,7 +88,9 @@ func _ensure_fn_logical(p_nodes: Dictionary, p_name: String, p_x: int, p_y: int,
 	if p_nodes.has(name):
 		return node_name
 	
-	var slot_config = {"left": [0, Color.DODGER_BLUE], "right": [1 if p_is_emit else 0, Color.RED if p_is_emit else Color.DODGER_BLUE]}
+	var slot_config = {"slots": [
+		{"li": true, "lt": 0, "lc": Color.DODGER_BLUE, "ri": p_is_emit, "rt": 1, "rc": EMIT_COLOR if p_is_emit else CONNECT_COLOR},
+	]}
 	p_nodes[name] = {
 		"node_name": node_name,
 		"kind": "function",

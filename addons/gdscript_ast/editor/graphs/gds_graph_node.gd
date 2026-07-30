@@ -24,8 +24,10 @@ func _ready() -> void:
 # p_hub_threshold: 枢纽高亮阈值（函数默认 5，文件默认 1——文件耦合度数值本身小）
 func configure(p_kind: String, p_name: String, p_subtitle: String, p_degree: int, p_signature: String = "", p_location: String = "", p_hub_threshold: int = 5) -> void:
 	var display_name = p_name
-	# 入口函数标记: 前缀 ▶ + 绿色 title（_ready 时应用 override）
-	if p_kind == "function" and ENTRY_METHODS.is_entry(p_name):
+	if p_kind == "external_file":
+		display_name = "📁 " + p_name
+		_pending_title_color = Color(0.6, 0.6, 0.6)
+	elif p_kind == "function" and ENTRY_METHODS.is_entry(p_name):
 		display_name = "▶ " + p_name
 		_pending_title_color = Color.LIME_GREEN
 	elif p_kind == "function" and p_degree >= p_hub_threshold:

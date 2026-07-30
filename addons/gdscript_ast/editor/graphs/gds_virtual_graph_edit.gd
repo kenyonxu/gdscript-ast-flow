@@ -106,10 +106,15 @@ func _instantiate(p_name: String) -> void:
 	gn.position_offset = info.pos
 	if info.has("jump") and not info.jump.file.is_empty():
 		gn.set_meta("jump", info.jump)
-	# 应用自定义 slot 配置（信号图需要）
+	# 应用 slot 配置（多 port：{slots: [...]}；兼容旧单 port：{left/right}）
 	if info.has("slot_config"):
 		var sc = info.slot_config
-		gn.set_slot(0, true, sc.left[0], sc.left[1], true, sc.right[0], sc.right[1])
+		if sc.has("slots"):
+			for i in sc.slots.size():
+				var s = sc.slots[i]
+				gn.set_slot(i, s.li, s.lt, s.lc, s.ri, s.rt, s.rc)
+		elif sc.has("left"):
+			gn.set_slot(0, true, sc.left[0], sc.left[1], true, sc.right[0], sc.right[1])
 	add_child(gn)
 	_rendered[p_name] = gn
 	_rendered_by_name[info.node_name] = gn
