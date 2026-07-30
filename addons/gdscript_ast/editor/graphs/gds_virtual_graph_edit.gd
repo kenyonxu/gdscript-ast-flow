@@ -110,6 +110,13 @@ func _instantiate(p_name: String) -> void:
 	if info.has("slot_config"):
 		var sc = info.slot_config
 		if sc.has("slots"):
+			# GraphNode slot 数 = child 数（Godot 语义：每 slot 需一 Control child）。
+			# configure 加的 label child 可能少于 slots（如 file 节点只 2 child 但 slot_config 4），
+			# 不凑齐的话 set_slot(>=child_count) 的 port 不进 port_cache，边访问该 port 越界。
+			while gn.get_child_count() < sc.slots.size():
+				var pad = Control.new()
+				pad.custom_minimum_size = Vector2(0, 0)
+				gn.add_child(pad)
 			for i in sc.slots.size():
 				var s = sc.slots[i]
 				gn.set_slot(i, s.li, s.lt, s.lc, s.ri, s.rt, s.rc)
