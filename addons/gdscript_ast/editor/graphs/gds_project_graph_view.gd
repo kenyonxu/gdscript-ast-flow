@@ -117,16 +117,23 @@ func _build_signal_logical(p_nodes: Dictionary, p_edges: Array, p_project: GDScr
 		# 信号节点（居中列）
 		if not p_nodes.has(edge.target_symbol):
 			var snode_name = "sig_" + edge.target_symbol
+			var sub = "cross-file"
+			var loc = edge.target_symbol
+			var jmp_file = ""
+			if edge.target_file != "":
+				sub = "cross-file · %s" % edge.target_file.get_file()
+				loc = "@%s" % edge.target_file.get_file()
+				jmp_file = edge.target_file
 			p_nodes[edge.target_symbol] = {
 				"node_name": snode_name,
 				"kind": "signal",
 				"title": edge.target_symbol,
-				"subtitle": "cross-file",
+				"subtitle": sub,
 				"degree": 0,
 				"signature": "",
-				"location": edge.target_symbol,
+				"location": loc,
 				"pos": Vector2(600, row * 110),
-				"jump": {"file": "", "line": 0},
+				"jump": {"file": jmp_file, "line": 0},
 			}
 			row += 1
 		
