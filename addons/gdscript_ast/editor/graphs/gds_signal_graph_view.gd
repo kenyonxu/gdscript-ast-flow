@@ -24,7 +24,7 @@ func build(p_graph: GraphEdit, p_result: GDScriptAnalysisResult, p_min_degree: i
 		p_graph.connect_node(edge[0], edge[2], edge[1], edge[3])
 
 # 产出逻辑节点/边表（供虚拟化使用）
-func build_logical(p_result: GDScriptAnalysisResult, p_min_degree: int = 0) -> Dictionary:
+func build_logical(p_result: GDScriptAnalysisResult, p_min_degree: int = 0, p_project: GDScriptProjectResult = null) -> Dictionary:
 	var nodes: Dictionary = {}
 	var edges: Array = []
 	if p_result == null or p_result.signal_graph == null:
@@ -79,7 +79,10 @@ func build_logical(p_result: GDScriptAnalysisResult, p_min_degree: int = 0) -> D
 			var fn_node_name = _ensure_fn_logical(nodes, fn_name, 850, i * 90, p_result, false)
 			edges.append([fn_node_name, "sig_" + sig_name, 0, 0])
 			i += 1
-	
+
+	if p_project != null:
+		_add_signal_cross_edges(nodes, edges, p_result, p_project)
+
 	return {"nodes": nodes, "edges": edges}
 
 func _ensure_fn_logical(p_nodes: Dictionary, p_name: String, p_x: int, p_y: int, p_result: GDScriptAnalysisResult, p_is_emit: bool) -> String:
@@ -104,3 +107,41 @@ func _ensure_fn_logical(p_nodes: Dictionary, p_name: String, p_x: int, p_y: int,
 		"slot_config": slot_config,
 	}
 	return node_name
+
+const SIGNAL_SLOT_PORT := 0  # Signal 图单 port（emit/connect 同 slot，靠方向 + 色）
+
+func _add_signal_cross_edges(p_nodes: Dictionary, p_edges: Array, p_result: GDScriptAnalysisResult, p_project: GDScriptProjectResult) -> void:
+	var cur_file: String = p_result.file_path
+	for xedge in p_project.cross_edges:
+		if xedge.kind != GDSCrossFileEdge.Kind.SIGNAL_EMIT and xedge.kind != GDSCrossFileEdge.Kind.SIGNAL_CONNECT:
+			continue
+		var is_out: bool = xedge.source_file == cur_file
+		var is_in: bool = xedge.target_file == cur_file
+		if not is_out and not is_in:
+			continue
+		var external_file: String = xedge.source_file if is_in else xedge.target_file
+		var local_fn: String = xedge.source_symbol if is_out else xedge.target_symbol
+		if local_fn == "":
+			continue
+		var is_emit: bool = xedge.kind == GDSCrossFileEdge.Kind.SIGNAL_EMIT
+		var fn_node_name: String = _ensure_fn_logical(p_nodes, local_fn, 150, p_nodes.size() * 90, p_result, is_emit)
+		var ext_name: String = "ext_" + external_file.get_file().get_basename()
+		if not p_nodes.has(ext_name):
+			p_nodes[ext_name] = {
+				"node_name": ext_name,
+				"kind": "external_file",
+				"title": external_file.get_file(),
+				"subtitle": "external",
+				"degree": 0,
+				"signature": "",
+				"location": external_file,
+				"pos": Vector2(900, p_nodes.size() * 90),
+				"jump": {"file": external_file, "line": 0},
+				"slot_config": {"slots": [
+					{"li": true, "lt": 0, "lc": CONNECT_COLOR, "ri": true, "rt": 1, "rc": EMIT_COLOR},
+				]},
+			}
+		if is_out:
+			p_edges.append([fn_node_name, ext_name, SIGNAL_SLOT_PORT, SIGNAL_SLOT_PORT])
+		else:
+			p_edges.append([ext_name, fn_node_name, SIGNAL_SLOT_PORT, SIGNAL_SLOT_PORT])

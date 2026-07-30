@@ -8,6 +8,7 @@ const GDScriptTokenizer = preload("res://addons/gdscript_ast/gds_tokenizer.gd")
 const GDScriptParser = preload("res://addons/gdscript_ast/gds_parser.gd")
 const GDScriptSymbolResolver = preload("res://addons/gdscript_ast/gds_symbol_resolver.gd")
 const GDSCrossFileEdge = preload("res://addons/gdscript_ast/gds_cross_file_edge.gd")
+const GDSSignalGraphView = preload("res://addons/gdscript_ast/editor/graphs/gds_signal_graph_view.gd")
 
 func _ready():
 	print("=== cross file views tests ===")
@@ -16,6 +17,7 @@ func _ready():
 	test_slot_config_multi_port()
 	test_external_file_node_kind()
 	test_call_view_cross_file_edges()
+	test_signal_view_cross_file_edges()
 	print("=== DONE ===")
 
 func test_kind_port_mapping():
@@ -106,4 +108,43 @@ func test_call_view_cross_file_edges():
 			has_cross_edge = true
 	assert_true(has_external, "should have external_file node enemy.gd")
 	assert_true(has_cross_edge, "should have CALL cross edge port 0")
+	print("  PASS")
+
+func test_signal_view_cross_file_edges():
+	print("Test: signal_graph_view cross-file emit/connect edges...")
+	var sources = {
+		"res://player.gd": "class_name Player\nextends Node\nsignal hit\nfunc _ready():\n\thit.emit()\n",
+		"res://ui.gd": "class_name UI\nextends Node\nfunc _ready(p: Player):\n\tp.hit.connect(_on_hit)\nfunc _on_hit():\n\tpass\n",
+	}
+	# ui.gd connect player.hit —— 对 ui 是出边 connect 跨文件
+	var ce_connect = GDSCrossFileEdge.new()
+	ce_connect.kind = GDSCrossFileEdge.Kind.SIGNAL_CONNECT
+	ce_connect.source_file = "res://ui.gd"
+	ce_connect.source_symbol = "_ready"
+	ce_connect.target_file = "res://player.gd"
+	ce_connect.target_symbol = "hit"
+	# player.gd emit hit —— 对 player 是出边 emit 跨文件
+	var ce_emit = GDSCrossFileEdge.new()
+	ce_emit.kind = GDSCrossFileEdge.Kind.SIGNAL_EMIT
+	ce_emit.source_file = "res://player.gd"
+	ce_emit.source_symbol = "_ready"
+	ce_emit.target_file = "res://ui.gd"
+	ce_emit.target_symbol = "hit"
+	sources["__cross_edges"] = [ce_connect, ce_emit]
+	var env = _resolve_project(sources)
+	# 测试 ui.gd 视角：connect 出边到 player
+	var view = GDSSignalGraphView.new()
+	var logical_ui = view.build_logical(env.files["res://ui.gd"], 0, env.project)
+	var has_external_ui = false
+	for name in logical_ui.nodes:
+		if logical_ui.nodes[name].get("kind") == "external_file":
+			has_external_ui = true
+	assert_true(has_external_ui, "signal view (ui.gd) should show external_file node for cross connect")
+	# 测试 player.gd 视角：emit 出边到 ui
+	var logical_pl = view.build_logical(env.files["res://player.gd"], 0, env.project)
+	var has_external_pl = false
+	for name in logical_pl.nodes:
+		if logical_pl.nodes[name].get("kind") == "external_file":
+			has_external_pl = true
+	assert_true(has_external_pl, "signal view (player.gd) should show external_file node for cross emit")
 	print("  PASS")

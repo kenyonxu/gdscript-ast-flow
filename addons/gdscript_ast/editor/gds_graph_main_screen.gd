@@ -194,7 +194,7 @@ func _rebuild() -> void:
 			var logical = _call_view.build_logical(_bridge.get_current_result(), _min_degree, _bridge.get_project_result())
 			_graph_edit.set_graph(logical.nodes, logical.edges)
 		else:
-			var logical = _signal_view.build_logical(_bridge.get_current_result(), _min_degree)
+			var logical = _signal_view.build_logical(_bridge.get_current_result(), _min_degree, _bridge.get_project_result())
 			_graph_edit.set_graph(logical.nodes, logical.edges)
 	# 每次重建后自动整理布局 + 居中（静态分析工具，用户不需手动布局）
 	_on_relayout()
