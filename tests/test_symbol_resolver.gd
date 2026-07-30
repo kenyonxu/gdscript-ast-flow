@@ -34,6 +34,8 @@ func run_all_tests():
 	test_23_expr_formatter()
 	test_24_signal_site_target()
 	test_25_variable_cross_edge()
+	test_26_instance_call_edge()
+	test_27_extends_recorded()
 	print("\n=== All tests completed ===")
 
 
@@ -652,4 +654,23 @@ func test_25_variable_cross_edge():
 			found_write = true
 	assert_true(found_read, "should have VARIABLE_READ edge for player.hp")
 	assert_true(found_write, "should have VARIABLE_WRITE edge for player.hp")
+	print("  PASS")
+
+# Test 26: T.new() 产 call edge（INSTANCE 候选）
+func test_26_instance_call_edge():
+	print("Test 26: T.new() instance call edge...")
+	var r = resolve("func _p():\n\tvar e := Enemy.new()\n")
+	var found = false
+	for edge in r.call_graph.edges:
+		if edge.callee in ["new", "Enemy.new"]:
+			found = true
+			break
+	assert_true(found, "Enemy.new() should produce a call edge (INSTANCE candidate)")
+	print("  PASS")
+
+# Test 27: extends 基类记录
+func test_27_extends_recorded():
+	print("Test 27: extends base class recorded...")
+	var r = resolve("extends Enemy\n")
+	assert_eq("Enemy", r.extends_path, "extends Enemy recorded in extends_path")
 	print("  PASS")
