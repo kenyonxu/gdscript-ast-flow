@@ -9,6 +9,7 @@ const GDScriptParser = preload("res://addons/gdscript_ast/gds_parser.gd")
 const GDScriptSymbolResolver = preload("res://addons/gdscript_ast/gds_symbol_resolver.gd")
 const GDSCrossFileEdge = preload("res://addons/gdscript_ast/gds_cross_file_edge.gd")
 const GDSSignalGraphView = preload("res://addons/gdscript_ast/editor/graphs/gds_signal_graph_view.gd")
+const GDSProjectGraphView = preload("res://addons/gdscript_ast/editor/graphs/gds_project_graph_view.gd")
 
 func _ready():
 	print("=== cross file views tests ===")
@@ -18,6 +19,7 @@ func _ready():
 	test_external_file_node_kind()
 	test_call_view_cross_file_edges()
 	test_signal_view_cross_file_edges()
+	test_project_call_4_kinds()
 	print("=== DONE ===")
 
 func test_kind_port_mapping():
@@ -147,4 +149,34 @@ func test_signal_view_cross_file_edges():
 		if logical_pl.nodes[name].get("kind") == "external_file":
 			has_external_pl = true
 	assert_true(has_external_pl, "signal view (player.gd) should show external_file node for cross emit")
+	print("  PASS")
+
+func test_project_call_4_kinds():
+	print("Test: project_graph_view _build_call_logical 4 Kind edges...")
+	var sources = {
+		"res://player.gd": "class_name Player\nextends Node\nfunc hit(e: Enemy):\n\te.take_damage()\n",
+		"res://enemy.gd": "class_name Enemy\nextends Node\nvar hp: int\nfunc take_damage():\n\thp -= 1\n",
+	}
+	# 4 种 cross edge: player ↔ enemy（每种 Kind 一条）
+	var edges_arr = []
+	for kind in [GDSCrossFileEdge.Kind.CALL, GDSCrossFileEdge.Kind.INSTANCE, GDSCrossFileEdge.Kind.EXTENDS, GDSCrossFileEdge.Kind.VARIABLE_ACCESS]:
+		var ce = GDSCrossFileEdge.new()
+		ce.kind = kind
+		ce.source_file = "res://player.gd"
+		ce.target_file = "res://enemy.gd"
+		edges_arr.append(ce)
+	sources["__cross_edges"] = edges_arr
+	var env = _resolve_project(sources)
+	var view = GDSProjectGraphView.new()
+	var logical = view.build_logical(env.project, 0, 0)  # graph_kind=0 (call)
+	assert_true(logical.edges.size() >= 4, "should have >=4 edges (4 kinds player->enemy)")
+	# 验证 port 分配：每条边 4 元素 [from, to, from_port, to_port]
+	var ports_found: Dictionary = {}
+	for e in logical.edges:
+		if e.size() >= 4:
+			ports_found[e[2]] = true
+	assert_true(ports_found.has(0), "should have port 0 (CALL)")
+	assert_true(ports_found.has(1), "should have port 1 (INSTANCE)")
+	assert_true(ports_found.has(2), "should have port 2 (EXTENDS)")
+	assert_true(ports_found.has(3), "should have port 3 (VARIABLE_ACCESS)")
 	print("  PASS")
