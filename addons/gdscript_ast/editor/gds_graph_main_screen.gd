@@ -6,6 +6,8 @@
 class_name GDSGraphMainScreen
 extends VBoxContainer
 
+const CrossFileKinds = preload("res://addons/gdscript_ast/editor/graphs/gds_cross_file_kinds.gd")
+
 var _bridge: GDSAnalysisBridge = null
 var _l10n: GDSL10n = null
 var _graph_edit: GDSVirtualGraphEdit = null
@@ -16,6 +18,7 @@ var _signal_view: GDSSignalGraphView = null
 var _project_view: GDSProjectGraphView = null
 var _min_degree: int = 0
 var _legend: HBoxContainer = null
+var _highlighted_kind: int = -1  # -1 = 无高亮
 var _file_label: Label = null  # 当前文件路径显示
 static var is_locked: bool = false  # 锁定时点击节点不跳转脚本编辑器（全局共享）
 var _lock_btn: Button = null
@@ -116,11 +119,17 @@ func _build_ui() -> void:
 	_graph_edit.gui_input.connect(_on_graph_double_click)
 	add_child(_graph_edit)
 
-func _add_legend_chip(p_parent: Control, p_text: String, p_color: Color) -> void:
+func _add_legend_chip(p_parent: Control, p_text: String, p_color: Color, p_on_click: Callable = Callable()) -> void:
 	var chip = Label.new()
 	chip.text = p_text
 	chip.add_theme_color_override("font_color", p_color)
 	chip.add_theme_font_size_override("font_size", 14)
+	chip.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	if p_on_click.is_valid():
+		chip.gui_input.connect(func(ev: InputEvent):
+			if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
+				p_on_click.call()
+		)
 	p_parent.add_child(chip)
 
 # 图例按当前 Scope × Kind 刷新——只显示该视图真实用到的颜色，避免误导
@@ -146,9 +155,12 @@ func _refresh_legend() -> void:
 			_add_legend_chip(_legend, _l10n.t("legend.entry"), Color.LIME_GREEN)
 			_add_legend_chip(_legend, _l10n.t("legend.hub"), Color.ORANGE_RED)
 		else:
-			# 调用图：仅节点标记（边未按 call_type 着色）
+			# 单文件 Call 图：节点标记 + 4 Kind 跨文件边
 			_add_legend_chip(_legend, _l10n.t("legend.entry"), Color.LIME_GREEN)
 			_add_legend_chip(_legend, _l10n.t("legend.hub"), Color.ORANGE_RED)
+			for kind in CrossFileKinds.CALL_GRAPH_KINDS:
+				var k = kind  # 闭包捕获
+				_add_legend_chip(_legend, CrossFileKinds.KIND_LABELS[kind], CrossFileKinds.KIND_COLORS[kind], _toggle_kind_highlight.bind(k))
 
 func _on_data_changed(_arg = null) -> void:
 	_rebuild()
@@ -176,6 +188,7 @@ func _on_mode_changed(i: int) -> void:
 			_scene_main_screen.visible = false
 
 func _rebuild() -> void:
+	_highlighted_kind = -1  # 切换视图时重置 Kind 高亮
 	# 更新当前文件标签
 	if _file_label:
 		if _scope == 1:
@@ -245,6 +258,20 @@ func _clear_highlight() -> void:
 	for c in _graph_edit.get_children():
 		if c is GraphNode:
 			c.modulate.a = 1.0
+
+func _toggle_kind_highlight(p_kind: int) -> void:
+	_highlighted_kind = p_kind if _highlighted_kind != p_kind else -1
+	_apply_kind_highlight()
+
+func _apply_kind_highlight() -> void:
+	for conn in _graph_edit.get_connection_list():
+		var port: int = conn.from_port
+		var amt: float
+		if _highlighted_kind < 0:
+			amt = 0.0  # 无高亮，全部恢复
+		else:
+			amt = 0.15 if port != _highlighted_kind else 0.0
+		_graph_edit.set_connection_activity(conn.from_node, conn.from_port, conn.to_node, conn.to_port, amt)
 
 func _on_relayout() -> void:
 	if get_tree() == null:
