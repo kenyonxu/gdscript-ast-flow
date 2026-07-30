@@ -24,7 +24,7 @@ const COLORS := {
 }
 
 # 未使用函数高亮 — 与 COLORS 的调用动作色系隔离
-const UNUSED_FUNC_COLOR := Color.GRAY
+const UNUSED_FUNC_COLOR := Color(0.42, 0.42, 0.42)  # 深灰 — Color.GRAY(0.745) 太接近默认文字色，未使用函数看不出
 
 func setup(p_bridge: GDSAnalysisBridge, p_l10n: GDSL10n = null) -> void:
 	_bridge = p_bridge

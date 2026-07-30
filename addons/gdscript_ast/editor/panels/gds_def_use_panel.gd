@@ -19,7 +19,7 @@ const COLORS := {
 
 # 未使用高亮配色 — 辅助色系，与 COLORS 的读写动作语义隔离
 const USAGE_COLORS := {
-	"unused": Color.GRAY,          # 完全死变量
+	"unused": Color(0.42, 0.42, 0.42),  # 深灰 — Color.GRAY(0.745) 太接近默认文字色，死变量看不出
 	"write_only": Color.MAGENTA,   # 只写不读 dead store
 }
 

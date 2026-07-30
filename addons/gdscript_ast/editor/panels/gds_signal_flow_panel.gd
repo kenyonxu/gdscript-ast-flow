@@ -11,7 +11,7 @@ var _search_edit: LineEdit = null
 var _context_menu: PopupMenu = null
 
 # 未连接信号高亮配色 — 与 EMIT(红)/CONNECT(蓝) 区分
-const UNUSED_SIGNAL_COLOR := Color.GRAY
+const UNUSED_SIGNAL_COLOR := Color(0.42, 0.42, 0.42)  # 深灰 — Color.GRAY(0.745) 太接近默认文字色，unused 信号看不出
 
 func setup(p_bridge: GDSAnalysisBridge, p_l10n: GDSL10n = null) -> void:
 	_bridge = p_bridge
