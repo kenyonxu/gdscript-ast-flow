@@ -144,8 +144,10 @@ func _refresh_legend() -> void:
 			_add_legend_chip(_legend, _l10n.t("legend.connect"), Color.DODGER_BLUE)
 			_add_legend_chip(_legend, _l10n.t("legend.emit_connect"), Color.MEDIUM_PURPLE)
 		else:
-			# 项目调用图：文件耦合（枢纽=高耦合文件）
-			_add_legend_chip(_legend, _l10n.t("legend.high_coupling"), Color.ORANGE_RED)
+			# 项目调用图：4 Kind 边（文件耦合，按关系类型分色）
+			for k in CrossFileKinds.CALL_GRAPH_KINDS:
+				var kind = k
+				_add_legend_chip(_legend, CrossFileKinds.KIND_LABELS[kind], CrossFileKinds.KIND_COLORS[kind], _toggle_kind_highlight.bind(kind))
 	else:
 		# 单文件
 		if _graph_kind == 1:
