@@ -12,6 +12,8 @@ const COLORS := {
 	7: Color.RED,            # EMIT
 }
 
+const CrossFileKinds = preload("res://addons/gdscript_ast/editor/graphs/gds_cross_file_kinds.gd")
+
 # 传统 build：直接 add_child 到 GraphEdit（小图兼容）
 func build(p_graph: GraphEdit, p_result: GDScriptAnalysisResult, p_min_degree: int = 0) -> void:
 	var logical = build_logical(p_result, p_min_degree)
@@ -29,12 +31,12 @@ func build(p_graph: GraphEdit, p_result: GDScriptAnalysisResult, p_min_degree: i
 		p_graph.connect_node(edge[0], 0, edge[1], 0)
 
 # 产出逻辑节点/边表（供虚拟化使用）
-func build_logical(p_result: GDScriptAnalysisResult, p_min_degree: int = 0) -> Dictionary:
+func build_logical(p_result: GDScriptAnalysisResult, p_min_degree: int = 0, p_project: GDScriptProjectResult = null) -> Dictionary:
 	var nodes: Dictionary = {}
 	var edges: Array = []
 	if p_result == null or p_result.call_graph == null:
 		return {"nodes": nodes, "edges": edges}
-	
+
 	# 收集所有函数名 + 从 symbol_table 取 FunctionNode（拿签名/行号）
 	var func_nodes: Dictionary = {}  # name → FunctionNode
 	if p_result.symbol_table != null:
@@ -42,13 +44,13 @@ func build_logical(p_result: GDScriptAnalysisResult, p_min_degree: int = 0) -> D
 			var sym = p_result.symbol_table.symbols[sym_name]
 			if sym.kind == GDScriptSymbol.Kind.FUNCTION and sym.declaration != null:
 				func_nodes[sym.declaration.name] = sym.declaration
-	
+
 	# 节点：所有出现过的 caller/callee
 	var all_names: Dictionary = {}
 	for edge in p_result.call_graph.edges:
 		all_names[edge.caller] = true
 		all_names[edge.callee] = true
-	
+
 	var col := 0
 	var row := 0
 	for name in all_names:
@@ -65,7 +67,7 @@ func build_logical(p_result: GDScriptAnalysisResult, p_min_degree: int = 0) -> D
 			sig = _format_signature(fn)
 			loc = "@%s:%d" % [p_result.file_path.get_file(), fn.line]
 			line = fn.line
-		
+
 		var node_name = "fn_" + name
 		nodes[name] = {
 			"node_name": node_name,
@@ -82,15 +84,80 @@ func build_logical(p_result: GDScriptAnalysisResult, p_min_degree: int = 0) -> D
 		if col >= 5:
 			col = 0
 			row += 1
-	
+
 	# 边
 	for edge in p_result.call_graph.edges:
 		var from_name = "fn_" + edge.caller
 		var to_name = "fn_" + edge.callee
 		if nodes.has(edge.caller) and nodes.has(edge.callee):
 			edges.append([from_name, to_name])
-	
+
+	# === 跨文件边 ===
+	if p_project != null:
+		_add_cross_file_edges(nodes, edges, p_result, p_project)
+
 	return {"nodes": nodes, "edges": edges}
+
+# 跨文件边：当前文件相关的 cross_edges → 外部文件节点 + 出入边（按 Kind 分色 + port）
+func _add_cross_file_edges(p_nodes: Dictionary, p_edges: Array, p_result: GDScriptAnalysisResult, p_project: GDScriptProjectResult) -> void:
+	var cur_file = p_result.file_path
+	for xedge in p_project.cross_edges:
+		if xedge.kind not in CrossFileKinds.CALL_GRAPH_KINDS:
+			continue
+		var is_out = xedge.source_file == cur_file
+		var is_in = xedge.target_file == cur_file
+		if not is_out and not is_in:
+			continue
+		var external_file = xedge.source_file if is_in else xedge.target_file
+		var local_fn = xedge.source_symbol if is_out else xedge.target_symbol
+		if local_fn == "":
+			local_fn = "<class>"  # EXTENDS 等类级边
+		# 确保本地函数节点存在（可能不在 call_graph 中，但仍需展示）
+		_ensure_fn_node(p_nodes, local_fn, p_result)
+		# 外部文件节点 key 是 ext_name
+		var ext_name = "ext_" + external_file.get_file().get_basename()
+		if not p_nodes.has(ext_name):
+			p_nodes[ext_name] = {
+				"node_name": ext_name, "kind": "external_file",
+				"title": external_file.get_file(), "subtitle": "external",
+				"degree": 0, "signature": "", "location": external_file,
+				"pos": Vector2(900, p_nodes.size() * 90),
+				"jump": {"file": external_file, "line": 0},
+			}
+		var port = CrossFileKinds.KIND_PORT[xedge.kind]
+		var fn_node = "fn_" + local_fn
+		# p_nodes key: 函数用 local_fn（函数名），外部节点用 ext_name
+		_add_kind_slot(p_nodes, local_fn, xedge.kind)
+		_add_kind_slot(p_nodes, ext_name, xedge.kind)
+		if is_out:
+			p_edges.append([fn_node, ext_name, port, port])
+		else:
+			p_edges.append([ext_name, fn_node, port, port])
+
+func _ensure_fn_node(p_nodes: Dictionary, p_name: String, p_result: GDScriptAnalysisResult) -> void:
+	if p_nodes.has(p_name):
+		return
+	p_nodes[p_name] = {
+		"node_name": "fn_" + p_name, "kind": "function",
+		"title": p_name, "subtitle": "", "degree": 0,
+		"signature": "", "location": "@%s" % p_result.file_path.get_file(),
+		"pos": Vector2(150, p_nodes.size() * 90),
+		"jump": {"file": p_result.file_path, "line": 0},
+	}
+
+# 给节点补某 Kind 的 slot（合并到 slot_config.slots 对应 port index）
+func _add_kind_slot(p_nodes: Dictionary, p_node_key: String, p_kind: int) -> void:
+	# p_node_key 是 p_nodes 字典的 key：函数用函数名（如 "hit"），外部节点用 ext_name（如 "ext_enemy"）
+	var node = p_nodes.get(p_node_key)
+	if node == null:
+		return
+	if not node.has("slot_config"):
+		node["slot_config"] = {"slots": []}
+	var slots = node.slot_config.slots
+	var port = CrossFileKinds.KIND_PORT[p_kind]
+	while slots.size() <= port:
+		slots.append({"li": false, "lt": 0, "lc": Color.WHITE, "ri": false, "rt": 0, "rc": Color.WHITE})
+	slots[port] = CrossFileKinds.make_slot(p_kind)
 
 func _format_signature(p_fn) -> String:
 	# 参数列表

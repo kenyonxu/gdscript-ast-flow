@@ -191,7 +191,7 @@ func _rebuild() -> void:
 		_graph_edit.set_graph(logical.nodes, logical.edges)
 	else:
 		if _graph_kind == 0:
-			var logical = _call_view.build_logical(_bridge.get_current_result(), _min_degree)
+			var logical = _call_view.build_logical(_bridge.get_current_result(), _min_degree, _bridge.get_project_result())
 			_graph_edit.set_graph(logical.nodes, logical.edges)
 		else:
 			var logical = _signal_view.build_logical(_bridge.get_current_result(), _min_degree)
