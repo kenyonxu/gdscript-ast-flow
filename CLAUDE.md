@@ -21,7 +21,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```
 addons/gdscript_ast/
-├── plugin.cfg                   # 插件配置 (v2.2.0)
+├── plugin.cfg                   # 插件配置 (v2.3.0)
 ├── plugin.gd                    # EditorPlugin 入口 (class_name: GDScriptUtil)
 ├── gds_ast_nodes.gd             # Token.Type 枚举 + AST 节点类
 ├── gds_tokenizer.gd             # 词法分析器
