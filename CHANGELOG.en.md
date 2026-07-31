@@ -2,6 +2,21 @@
 
 This project follows [Keep a Changelog](https://keepachangelog.com/) style. Version numbers follow [Semantic Versioning](https://semver.org/).
 
+## [2.3.0] - 2026-07-30
+
+### Added
+- **Flow Visualizer cross-file edge display**:
+  - Project-level Call graph: 4 Kind cross-file edges colored (CALL/INSTANCE/EXTENDS/VARIABLE_ACCESS, blue/orange/purple/cyan)
+  - Current-file Call/Signal graph: cross-file in/out edges + external file nodes (📁 gray, double-click to jump)
+  - Per-Kind edge coloring (multi-port-per-Kind mechanism, GDSCrossFileKinds unified colors/ports)
+  - Legend Kind chips + click to highlight (other Kinds dimmed)
+  - Signal graph node shows declaring file name
+- INSTANCE/EXTENDS cross-file edge data-layer coverage tests
+
+### Fixed
+- unused highlight Color.GRAY(0.745) too light to see → dark gray (DefUse dead var / Signal Flow dead signal / Call Graph unused func)
+- GraphNode multi-port port_cache out of bounds (slot count = child count, pad dummy Control child; dragging cross-file nodes threw port out of bounds)
+
 ## [2.2.0] - 2026-07-28
 
 ### Added

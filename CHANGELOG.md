@@ -2,6 +2,21 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/) 风格，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.3.0] - 2026-07-30
+
+### 新增
+- **Flow Visualizer 跨文件边显示增强**：
+  - 项目级 Call 图：4 Kind 跨文件边分色全画（CALL/INSTANCE/EXTENDS/VARIABLE_ACCESS，蓝/橙/紫/青）
+  - 当前文件 Call/Signal 图：跨文件出入边 + 外部文件节点（📁 灰，双击跳转目标文件）
+  - 边 per-Kind 着色（多 port per Kind 机制，GDSCrossFileKinds 统一配色/端口）
+  - 图例 Kind chip + 点击高亮（其他 Kind 边变淡）
+  - Signal 图信号节点显示声明文件名
+- INSTANCE/EXTENDS 跨文件边数据层覆盖测试
+
+### 修复
+- unused 高亮 Color.GRAY(0.745) 太浅看不出 → 深灰（DefUse 死变量 / Signal Flow 哑信号 / Call Graph 未使用函数）
+- GraphNode 多 port port_cache 越界（slot 数 = child 数，凑 dummy Control child；拖动跨文件节点报 port out of bounds）
+
 ## [2.2.0] - 2026-07-28
 
 ### 新增
